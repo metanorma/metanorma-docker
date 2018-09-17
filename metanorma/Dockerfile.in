@@ -4,7 +4,7 @@ MAINTAINER Open Source at Ribose <open.source@ribose.com>
 
 RUN apt-get update
 # for metanorma
-RUN apt install -y git make ruby-bundler ruby-dev libxml2-dev libxslt-dev default-jre curl
+RUN apt-get install -y curl git make ruby-bundler ruby-dev libxml2-dev libxslt-dev default-jre
 RUN apt-get install -y sassc
 # for puppeteer
 RUN apt-get install -y npm
