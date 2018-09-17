@@ -1,0 +1,29 @@
+FROM ${ROOT_IMAGE}
+
+MAINTAINER Open Source at Ribose <open.source@ribose.com>
+
+RUN apt-get update
+# for metanorma
+RUN apt install -y git make ruby-bundler ruby-dev libxml2-dev libxslt-dev default-jre curl
+RUN apt-get install -y sassc
+# for puppeteer
+RUN apt-get install -y npm
+RUN apt-get install -y gconf-service gconf-service-backend gconf2-common libdbus-glib-1-2 libgconf-2-4 libgconf2-4 libxss1
+# for plantuml
+RUN apt-get install -y graphviz
+
+RUN npm i puppeteer
+
+# Ruby sassc gem depends on rake gem
+RUN gem install rake
+RUN gem install bundler
+RUN gem install nokogiri -v '1.8.4'
+RUN gem install metanorma
+RUN gem install metanorma-cli
+
+# install PlantUML
+RUN mkdir -p /opt/plantuml && \
+  curl -o /opt/plantuml/plantuml.jar \
+  http://sourceforge.net/projects/plantuml/files/plantuml.1.2018.10.jar/download
+RUN printf '#!/bin/sh\nexec java -jar /opt/plantuml/plantuml.jar "$@"' > /usr/bin/plantuml.sh
+RUN chmod +x /usr/bin/plantuml.sh

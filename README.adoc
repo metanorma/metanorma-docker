@@ -142,7 +142,7 @@ For example:
 
 [source,sh]
 ----
-# equivalent to make {build,squash,push}-metanorma
+# equivalent to make {build,squash,push}-{container-flavor}
 make bsp-metanorma
 ----
 
