@@ -2,12 +2,40 @@
 
 == Purpose
 
-Metanorma
+This is the cross-platform solution for Metanorma
+that works on all OSes, including Windows.
+
+Some people mentioned setting up Metanorma on macOS felt
+cumbersome (well...).
+
+
+== Prerequisites
+
+All you need is install Docker as shown below.
+
+macOS:
+
+* *Recommended* Install using the
+https://github.com/riboseinc/metanorma-macos-setup[Metanorma macOS Setup Script]
+instead of this docker container
+* https://www.docker.com/products/docker-desktop[Docker Desktop for Mac]
+
+Windows:
+
+* https://www.docker.com/products/docker-desktop[Docker Desktop for Windows (10)]
+* https://docs.docker.com/toolbox/overview/[Docker Toolbox for legacy Windows]
+
+Linux:
+
+* https://docs.docker.com/install/linux/docker-ce/ubuntu/[Docker CE for Ubuntu]
+* https://docs.docker.com/install/linux/docker-ce/centos/[Docker CE for CentOS]
+* https://docs.docker.com/install/linux/docker-ce/debian/[Docker CE for Debian]
 
 
 == Pulling the container
 
-This container is published at the https://hub.docker.com/r/ribose/metanorma/[Docker Registry] as `docker.io/ribose/metanorma` or `ribose/metanorma`,
+This container is published at the
+https://hub.docker.com/r/ribose/metanorma/[Docker Registry] as `docker.io/ribose/metanorma` or `ribose/metanorma`,
 and can be pulled with the following command:
 
 [source,sh]
@@ -18,34 +46,77 @@ docker pull ribose/metanorma
 
 == Usage
 
-The `Makefile` in this repository is rather complicated, but
-all necessary for enabling quick iteration of the resulting
-containers.
+
+=== Setting document attributes for docker compilation
+
+The `:local-cache:` document attribute should be set in your
+document in order to take advantage of local caching of
+bibliographic items fetched from the Internet.
+
+NOTE: Normally, the Metanorma toolchain assumes that you have a global
+bibliographic cache located in `~/.relaton.bib.pstore` and
+`~/.iev.bib.pstore`. However, when run in a docker container,
+the global cache is not shared between the host and the container.
+
+By setting `:local-cache`, Metanorma will store the caches
+in the local working directory, which is shared between the host
+and the container, as in:
+
+* `./.relaton.bib.pstore`; and
+* `./.iev.bib.pstore`.
+
+The document attribute is to be set in the document header, like this:
+
+[source,adoc]
+----
+= ISO 8601-2
+:docnumber: 8601
+:partnumber: 2
+:ref-docnumber: 8601-2:2018(E)
+:title-intro-en: Date and time
+:title-main-en: Representations for information interchange
+:title-part-en: Extensions
+// ...
+:local-cache:
+----
+
+These files can also be checked-in into version control.
 
 
-=== Running of the `metanorma` container via docker
+=== Compiling a Metamorma document via docker
 
-So running `systemd` from a CentOS container is rather cumbersome
-(didn't think that would stop you!).
-
-To make `systemd` work, the container needs to be started with
-`--security-opt` and `--cap-add` arguments, which basically give it
-`root` access to the host.
-
-If that didn't stop you, here are the instructions:
+In a directory containing the Metanorma document, run this:
 
 [source,sh]
 ----
-docker run --rm ribose/metanorma
+docker run -v "$(pwd)":/metanorma/ ribose/metanorma -t {flavor} -x {extensions} {my-document-file}
 ----
 
-To get inside the container, you must `docker exec` into it.
-Remember `systemd` is already running as PID 1 (not `bash`!).
+Where,
+
+* `{my-document-file}` is the name of the Metanorma document file, such as `iso-12345.adoc`
+* `{flavor}` is the flavor of Metanorma document, such as `iso`
+* `{extensions}` is a list of extensions desired, such as `xml,html,doc`
+
+The above command actually uses a couple assumptions set in the
+built container itself, including:
+
+* the `/metanorma` path is set within the container's `WORKDIR`
+* the `metanorma` command is set in the container's `ENTRYPOINT`
+
+The full command is actually this:
+
+[source,sh]
+----
+docker run -v "$(pwd)":/metanorma/ -w /metanorma ribose/metanorma metanorma -t iso -x {extensions} {my-document-file}
+----
 
 
-=== Running the containers (and bash) via the Makefile
 
-And the `Makefile` makes life much simpler.
+
+=== Running the Metamorma container via the Makefile
+
+The `Makefile` makes life much simpler.
 To start the `metanorma` container and enter it with `bash`,
 all you need is:
 
@@ -71,9 +142,8 @@ make {run,kill,rm,rmf}-metanorma
 
 == Building the containers yourself
 
-For those concerned about security you might not want to use
-our container but build your own.
-This `Makefile` allows for such a case (as you can imagine).
+This `Makefile` allows you to build the Metanorma container
+yourself.
 
 All you have to set is a couple environment variables.
 

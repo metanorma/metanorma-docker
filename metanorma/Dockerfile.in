@@ -27,3 +27,8 @@ RUN mkdir -p /opt/plantuml && \
   http://sourceforge.net/projects/plantuml/files/plantuml.1.2018.10.jar/download
 RUN printf '#!/bin/sh\nexec java -jar /opt/plantuml/plantuml.jar "$@"' > /usr/bin/plantuml.sh
 RUN chmod +x /usr/bin/plantuml.sh
+
+VOLUME /metanorma
+WORKDIR /metanorma
+
+ENTRYPOINT [ "metanorma" ]

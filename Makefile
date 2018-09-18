@@ -99,12 +99,7 @@ clean-remote-$(3):
 	docker rmi -f $(CONTAINER_REMOTE_NAME)
 
 run-$(3):
-	CONTAINER_ID=`$(DOCKER_RUN) -dit --name=test-$(3) $(CONTAINER_REMOTE_NAME)`; \
-	if [ "$$$${CONTAINER_ID}" == "" ]; then \
-	  echo "Container unable to start."; \
-    exit 1; \
-  fi; \
-	docker exec -it $$$${CONTAINER_ID} /bin/bash
+	$(DOCKER_RUN) -it --name=test-$(3) --entrypoint="" $(CONTAINER_REMOTE_NAME) /bin/bash; \
 
 kill-$(3):
 	docker kill test-$(3)
