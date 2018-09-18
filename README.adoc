@@ -98,6 +98,15 @@ Where,
 * `{flavor}` is the flavor of Metanorma document, such as `iso`
 * `{extensions}` is a list of extensions desired, such as `xml,html,doc`
 
+Example (real-life):
+
+[source,sh]
+----
+docker run -v "$(pwd)":/metanorma ribose/metanorma -t iso -x xml,html,doc iso-tc154-8601-2-en.adoc
+----
+
+
+
 The above command actually uses a couple assumptions set in the
 built container itself, including:
 
