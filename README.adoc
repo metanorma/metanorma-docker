@@ -49,7 +49,7 @@ docker pull ribose/metanorma
 
 === Setting document attributes for docker compilation
 
-The `:local-cache:` document attribute should be set in your
+The `:local-cache-only:` document attribute should be set in your
 document in order to take advantage of local caching of
 bibliographic items fetched from the Internet.
 
@@ -58,12 +58,13 @@ bibliographic cache located in `~/.relaton.bib.pstore` and
 `~/.iev.bib.pstore`. However, when run in a docker container,
 the global cache is not shared between the host and the container.
 
-By setting `:local-cache`, Metanorma will store the caches
+By setting `:local-cache-only`, Metanorma will not generate a global
+bibliographic cache, and will store a cache instance for each document
 in the local working directory, which is shared between the host
 and the container, as in:
 
-* `./.relaton.bib.pstore`; and
-* `./.iev.bib.pstore`.
+* `./{document-name}.relaton.bib.pstore`; and
+* `./{document-name}.iev.bib.pstore`.
 
 The document attribute is to be set in the document header, like this:
 
