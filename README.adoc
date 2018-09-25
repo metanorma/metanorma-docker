@@ -78,7 +78,7 @@ The document attribute is to be set in the document header, like this:
 :title-main-en: Representations for information interchange
 :title-part-en: Extensions
 // ...
-:local-cache:
+:local-cache-only:
 ----
 
 These files can also be checked-in into version control.
