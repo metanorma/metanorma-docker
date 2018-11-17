@@ -2,33 +2,100 @@ FROM ${ROOT_IMAGE}
 
 MAINTAINER Open Source at Ribose <open.source@ribose.com>
 
-RUN apt-get update
-# for metanorma
-RUN apt-get install -y curl git make ruby-bundler ruby-dev libxml2-dev libxslt-dev default-jre
-RUN apt-get install -y sassc
-# for puppeteer
+RUN apt-get update \
+    && apt-get install -y \
+       curl \
+       git \
+       gnupg2
+
+RUN curl -L https://raw.githubusercontent.com/riboseinc/metanorma-linux-setup/master/ubuntu.sh > /tmp/ubuntu.sh && chmod +x /tmp/ubuntu.sh
+RUN /tmp/ubuntu.sh
+
+# RUN curl -L https://raw.githubusercontent.com/riboseinc/metanorma-linux-setup/master/install-gems.sh > /tmp/install-gems.sh && chmod +x /tmp/install-gems.sh
+# RUN /tmp/install-gems.sh
+
+# RVM version to install
+ARG RVM_VERSION=stable
+ENV RVM_VERSION=${RVM_VERSION}
+
+# RMV user to create
+ARG RVM_USER=metanorma
+ENV RVM_USER=${RVM_USER}
+
+# Install + verify RVM with gpg (https://rvm.io/rvm/security)
+RUN curl -sSL https://get.rvm.io | bash -s
+RUN cat /usr/local/rvm/gemsets/global.gems
+RUN echo "bundler" >> /usr/local/rvm/gemsets/global.gems \
+    && echo "rvm_silence_path_mismatch_check_flag=1" >> /etc/rvmrc \
+    && echo "install: --no-document" > /etc/gemrc
+
+# Workaround tty check, see https://github.com/hashicorp/vagrant/issues/1673#issuecomment-26650102
+RUN sed -i 's/^mesg n/tty -s \&\& mesg n/g' /root/.profile
+
+# Switch to a bash login shell to allow simple 'rvm' in RUN commands
+SHELL [ "/bin/bash", "-l", "-c" ]
+
+RUN rvm use ${RUBY_VER} --install --binary --fuzzy
+
+# Optional: child images can change to this user, or add 'rvm' group to other user
+# see https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user
+RUN useradd -m --no-log-init -r -g rvm ${RVM_USER}
+
+RUN mkdir -p /metanorma
+COPY metanorma/Gemfile metanorma/Gemfile.lock /metanorma/
+
+WORKDIR /metanorma
+RUN which ruby
+RUN rvm use ${RUBY_VER}; \
+  gem install bundler \
+  && gem install rake \
+  && gem install sassc \
+  && bundle
+
+# Add user "metanorma" as non-root user w/ sudo privileges
+RUN echo 'metanorma ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# TODO: use NVM instead of system node, problem is the metanorma gem
+# issues `system` commands that invoke npm and node, but they can only be
+# accessed through NVM using a login shell
+#
+# ENV NVM_DIR /usr/local/nvm
+# RUN mkdir -p ${NVM_DIR} && \
+#     curl https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash && \
+#     echo 'source $NVM_DIR/nvm.sh' >> /etc/profile && \
+#     source $NVM_DIR/nvm.sh && \
+#     nvm install node
+# COPY metanorma/nvm.sh /usr/bin/nvm
+# RUN chmod +x /usr/bin/nvm
+# RUN useradd -m --no-log-init -r -g nvm ${RVM_USER}
+
 RUN apt-get install -y npm
-RUN apt-get install -y gconf-service gconf-service-backend gconf2-common libdbus-glib-1-2 libgconf-2-4 libgconf2-4 libxss1
-# for plantuml
-RUN apt-get install -y graphviz
-
-RUN npm i puppeteer
-
-# Ruby sassc gem depends on rake gem
-RUN gem install rake
-RUN gem install bundler
-RUN gem install nokogiri -v '1.8.4'
-RUN gem install metanorma
-RUN gem install metanorma-cli
-
-# install PlantUML
-RUN mkdir -p /opt/plantuml && \
-  curl -o /opt/plantuml/plantuml.jar \
-  http://sourceforge.net/projects/plantuml/files/plantuml.1.2018.10.jar/download
-RUN printf '#!/bin/sh\nexec java -jar /opt/plantuml/plantuml.jar "$@"' > /usr/bin/plantuml.sh
-RUN chmod +x /usr/bin/plantuml.sh
+RUN npm install -g --save --save-exact puppeteer --unsafe-perm=true
 
 VOLUME /metanorma
-WORKDIR /metanorma
 
-ENTRYPOINT [ "metanorma" ]
+# USER ${RVM_USER}
+
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT [ "/bin/bash", "-c", "-l" ]
+
+# Optional: child images can set Ruby versions to install (whitespace-separated)
+ONBUILD ARG RVM_RUBY_VERSIONS
+
+# Optional: child images can set default Ruby version (default is first version)
+ONBUILD ARG RVM_RUBY_DEFAULT
+
+# Child image runs this only if RVM_RUBY_VERSIONS is defined as ARG before the FROM line
+ONBUILD RUN if [ ! -z "${RVM_RUBY_VERSIONS}" ]; then \
+              VERSIONS="$(echo "${RVM_RUBY_VERSIONS}" | sed -E -e 's/\s+/\n/g')" \
+              && for v in ${VERSIONS}; do \
+                   echo "== docker-rvm: Installing ${v} ==" \
+                   && rvm install ${v}; \
+                 done \
+              && DEFAULT=${RVM_RUBY_DEFAULT:-$(echo "${VERSIONS}" | head -n1)} \
+              && echo "== docker-rvm: Setting default ${DEFAULT} ==" \
+              && rvm use --default "${DEFAULT}"; \
+            fi \
+            && rvm cleanup all \
+            && rm -rf /var/lib/apt/lists/*

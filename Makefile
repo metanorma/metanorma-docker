@@ -25,8 +25,8 @@ REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
 ITEMS       ?= 1
 IMAGE_TYPES ?= metanorma
-VERSIONS		?= 1.0
-ROOT_IMAGES ?= ubuntu:18.10
+VERSIONS		?= 20181114
+ROOT_IMAGES ?= ubuntu:18.04
 
 # Getters
 GET_IMAGE_TYPE = $(word $1,$(IMAGE_TYPES))
@@ -68,6 +68,7 @@ define ROOT_IMAGE_TASKS
 
 $(eval CONTAINER_LOCAL_NAME := $(NS_LOCAL)/$(3):$(1).$(CONTAINER_BRANCH))
 $(eval CONTAINER_REMOTE_NAME := $(NS_REMOTE)/$(3):$(1).$(CONTAINER_BRANCH))
+$(eval CONTAINER_LATEST_NAME := $(NS_REMOTE)/$(3):latest)
 
 # Only the first line is eval'ed by bash
 $(3)/Dockerfile:
@@ -146,6 +147,15 @@ bt-$(3):
 
 bs-$(3):
 	$(MAKE) build-$(3) squash-$(3)
+
+latest-tag-$(3):
+	docker tag $(CONTAINER_REMOTE_NAME) $(CONTAINER_LATEST_NAME)
+
+latest-push-$(3):
+	docker push $(CONTAINER_LATEST_NAME)
+
+latest-tp-$(3):
+	$(MAKE) latest-tag-$(3) latest-push-$(3)
 
 endef
 
