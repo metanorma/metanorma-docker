@@ -54,7 +54,7 @@ document in order to take advantage of local caching of
 bibliographic items fetched from the Internet.
 
 NOTE: Normally, the Metanorma toolchain assumes that you have a global
-bibliographic cache located in `~/.relaton.bib.pstore` and
+bibliographic cache located in `~/.relaton/cache` and
 `~/.iev.bib.pstore`. However, when run in a docker container,
 the global cache is not shared between the host and the container.
 
@@ -63,7 +63,7 @@ bibliographic cache, and will store a cache instance for each document
 in the local working directory, which is shared between the host
 and the container, as in:
 
-* `./{document-name}.relaton.bib.pstore`; and
+* `./relaton/cache`; and
 * `./{document-name}.iev.bib.pstore`.
 
 The document attribute is to be set in the document header, like this:
