@@ -152,6 +152,16 @@ make {run,kill,rm,rmf}-metanorma
 
 == Building the containers yourself
 
+=== Container flavors
+
+There are two supported container flavors:
+
+* `metanorma`: official release of the Metanorma container, using released gems
+* `mn`: experimental release of the Metanorma container, using unreleased (but hopefully functional) gems
+
+
+=== Prerequisites
+
 This `Makefile` allows you to build the Metanorma container
 yourself.
 
@@ -194,6 +204,7 @@ within. See existing examples.
 
 `ROOT_IMAGES`:: the container your new image should be based on
 
+
 === Makefile build targets
 
 The `Makefile` supports the following commands for building:
@@ -206,6 +217,36 @@ make {build,push,tag,squash,clean-remote,clean-local}-{container-flavor}
 NOTE: The `squash-{container-flavor}` command relies on
 (and automatically pulls) the
 https://github.com/riboseinc/docker-squash-container[`docker-squash` container]
+
+
+=== Updating container flavors
+
+All files relating to building a certain container flavor is located in the
+`{container-flavor}` directory.
+
+For the `metanorma` and `mn` flavors, we update using this procedure:
+
+[source,sh]
+----
+pushd metanorma
+bundle update
+popd
+# Gemfile.lock is updated
+----
+
+Then, we build, squash and push the container:
+
+[source,sh]
+----
+make bsp-metanorma
+----
+
+Lastly, we tag and push the built container as latest.
+
+[source,sh]
+----
+make latest-tp-metanorma
+----
 
 
 == Chain commands

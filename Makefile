@@ -23,9 +23,9 @@ endif
 CONTAINER_COMMIT ?= $(shell git rev-parse --short HEAD)
 REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
-ITEMS       ?= 2
+ITEMS       ?= 1 2
 IMAGE_TYPES ?= metanorma mn
-VERSIONS		?= 20181114 2018119
+VERSIONS		?= 20181120 20181119
 ROOT_IMAGES ?= ubuntu:18.04 ubuntu:18.04
 
 # Getters
@@ -64,7 +64,8 @@ define ROOT_IMAGE_TASKS
 .PHONY: build-$(3) clean-local-$(3) kill-$(3) rm-$(3) \
 	rmf-$(3) squash-$(3) tag-$(3) push-$(3) sp-$(3) \
 	bsp-$(3) tp-$(3) btp-$(3) bt-$(3) bs-$(3) \
-	clean-remote-$(3) run-$(3)
+	clean-remote-$(3) run-$(3) \
+	latest-tag-$(3) latest-push-$(3) latest-tp-$(3)
 
 $(eval CONTAINER_LOCAL_NAME := $(NS_LOCAL)/$(3):$(1).$(CONTAINER_BRANCH))
 $(eval CONTAINER_REMOTE_NAME := $(NS_REMOTE)/$(3):$(1).$(CONTAINER_BRANCH))

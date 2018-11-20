@@ -42,7 +42,7 @@ GEM
     iev (0.2.0)
       nokogiri
     image_size (2.0.0)
-    iso-bib-item (0.4.2)
+    iso-bib-item (0.4.3)
       isoics (~> 0.1.6)
       nokogiri (~> 1.8.4)
       ruby_deep_clone (~> 0.8.0)
@@ -50,7 +50,7 @@ GEM
       algoliasearch
       iecbib (~> 0.2.1)
       iso-bib-item (~> 0.4.2)
-    isodoc (0.9.9)
+    isodoc (0.9.10)
       asciimath
       html2doc (~> 0.8.6)
       htmlentities (~> 4.3.4)
@@ -67,7 +67,7 @@ GEM
     json (2.1.0)
     liquid (4.0.1)
     metanorma (0.3.1)
-    metanorma-acme (1.0.4)
+    metanorma-acme (1.0.5)
       asciidoctor (~> 1.5.7)
       htmlentities (~> 4.3.4)
       isodoc (~> 0.9.0)
@@ -104,18 +104,18 @@ GEM
     metanorma-csd (1.0.10)
       isodoc (~> 0.9.6)
       metanorma-standoc (~> 1.0.0)
-    metanorma-gb (1.0.8)
+    metanorma-gb (1.0.9)
       gb-agencies (~> 0.0.4)
       isodoc (~> 0.9.1)
       metanorma-iso (~> 1.0.1)
       twitter_cldr
-    metanorma-iso (1.0.9)
+    metanorma-iso (1.0.10)
       asciidoctor (~> 1.5.7)
       iev (~> 0.2.0)
-      isodoc (~> 0.9.0)
+      isodoc (~> 0.9.8)
       metanorma-standoc (~> 1.0.0)
       ruby-jing
-    metanorma-m3d (1.0.8)
+    metanorma-m3d (1.0.9)
       asciidoctor (~> 1.5.7)
       asciimath
       htmlentities (~> 4.3.4)
@@ -128,27 +128,27 @@ GEM
       ruby-xslt
       thread_safe
       uuidtools
-    metanorma-mpfd (0.1.1)
+    metanorma-mpfd (0.1.2)
       asciidoctor (~> 1.5.7)
       htmlentities (~> 4.3.4)
       isodoc (~> 0.9.0)
       metanorma-standoc (~> 1.0.0)
       nokogiri
       twitter_cldr
-    metanorma-rsd (1.0.8)
+    metanorma-rsd (1.0.9)
       asciidoctor (~> 1.5.7)
       htmlentities (~> 4.3.4)
       isodoc (~> 0.9.0)
       metanorma-standoc (~> 1.0.0)
       nokogiri
-    metanorma-standoc (1.0.9)
+    metanorma-standoc (1.0.10)
       asciidoctor (~> 1.5.7)
       iev (~> 0.2.0)
       isodoc (~> 0.9.0)
       relaton (~> 0.3.0)
       ruby-jing
       sterile
-    metanorma-unece (0.0.3)
+    metanorma-unece (0.0.4)
       asciidoctor (~> 1.5.7)
       htmlentities (~> 4.3.4)
       isodoc (~> 0.9.0)
