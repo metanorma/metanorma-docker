@@ -47,6 +47,7 @@ COPY metanorma/Gemfile metanorma/Gemfile.lock /metanorma/
 WORKDIR /metanorma
 RUN which ruby
 RUN rvm use ${RUBY_VER}; \
+  gem update --system; \
   gem install bundler \
   && gem install rake \
   && gem install sassc \

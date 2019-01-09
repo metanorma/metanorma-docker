@@ -263,8 +263,8 @@ For example:
 
 [source,sh]
 ----
-# equivalent to make {build,squash,push}-{container-flavor}
-make bsp-metanorma
+# equivalent to make {build,squash,push}-{container-flavor} latest-{tag,push}-{container-flavor}
+make bsp-metanorma latest-tp-metanorma
 ----
 
 The shortcut targets are:
