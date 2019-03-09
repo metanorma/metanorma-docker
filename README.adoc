@@ -16,7 +16,7 @@ All you need is install Docker as shown below.
 macOS:
 
 * *Recommended* Install using the
-https://github.com/riboseinc/metanorma-macos-setup[Metanorma macOS Setup Script]
+https://github.com/metanorma/metanorma-macos-setup[Metanorma macOS Setup Script]
 instead of this docker container
 * https://www.docker.com/products/docker-desktop[Docker Desktop for Mac]
 
