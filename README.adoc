@@ -6,7 +6,13 @@ This is the cross-platform solution for Metanorma
 that works on all OSes, including Windows.
 
 Some people mentioned setting up Metanorma on macOS felt
-cumbersome (well...).
+cumbersome (well...). If you want Metanorma install to affect
+your local machine’s environment as little as possible, using
+Docker may be the best choice, although not without some performance
+tradeoff.
+
+If you do want that performance, or have some other reason to avoid Docker setup,
+check out Metanorma installation docs at https://metanorma.com/author/topics/install/.
 
 
 == Prerequisites
