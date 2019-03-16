@@ -16,7 +16,7 @@ DOCKER_SQUASH_CMD := $(DOCKER_RUN) --rm \
 
 # On Jenkins we won't be on any branch, use the CONTAINER_BRANCH environment
 # variable to set it
-CONTAINER_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
+CONTAINER_BRANCH ?= $(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
 ifeq ($(CONTAINER_BRANCH),HEAD)
 CONTAINER_BRANCH := master
 endif
@@ -104,6 +104,9 @@ clean-remote-$(3):
 run-$(3):
 	$(DOCKER_RUN) -it --name=test-$(3) --entrypoint="" $(CONTAINER_REMOTE_NAME) /bin/bash; \
 
+test-$(3):
+	$(DOCKER_RUN) $(CONTAINER_REMOTE_NAME) /bin/bash 'metanorma -h'
+
 kill-$(3):
 	docker kill test-$(3)
 
@@ -162,3 +165,7 @@ latest-tp-$(3):
 endef
 
 $(foreach i,$(ITEMS),$(eval $(call ROOT_IMAGE_TASKS,$(call GET_VERSION,$i),$(call GET_ROOT_IMAGE,$i),$(call GET_IMAGE_TYPE,$i),$(CONTAINER_TYPE))))
+
+build: $(addprefix build-, $(notdir $(IMAGE_TYPES)))
+test: $(addprefix test-, $(notdir $(IMAGE_TYPES)))
+tp: $(addprefix tp-, $(notdir $(IMAGE_TYPES)))
