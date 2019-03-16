@@ -2,20 +2,9 @@ FROM ${ROOT_IMAGE}
 
 MAINTAINER Open Source at Ribose <open.source@ribose.com>
 
-RUN apt-get update \
-    && apt-get install -y \
-       curl \
-       git \
-       gnupg2 \
-       ruby \
-       libffi-dev
+RUN apt-get update && apt-get install -y curl gnupg2
 
-RUN curl -L https://raw.githubusercontent.com/riboseinc/metanorma-linux-setup/master/ubuntu.sh > /tmp/ubuntu.sh && chmod +x /tmp/ubuntu.sh
-RUN sed 's,https://raw.githubusercontent.com/metanorma/plantuml-install/master/ubuntu.sh,https://raw.githubusercontent.com/riboseinc/plantuml-install/master/ubuntu.sh,g' /tmp/ubuntu.sh > /tmp/ubuntu.sh
-RUN /tmp/ubuntu.sh
-
-# RUN curl -L https://raw.githubusercontent.com/riboseinc/metanorma-linux-setup/master/install-gems.sh > /tmp/install-gems.sh && chmod +x /tmp/install-gems.sh
-# RUN /tmp/install-gems.sh
+RUN curl -sSL https://raw.githubusercontent.com/metanorma/metanorma-linux-setup/master/ubuntu.sh | bash -s
 
 # RVM version to install
 ARG RVM_VERSION=stable
@@ -58,23 +47,6 @@ RUN rvm use ${RUBY_VER}; \
 
 # Add user "metanorma" as non-root user w/ sudo privileges
 RUN echo 'metanorma ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
-
-# TODO: use NVM instead of system node, problem is the metanorma gem
-# issues `system` commands that invoke npm and node, but they can only be
-# accessed through NVM using a login shell
-#
-# ENV NVM_DIR /usr/local/nvm
-# RUN mkdir -p ${NVM_DIR} && \
-#     curl https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash && \
-#     echo 'source $NVM_DIR/nvm.sh' >> /etc/profile && \
-#     source $NVM_DIR/nvm.sh && \
-#     nvm install node
-# COPY metanorma/nvm.sh /usr/bin/nvm
-# RUN chmod +x /usr/bin/nvm
-# RUN useradd -m --no-log-init -r -g nvm ${RVM_USER}
-
-RUN apt-get install -y npm
-RUN npm install -g --save --save-exact puppeteer --unsafe-perm=true
 
 VOLUME /metanorma
 
