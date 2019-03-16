@@ -6,9 +6,12 @@ RUN apt-get update \
     && apt-get install -y \
        curl \
        git \
-       gnupg2
+       gnupg2 \
+       ruby \
+       libffi-dev
 
 RUN curl -L https://raw.githubusercontent.com/riboseinc/metanorma-linux-setup/master/ubuntu.sh > /tmp/ubuntu.sh && chmod +x /tmp/ubuntu.sh
+RUN sed 's,https://raw.githubusercontent.com/metanorma/plantuml-install/master/ubuntu.sh,https://raw.githubusercontent.com/riboseinc/plantuml-install/master/ubuntu.sh,g' /tmp/ubuntu.sh > /tmp/ubuntu.sh
 RUN /tmp/ubuntu.sh
 
 # RUN curl -L https://raw.githubusercontent.com/riboseinc/metanorma-linux-setup/master/install-gems.sh > /tmp/install-gems.sh && chmod +x /tmp/install-gems.sh
