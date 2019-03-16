@@ -1,22 +1,20 @@
-sudo: 'required'
-
+sudo: required
 env:
   global:
     DOCKER_LOGIN_USERNAME: ___________
     DOCKER_LOGIN_PASSWORD: ___________
-
+  matrix:
+  - secure: axQouBzSovX3iskt7h1k9I30QBuOj7qylAcgMkiI+Q01H17N6rxAEhh5cbxU+XM6M9rniKdwMKBEu4R44QWQp4z98p1Y19LZMF0NPNNeoEhGZ04bzXniwx19ekzW1LfkcyJN+7xh8VaYEea5nX0c82CRu1tNR8lOUuD2X9W/YKcICu5jnK9VJh00B2HcSJFA9E0yIn9N0lQ+uf7s02mXEM1s1inAKtwIQq6GsiUXU8MF1QWIs2GMaVFYXEThhIvXTlHm690pfHXBa4OY9Z2jOeDGO4/fFm3deJ8pJ/A2dSa9SJ1xHCkE4MmB2LyNFZWyfGAnYdL8eIrhSq6Bo2dKlRI6bpP7dazUArZ2f6TP1CcM2z62m/edJ9SuKJQR5L/slwGAwTSjphytLJYAeIt7Zcq0hf7+MFfEf0HWnVFeVRM6CeIK+2EgYBURxRzP4FBmxodflmCmdOvvnk0Yiq6qV8IfMUmtBmlWQke3MSO/qeSeE4fbqQRkunRMgjN1G1LWVKMWaqxkcO7zaE1ZG+u7YX9XpyOB5rkOpZ1MZSRfYgrouyz+DEXVLfw8J+MHUCJytORqXNDlxdyr6kV8z9hyNtsE989n1X798zQt+VFzlRghD4HaPR3PDsYdM4LQFXrMtL6rGgJYHFVzRcA5Ky2kT9qcmnnem77VhyZ1blEVvB8=
+  - secure: OIrxJC3w4BhvxbiPTH3lBIRbZ45u1YPvNSO2xFpqs5AcagqctrKkuYObYMhVqs0fzkxy12CTMP9QOoBfE/ziD9T428vd/Q3pr3DWBpehHrfojQ/WV7TuabEBjOCV6i6qPyqO2xJZE5rhK1rxuoZUVd9knRXdDyeJDint+EgSyEMpyPIs1DNiKgAddkKUyPbBmg5J0D58gYlogCE2Yyx0vtcB44+jojgttWYKoqpRdLiE8Mh03OaitOqJiGrj9OFXadGOlIE0zR22ShCLvulcvPKafsD+6tSbed1w/aPY7PxpS9A2uIH227GWrFHf/ECPDHKt/a9FAv58hbTlQfgGX2+BZqmWfnTmg/P+RJ8n2x/ymJfZIA5mS4PWZGDpPp0eoYZqaVVz3wLCBk91vCCixXj2wD2elMv/zZnckGDqFLCEBNHJUUE258j5cLK2q1nhO3spXd0yr5OL6v2g74vY1H5qGGyYOP6px6n5yzDRREMeqUUsYMIc2O/o01P0UPIoNzdsA/kIVuzz4VAoULR2YSYdDNfRdkUvp+ahwkTnWhVZLkphEDEDL2W/kbhu3iDj6poDxq8DNKbZOiqi3+73J1/SuomW0OQTiLDo6tKRyAzNwaBDHKgEd3YUS4UOqQWIhzAswHFfS/KdYVjzzesqvdCxBKR9X1cm+jf9Ep+xUws=
 services:
-  - 'docker'
-
+- docker
 before_install:
-  - './.travis/main.sh'
-
+- "./.travis/main.sh"
 script:
-  - make build
-  - make test
-
+- make build
+- make test
 after_success:
-  - |
-    if [[ -n "$TRAVIS_TAG" ]]; then
-      make tp ;
-    fi
+- |
+  if [[ -n "$TRAVIS_TAG" ]]; then
+    make tp ;
+  fi
