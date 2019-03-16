@@ -1,0 +1,22 @@
+sudo: 'required'
+
+env:
+  global:
+    DOCKER_LOGIN_USERNAME: ___________
+    DOCKER_LOGIN_PASSWORD: ___________
+
+services:
+  - 'docker'
+
+before_install:
+  - './.travis/main.sh'
+
+script:
+  - make build
+  - make test
+
+after_success:
+  - |
+    if [[ -n "$TRAVIS_TAG" ]]; then
+      make tp ;
+    fi
