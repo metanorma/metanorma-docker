@@ -7,8 +7,9 @@ before_install:
 script:
 - make build
 - make test
-after_success:
-- |
-  if [[ -n "$TRAVIS_TAG" ]]; then
-    make tp ;
-  fi
+deploy:
+  provider: script
+  script: bash -c make tp
+  on:
+    tags: true
+    branch: master
