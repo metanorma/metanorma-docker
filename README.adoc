@@ -1,5 +1,7 @@
 = Metanorma Linux Container (Ubuntu)
 
+image:https://travis-ci.com/metanorma/metanorma-docker.svg?branch=master["Build Status", link="https://travis-ci.com/metanorma/metanorma-docker"]
+
 == Purpose
 
 This is the cross-platform solution for Metanorma
