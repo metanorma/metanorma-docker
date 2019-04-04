@@ -105,7 +105,7 @@ run-$(3):
 	$(DOCKER_RUN) -it --name=test-$(3) --entrypoint="" $(CONTAINER_REMOTE_NAME) /bin/bash; \
 
 test-$(3):
-	$(DOCKER_RUN) $(CONTAINER_REMOTE_NAME) /bin/bash 'metanorma -h'
+	$(DOCKER_RUN) $(CONTAINER_LOCAL_NAME) /bin/bash 'metanorma -h'
 
 kill-$(3):
 	docker kill test-$(3)
