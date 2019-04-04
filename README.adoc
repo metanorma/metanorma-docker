@@ -286,3 +286,24 @@ The shortcut targets are:
 `bt-{target}`:: build + tag
 `sp-{target}`:: squash + push
 `tp-{target}`:: tag + push
+
+== Push the container by CI
+
+Currently CI do `docker push` only for tags on `master`. 
+So to trigger build you need to create tag on `master` and push it, example:
+
+[source,sh]
+----
+git tag v1.2.3
+git push origin master --tags
+----
+
+Important requirment for `tag`: it must correlate with versioning of ["metanorma-cli", link="https://github.com/metanorma/metanorma-cli/releases"]
+
+Tags allow you to fast switch between different versions
+List of tags can be obtained with:
+
+[source,sh]
+----
+git tag --list
+----

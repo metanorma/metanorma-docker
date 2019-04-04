@@ -9,7 +9,8 @@ script:
 - make test
 deploy:
   provider: script
-  script: bash -c make sp
+  script: bash -c make tp
+  skip_cleanup: true
   on:
     tags: true
     branch: master
