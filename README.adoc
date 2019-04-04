@@ -2,6 +2,8 @@
 
 image:https://travis-ci.com/metanorma/metanorma-docker.svg?branch=master["Build Status", link="https://travis-ci.com/metanorma/metanorma-docker"]
 
+https://cloud.docker.com/u/metanorma/repository/docker/metanorma/metanorma/general[Docker Hub: metanorma/metanorma]
+
 == Purpose
 
 The Metanorma Docker container provides all dependencies necessary
