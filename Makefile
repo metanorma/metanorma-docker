@@ -3,7 +3,7 @@
 SHELL := /bin/bash
 
 NS_LOCAL := ribose-local
-NS_REMOTE ?= ribose
+NS_REMOTE ?= metanorma
 
 DOCKER_RUN := docker run
 DOCKER_EXEC := docker exec
@@ -25,9 +25,9 @@ REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
 ITEMS       ?= 1 2
 IMAGE_TYPES ?= metanorma mn
-VERSIONS		?= 20190109 20190109
+VERSIONS		?= 20190404 20190404
 ROOT_IMAGES ?= ubuntu:18.04 ubuntu:18.04
-RUBY_VER = 2.5.1
+RUBY_VER = 2.5.3
 
 # Getters
 GET_IMAGE_TYPE = $(word $1,$(IMAGE_TYPES))
@@ -169,3 +169,5 @@ $(foreach i,$(ITEMS),$(eval $(call ROOT_IMAGE_TASKS,$(call GET_VERSION,$i),$(cal
 build: $(addprefix build-, $(notdir $(IMAGE_TYPES)))
 test: $(addprefix test-, $(notdir $(IMAGE_TYPES)))
 tp: $(addprefix tp-, $(notdir $(IMAGE_TYPES)))
+sp: $(addprefix sp-, $(notdir $(IMAGE_TYPES)))
+latest-tp: $(addprefix latest-tp-, $(notdir $(IMAGE_TYPES)))

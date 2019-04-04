@@ -1,20 +1,24 @@
-= Metanorma Linux Container (Ubuntu)
+= Metanorma Docker Container (based on Ubuntu Linux)
 
 image:https://travis-ci.com/metanorma/metanorma-docker.svg?branch=master["Build Status", link="https://travis-ci.com/metanorma/metanorma-docker"]
 
 == Purpose
 
+The Metanorma Docker container provides all dependencies necessary
+for its usage.
+
 This is the cross-platform solution for Metanorma
-that works on all OSes, including Windows.
+that across operating systems where supported by Docker
+(including Windows).
 
-Some people mentioned setting up Metanorma on macOS felt
-cumbersome (well...). If you want Metanorma install to affect
-your local machine’s environment as little as possible, using
-Docker may be the best choice, although not without some performance
-tradeoff.
+If you want Metanorma to affect your local machine's environment
+as little as possible, using Docker may be the best choice --
+although not without some performance tradeoff.
 
-If you do want that performance, or have some other reason to avoid Docker setup,
-check out Metanorma installation docs at https://metanorma.com/author/topics/install/.
+For those who need better performance, or wish to avoid a Docker
+setup (e.g. administrative rights, memory usage), please refer to
+alternative Metanorma installation methods at
+https://metanorma.com/author/topics/install/.
 
 
 == Prerequisites
@@ -27,7 +31,7 @@ macOS:
 
 Windows:
 
-* https://www.docker.com/products/docker-desktop[Docker Desktop for Windows (10)]
+* https://www.docker.com/products/docker-desktop[Docker Desktop for Windows (Windows 10)]
 * https://docs.docker.com/toolbox/overview/[Docker Toolbox for legacy Windows]
 
 Linux:
@@ -40,12 +44,12 @@ Linux:
 == Pulling the container
 
 This container is published at the
-https://hub.docker.com/r/ribose/metanorma/[Docker Registry] as `docker.io/ribose/metanorma` or `ribose/metanorma`,
+https://hub.docker.com/r/metanorma/metanorma/[Docker Registry] as `docker.io/metanorma/metanorma` or `metanorma/metanorma`,
 and can be pulled with the following command:
 
 [source,sh]
 ----
-docker pull ribose/metanorma
+docker pull metanorma/metanorma
 ----
 
 
@@ -95,7 +99,7 @@ In a directory containing the Metanorma document, run this:
 
 [source,sh]
 ----
-docker run -v "$(pwd)":/metanorma/ ribose/metanorma -t {flavor} -x {extensions} {my-document-file}
+docker run -v "$(pwd)":/metanorma/ metanorma/metanorma -t {flavor} -x {extensions} {my-document-file}
 ----
 
 Where,
@@ -108,7 +112,7 @@ Example (real-life):
 
 [source,sh]
 ----
-docker run -v "$(pwd)":/metanorma ribose/metanorma -t iso -x xml,html,doc iso-tc154-8601-2-en.adoc
+docker run -v "$(pwd)":/metanorma metanorma/metanorma -t iso -x xml,html,doc iso-tc154-8601-2-en.adoc
 ----
 
 
@@ -123,7 +127,7 @@ The full command is actually this:
 
 [source,sh]
 ----
-docker run -v "$(pwd)":/metanorma/ -w /metanorma ribose/metanorma metanorma -t iso -x {extensions} {my-document-file}
+docker run -v "$(pwd)":/metanorma/ -w /metanorma metanorma/metanorma metanorma -t iso -x {extensions} {my-document-file}
 ----
 
 

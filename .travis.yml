@@ -9,7 +9,7 @@ script:
 - make test
 deploy:
   provider: script
-  script: bash -c make tp
+  script: bash -c make sp
   on:
     tags: true
     branch: master
