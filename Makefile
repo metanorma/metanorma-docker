@@ -25,7 +25,7 @@ REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
 ITEMS       ?= 1 2
 IMAGE_TYPES ?= metanorma mn
-VERSIONS		?= 20190404 20190404
+VERSIONS		?= 1.1.6 1.1.6
 ROOT_IMAGES ?= ubuntu:18.04 ubuntu:18.04
 RUBY_VER = 2.5.3
 
@@ -36,7 +36,7 @@ GET_ROOT_IMAGE = $(word $1,$(ROOT_IMAGES))
 
 DOCKER_LOGIN_USERNAME ?=
 DOCKER_LOGIN_PASSWORD ?=
-DOCKER_LOGIN_CMD ?= "docker login --username=$(DOCKER_LOGIN_USERNAME) --password=\"$(DOCKER_LOGIN_PASSWORD)\""
+DOCKER_LOGIN_CMD ?= "echo \"$(DOCKER_LOGIN_PASSWORD)\" | docker login docker.io --username=$(DOCKER_LOGIN_USERNAME) --password-stdin"
 
 login:
 	eval $(DOCKER_LOGIN_CMD)
@@ -49,7 +49,7 @@ docker-squash-exists:
 define PULL_TASKS
 pull-build-$(1):	login
 	docker pull $(3); \
-	docker pull $(NS_REMOTE)/$(1):$(2).$(CONTAINER_BRANCH);
+	docker pull $(NS_REMOTE)/$(1):$(2);
 endef
 
 $(foreach i,$(ITEMS),$(eval $(call PULL_TASKS,$(call GET_IMAGE_TYPE,$i),$(call GET_VERSION,$i),$(call GET_ROOT_IMAGE,$i))))
@@ -68,8 +68,8 @@ define ROOT_IMAGE_TASKS
 	clean-remote-$(3) run-$(3) \
 	latest-tag-$(3) latest-push-$(3) latest-tp-$(3)
 
-$(eval CONTAINER_LOCAL_NAME := $(NS_LOCAL)/$(3):$(1).$(CONTAINER_BRANCH))
-$(eval CONTAINER_REMOTE_NAME := $(NS_REMOTE)/$(3):$(1).$(CONTAINER_BRANCH))
+$(eval CONTAINER_LOCAL_NAME := $(NS_LOCAL)/$(3):$(1))
+$(eval CONTAINER_REMOTE_NAME := $(NS_REMOTE)/$(3):$(1))
 $(eval CONTAINER_LATEST_NAME := $(NS_REMOTE)/$(3):latest)
 
 # Only the first line is eval'ed by bash

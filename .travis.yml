@@ -1,5 +1,3 @@
-sudo: required
-env:
 services:
 - docker
 before_install:
@@ -9,7 +7,7 @@ script:
 - make test
 deploy:
   provider: script
-  script: bash -c make tp
+  script: bash ./.travis/docker_push.sh
   skip_cleanup: true
   on:
     tags: true
