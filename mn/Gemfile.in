@@ -1,6 +1,5 @@
 source "https://rubygems.org"
 
 gem "metanorma"
-gem "metanorma-cli"
-gem "metanorma-csd", git: "https://github.com/metanorma/metanorma-csd"
+gem "metanorma-cli", "${METANORMA_VERSION}"
 gem "metanorma-nist", git: "https://github.com/metanorma/metanorma-nist"

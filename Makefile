@@ -25,7 +25,7 @@ REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
 ITEMS       ?= 1 2
 IMAGE_TYPES ?= metanorma mn
-VERSIONS		?= 1.1.6 1.1.6
+VERSIONS		?= 1.1.7 1.1.7
 ROOT_IMAGES ?= ubuntu:18.04 ubuntu:18.04
 RUBY_VER = 2.5.3
 
@@ -73,16 +73,24 @@ $(eval CONTAINER_REMOTE_NAME := $(NS_REMOTE)/$(3):$(1))
 $(eval CONTAINER_LATEST_NAME := $(NS_REMOTE)/$(3):latest)
 
 # Only the first line is eval'ed by bash
-$(3)/Dockerfile:
-	VERSION=$(1); \
-	ROOT_IMAGE=$(2); \
-	CONTAINER_BRANCH=$(CONTAINER_BRANCH); \
-	FROM_LINE=`head -1 $$@.in`; \
-	FROM_LINE_EVALED=`eval "echo \"$$$${FROM_LINE}\""`; \
-		echo "$$$${FROM_LINE_EVALED}" > $$@; \
-		sed '1d' $$@.in >> $$@
 
-build-$(3):	$(3)/Dockerfile
+clean-$(3):
+	rm -f $(3)/Gemfile $(3)/Gemfile.lock $(3)/Dockerfile
+
+$(3)/Gemfile:
+	export METANORMA_VERSION=$(1); \
+	envsubst '$$$${METANORMA_VERSION}' < $$@.in > $$@
+
+$(3)/Gemfile.lock: $(3)/Gemfile
+	pushd $(3); \
+	bundle; \
+	popd
+
+$(3)/Dockerfile:
+	ROOT_IMAGE=$(2); \
+	envsubst '${ROOT_IMAGE} ${METANORMA_VERSION}' < $$@.in > $$@
+
+build-$(3): $(3)/Gemfile $(3)/Dockerfile
 	docker build --rm \
 		-t $(CONTAINER_LOCAL_NAME) \
 		-f $(3)/Dockerfile \
@@ -170,4 +178,5 @@ build: $(addprefix build-, $(notdir $(IMAGE_TYPES)))
 test: $(addprefix test-, $(notdir $(IMAGE_TYPES)))
 tp: $(addprefix tp-, $(notdir $(IMAGE_TYPES)))
 sp: $(addprefix sp-, $(notdir $(IMAGE_TYPES)))
+clean: $(addprefix clean-, $(notdir $(IMAGE_TYPES)))
 latest-tp: $(addprefix latest-tp-, $(notdir $(IMAGE_TYPES)))
