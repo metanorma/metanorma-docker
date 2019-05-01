@@ -88,7 +88,7 @@ $(3)/Gemfile.lock: $(3)/Gemfile
 
 $(3)/Dockerfile:
 	export ROOT_IMAGE=$(2); \
-	envsubst '${ROOT_IMAGE} ${METANORMA_VERSION}' < $$@.in > $$@
+	envsubst '$$$${ROOT_IMAGE}' < $$@.in > $$@
 
 build-$(3): $(3)/Gemfile $(3)/Dockerfile
 	docker build --rm \
