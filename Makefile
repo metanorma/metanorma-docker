@@ -90,7 +90,7 @@ $(3)/Dockerfile:
 	export ROOT_IMAGE=$(2); \
 	envsubst '$$$${ROOT_IMAGE}' < $$@.in > $$@
 
-build-$(3): $(3)/Gemfile $(3)/Dockerfile
+build-$(3): $(3)/Gemfile.lock $(3)/Dockerfile
 	docker build --rm \
 		-t $(CONTAINER_LOCAL_NAME) \
 		-f $(3)/Dockerfile \
