@@ -25,7 +25,7 @@ REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
 ITEMS       ?= 1 2
 IMAGE_TYPES ?= metanorma mn
-VERSIONS		?= 1.1.7 1.1.7
+VERSIONS		?= 1.1.8 1.1.8
 ROOT_IMAGES ?= ubuntu:18.04 ubuntu:18.04
 RUBY_VER = 2.5.3
 
