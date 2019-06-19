@@ -27,7 +27,7 @@ ITEMS       ?= 1 2
 IMAGE_TYPES ?= metanorma mn
 VERSIONS		?= 1.1.8 1.1.8
 ROOT_IMAGES ?= ubuntu:18.04 ubuntu:18.04
-RUBY_VER = 2.5.3
+RUBY_VER = 2.5.4
 
 # Getters
 GET_IMAGE_TYPE = $(word $1,$(IMAGE_TYPES))
