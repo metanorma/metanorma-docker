@@ -69,7 +69,7 @@ bibliographic cache located in `~/.relaton/cache` and
 `~/.iev.bib.pstore`. However, when run in a docker container,
 the global cache is not shared between the host and the container.
 
-By setting `:local-cache-only`, Metanorma will not generate a global
+By setting `:local-cache-only:`, Metanorma will not generate a global
 bibliographic cache, and will store a cache instance for each document
 in the local working directory, which is shared between the host
 and the container, as in:
@@ -289,7 +289,7 @@ The shortcut targets are:
 
 == Push the container by CI
 
-Currently CI do `docker push` only for tags on `master`. 
+Currently CI do `docker push` only for tags on `master`.
 So to trigger build you need to create tag on `master` and push it, example:
 
 [source,sh]
