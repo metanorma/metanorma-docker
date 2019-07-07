@@ -25,9 +25,8 @@ REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
 ITEMS       ?= 1 2
 IMAGE_TYPES ?= metanorma mn
-VERSIONS		?= 1.1.8 1.1.8
-ROOT_IMAGES ?= ubuntu:18.04 ubuntu:18.04
-RUBY_VER = 2.5.4
+VERSIONS		?= 1.1.8 1.2.1
+ROOT_IMAGES ?= ruby:2.5-slim-stretch ruby:2.5-slim-stretch
 
 # Getters
 GET_IMAGE_TYPE = $(word $1,$(IMAGE_TYPES))
@@ -88,9 +87,10 @@ $(3)/Gemfile.lock: $(3)/Gemfile
 
 $(3)/Dockerfile:
 	export ROOT_IMAGE=$(2); \
-	envsubst '$$$${ROOT_IMAGE}' < $$@.in > $$@
+	export METANORMA_VERSION=$(1); \
+	envsubst '$$$${ROOT_IMAGE},$$$${METANORMA_VERSION}' < $$@.in > $$@
 
-build-$(3): $(3)/Gemfile.lock $(3)/Dockerfile
+build-$(3): $(3)/Dockerfile
 	docker build --rm \
 		-t $(CONTAINER_LOCAL_NAME) \
 		-f $(3)/Dockerfile \
@@ -113,7 +113,7 @@ run-$(3):
 	$(DOCKER_RUN) -it --name=test-$(3) --entrypoint="" $(CONTAINER_REMOTE_NAME) /bin/bash; \
 
 test-$(3):
-	$(DOCKER_RUN) $(CONTAINER_LOCAL_NAME) /bin/bash 'metanorma -h'
+	$(DOCKER_RUN) $(CONTAINER_LOCAL_NAME) metanorma help
 
 kill-$(3):
 	docker kill test-$(3)

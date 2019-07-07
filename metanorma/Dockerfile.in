@@ -2,76 +2,18 @@ FROM ${ROOT_IMAGE}
 
 MAINTAINER Open Source at Ribose <open.source@ribose.com>
 
+# install dependencies
 RUN apt-get update && apt-get install -y curl gnupg2
-
 RUN curl -sSL https://raw.githubusercontent.com/metanorma/metanorma-linux-setup/master/ubuntu.sh | bash -s
 
-# RVM version to install
-ARG RVM_VERSION=stable
-ENV RVM_VERSION=${RVM_VERSION}
-
-# RMV user to create
-ARG RVM_USER=metanorma
-ENV RVM_USER=${RVM_USER}
-
-# Install + verify RVM with gpg (https://rvm.io/rvm/security)
-RUN curl -sSL https://get.rvm.io | bash -s
-RUN cat /usr/local/rvm/gemsets/global.gems
-RUN echo "bundler" >> /usr/local/rvm/gemsets/global.gems \
-    && echo "rvm_silence_path_mismatch_check_flag=1" >> /etc/rvmrc \
-    && echo "install: --no-document" > /etc/gemrc
-
-# Workaround tty check, see https://github.com/hashicorp/vagrant/issues/1673#issuecomment-26650102
-RUN sed -i 's/^mesg n/tty -s \&\& mesg n/g' /root/.profile
-
-# Switch to a bash login shell to allow simple 'rvm' in RUN commands
-SHELL [ "/bin/bash", "-l", "-c" ]
-
-RUN rvm use ${RUBY_VER} --install --binary --fuzzy
-
-# Optional: child images can change to this user, or add 'rvm' group to other user
-# see https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user
-RUN useradd -m --no-log-init -r -g rvm ${RVM_USER}
-
-RUN mkdir -p /metanorma
-COPY metanorma/Gemfile metanorma/Gemfile.lock /metanorma/
-
+# install metanorma toolchain
 WORKDIR /metanorma
-RUN which ruby
-RUN rvm use ${RUBY_VER}; \
-  gem update --system; \
-  gem install bundler \
-  && gem install rake \
-  && gem install sassc \
-  && bundle
+RUN gem install metanorma-cli -v "${METANORMA_VERSION}"
 
-# Add user "metanorma" as non-root user w/ sudo privileges
-RUN echo 'metanorma ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+# export java executable path
+ENV JAVA_HOME /usr/lib/jvm/default-java
+ENV PATH $PATH:$JAVA_HOME/bin
 
-VOLUME /metanorma
-
-# USER ${RVM_USER}
-
+# cleanup and set base entrypoint
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-ENTRYPOINT [ "/bin/bash", "-c", "-l" ]
-
-# Optional: child images can set Ruby versions to install (whitespace-separated)
-ONBUILD ARG RVM_RUBY_VERSIONS
-
-# Optional: child images can set default Ruby version (default is first version)
-ONBUILD ARG RVM_RUBY_DEFAULT
-
-# Child image runs this only if RVM_RUBY_VERSIONS is defined as ARG before the FROM line
-ONBUILD RUN if [ ! -z "${RVM_RUBY_VERSIONS}" ]; then \
-              VERSIONS="$(echo "${RVM_RUBY_VERSIONS}" | sed -E -e 's/\s+/\n/g')" \
-              && for v in ${VERSIONS}; do \
-                   echo "== docker-rvm: Installing ${v} ==" \
-                   && rvm install ${v}; \
-                 done \
-              && DEFAULT=${RVM_RUBY_DEFAULT:-$(echo "${VERSIONS}" | head -n1)} \
-              && echo "== docker-rvm: Setting default ${DEFAULT} ==" \
-              && rvm use --default "${DEFAULT}"; \
-            fi \
-            && rvm cleanup all \
-            && rm -rf /var/lib/apt/lists/*
+CMD ["metanorma"]
