@@ -25,7 +25,7 @@ REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
 ITEMS       ?= 1 2
 IMAGE_TYPES ?= metanorma mn
-VERSIONS		?= 1.1.8 1.2.1
+VERSIONS		?= 1.1.8 1.2.2
 ROOT_IMAGES ?= ruby:2.5-slim-stretch ruby:2.5-slim-stretch
 
 # Getters
@@ -59,7 +59,7 @@ define ROOT_IMAGE_TASKS
 
 # All */Dockerfiles are intermediate files, removed after using
 # Comment this out when debugging
-.INTERMEDIATE: $(3)/Dockerfile
+.INTERMEDIATE: $(3)/Gemfile $(3)/Dockerfile
 
 .PHONY: build-$(3) clean-local-$(3) kill-$(3) rm-$(3) \
 	rmf-$(3) squash-$(3) tag-$(3) push-$(3) sp-$(3) \
@@ -74,7 +74,7 @@ $(eval CONTAINER_LATEST_NAME := $(NS_REMOTE)/$(3):latest)
 # Only the first line is eval'ed by bash
 
 clean-$(3):
-	rm -f $(3)/Gemfile $(3)/Gemfile.lock $(3)/Dockerfile
+	rm -f $(3)/Gemfile $(3)/Dockerfile
 
 $(3)/Gemfile:
 	export METANORMA_VERSION=$(1); \
@@ -87,10 +87,10 @@ $(3)/Gemfile.lock: $(3)/Gemfile
 
 $(3)/Dockerfile:
 	export ROOT_IMAGE=$(2); \
-	export METANORMA_VERSION=$(1); \
-	envsubst '$$$${ROOT_IMAGE},$$$${METANORMA_VERSION}' < $$@.in > $$@
+	export METANORMA_IMAGE_NAME=$(3); \
+	envsubst '$$$${ROOT_IMAGE},$$$${METANORMA_IMAGE_NAME}' < $$@.in > $$@
 
-build-$(3): $(3)/Dockerfile
+build-$(3): $(3)/Gemfile $(3)/Dockerfile
 	docker build --rm \
 		-t $(CONTAINER_LOCAL_NAME) \
 		-f $(3)/Dockerfile \
@@ -101,7 +101,9 @@ build-$(3): $(3)/Dockerfile
 		--label metanorma-container-version=$(1) \
 		--label metanorma-container-commit=$(CONTAINER_COMMIT) \
 		--label metanorma-container-commit-branch=$(CONTAINER_BRANCH) \
-		.
+		.;\
+
+	$$(MAKE) clean-$(3)
 
 clean-local-$(3):
 	docker rmi -f $(CONTAINER_LOCAL_NAME)
