@@ -6,6 +6,9 @@ MAINTAINER Open Source at Ribose <open.source@ribose.com>
 RUN apt-get update && apt-get install -y curl gnupg2
 RUN curl -sSL https://raw.githubusercontent.com/metanorma/metanorma-linux-setup/master/ubuntu.sh | bash -s
 
+# install latest bundler
+RUN gem install bundler
+
 # install metanorma toolchain
 RUN mkdir -p /setup
 COPY ${METANORMA_IMAGE_NAME}/Gemfile /setup/Gemfile
