@@ -1,5 +1,3 @@
 source "https://rubygems.org"
 
-gem "metanorma"
-gem "metanorma-cli", "${METANORMA_VERSION}"
-gem "metanorma-nist"
+gem "metanorma-cli", :github => "metanorma/metanorma-cli", :branch => "master"
