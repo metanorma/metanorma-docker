@@ -6,9 +6,14 @@ script:
 - make build
 - make test
 deploy:
-  provider: script
-  script: bash ./.travis/docker_push.sh
+- provider: script
+  script: make tp-metanorma
   skip_cleanup: true
   on:
     tags: true
+    branch: master
+- provider: script
+  script: make latest-tp-mn
+  skip_cleanup: true
+  on:
     branch: master
