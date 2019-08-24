@@ -307,3 +307,22 @@ List of tags can be obtained with:
 ----
 git tag --list
 ----
+
+== What's inclded?
+
+Under the hood, the metanorma toolchain depends on couple of software/packages.
+To ease the process, the docker image will setup everything for you so you don't
+have to worry about anything. In a high level the image incldues are followings
+
+* Latest version of https://nodejs.org/en/download/[Node and NPM]
+* Headless Chrome: https://github.com/GoogleChrome/puppeteer[Puppeteer]
+* PlantUML with the Java subsystem
+* LaTeXML `0.8.4` with Perl
+* Ruby 2.5 with Metanorma and Metanorma CLI
+
+If you are interested to see the full list of packages/software then please
+checkout https://github.com/metanorma/metanorma-linux-setup/blob/master/ubuntu.sh[this script]
+
+== License
+
+The image is available open source under the terms of the http://opensource.org/licenses/MIT[MIT License].
