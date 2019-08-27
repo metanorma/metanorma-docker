@@ -8,7 +8,7 @@ NS_REMOTE ?= metanorma
 DOCKER_RUN := docker run
 DOCKER_EXEC := docker exec
 
-DOCKER_SQUASH_IMG := $(NS_REMOTE)/docker-squash:latest
+DOCKER_SQUASH_IMG := ribose/docker-squash
 DOCKER_SQUASH_CMD := $(DOCKER_RUN) --rm \
   -v $(shell which docker):/usr/bin/docker \
   -v /var/run/docker.sock:/var/run/docker.sock \
