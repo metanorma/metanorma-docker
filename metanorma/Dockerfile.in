@@ -4,7 +4,6 @@ MAINTAINER Open Source at Ribose <open.source@ribose.com>
 
 # install dependencies
 RUN apt-get update && apt-get install -y curl gnupg2 software-properties-common
-RUN curl -sSL https://github.com/mikefarah/yq/releases/download/2.4.0/yq_linux_amd64 -o /usr/bin/yq && chmod +x /usr/bin/yq
 RUN curl -sSL https://raw.githubusercontent.com/metanorma/metanorma-linux-setup/master/ubuntu.sh | bash -s
 
 # install latest bundler

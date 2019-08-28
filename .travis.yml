@@ -7,13 +7,13 @@ script:
 - make test
 deploy:
 - provider: script
-  script: make tp-metanorma
+  script: make bsp-metanorma latest-tp-metanorma
   skip_cleanup: true
   on:
     tags: true
     branch: master
 - provider: script
-  script: make latest-tp-mn
+  script: make bsp-mn latest-tp-mn
   skip_cleanup: true
   on:
     branch: master
