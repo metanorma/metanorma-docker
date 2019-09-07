@@ -4,6 +4,7 @@ MAINTAINER Open Source at Ribose <open.source@ribose.com>
 
 # install dependencies
 RUN apt-get update && apt-get install -y curl gnupg2 software-properties-common
+RUN mkdir -p /usr/share/man/man1 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199
 RUN curl -sSL https://raw.githubusercontent.com/metanorma/metanorma-linux-setup/master/ubuntu.sh | bash -s
 
 # install latest bundler
