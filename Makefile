@@ -26,7 +26,7 @@ REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 ITEMS       ?= 1 2
 IMAGE_TYPES ?= metanorma mn
 VERSIONS    ?= 1.2.3 latest
-ROOT_IMAGES ?= ruby:2.5-slim-stretch ruby:2.5-slim-stretch
+ROOT_IMAGES ?= ruby:2.6-slim-stretch ruby:2.6-slim-stretch
 
 # Getters
 GET_IMAGE_TYPE = $(word $1,$(IMAGE_TYPES))
