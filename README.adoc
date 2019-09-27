@@ -1,8 +1,7 @@
 = Metanorma Docker Container (based on Ubuntu Linux)
 
-image:https://travis-ci.com/metanorma/metanorma-docker.svg?branch=master["Build Status", link="https://travis-ci.com/metanorma/metanorma-docker"]
-
-image:https://ci.appveyor.com/api/projects/status/ghb0adudv6vrqw6o?svg=true["Appveyor Build Status",link="https://ci.appveyor.com/project/Metanorma/metanorma-docker"]
+image:https://github.com/metanorma/metanorma-docker/workflows/metanorma/badge.svg["Build Status", link="https://github.com/metanorma/metanorma-docker/actions?workflow=metanorma"]
+image:https://github.com/metanorma/metanorma-docker/workflows/mn/badge.svg["Build Status", link="https://github.com/metanorma/metanorma-docker/actions?workflow=mn"]
 
 https://hub.docker.com/r/metanorma/metanorma/tags[Docker Hub: metanorma/metanorma]
 
