@@ -12,10 +12,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    # - name: Run tests
-    #   run: |
-    #     make build
-    #     make test
+    - name: Run tests
+      run: |
+        make build
+        make test
 
     - name: Build the Docker image
       env:

@@ -19,5 +19,8 @@ jobs:
         make test
 
     - name: Build the Docker image
+      env:
+        DOCKER_LOGIN_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
+        DOCKER_LOGIN_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
       run: |
         make bsp-metanorma latest-tp-metanorma
