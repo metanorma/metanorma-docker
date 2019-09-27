@@ -1,4 +1,4 @@
-name: Publishing the metanorma/metanorma image
+name: docker-metanorma
 
 on:
   push:

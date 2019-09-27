@@ -1,7 +1,7 @@
 = Metanorma Docker Container (based on Ubuntu Linux)
 
-image:https://github.com/metanorma/metanorma-docker/workflows/metanorma/badge.svg["Build Status", link="https://github.com/metanorma/metanorma-docker/actions?workflow=metanorma"]
-image:https://github.com/metanorma/metanorma-docker/workflows/mn/badge.svg["Build Status", link="https://github.com/metanorma/metanorma-docker/actions?workflow=mn"]
+image:https://github.com/metanorma/metanorma-docker/workflows/docker-metanorma/badge.svg["Build Status", link="https://github.com/metanorma/metanorma-docker/actions?workflow=docker-metanorma"]
+image:https://github.com/metanorma/metanorma-docker/workflows/docker-mn/badge.svg["Build Status", link="https://github.com/metanorma/metanorma-docker/actions?workflow=docker-mn"]
 
 https://hub.docker.com/r/metanorma/metanorma/tags[Docker Hub: metanorma/metanorma]
 
