@@ -1,0 +1,22 @@
+name: Publishing the metanorma/mn image
+
+on:
+  push:
+    branch: master
+ 
+jobs:
+
+  build:
+ 
+    runs-on: ubuntu-latest
+ 
+    steps:
+    - uses: actions/checkout@v1
+    - name: Run tests
+      run: |
+        make build
+        make test
+
+    - name: Build the Docker image
+      run: |
+        make bsp-mn latest-tp-mn
