@@ -1,0 +1,22 @@
+name: Publishing the metanorma/metanorma image
+
+on:
+  release:
+    types: [published]
+  
+jobs:
+
+  build:
+ 
+    runs-on: ubuntu-latest
+ 
+    steps:
+    - uses: actions/checkout@v1
+    - name: Run tests
+      run: |
+        make build
+        make test
+
+    - name: Build the Docker image
+      run: |
+        make bsp-metanorma latest-tp-metanorma
