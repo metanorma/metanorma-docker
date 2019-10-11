@@ -25,4 +25,4 @@ ENV BUNDLE_GEMFILE /setup/Gemfile
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /metanorma
-CMD ["metanorma"]
+CMD source /root/.bashrc && metanorma
