@@ -8,6 +8,10 @@ RUN apt-get update && apt-get install -y curl gnupg2 software-properties-common
 RUN mkdir -p /usr/share/man/man1 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199
 RUN curl -sSL https://raw.githubusercontent.com/metanorma/metanorma-linux-setup/master/ubuntu.sh | bash -s
 
+# install xml2rfc
+RUN pip install --upgrade pip
+RUN pip install idnits xml2rfc --ignore-installed six chardet
+
 # install latest bundler
 RUN gem install bundler
 
