@@ -3,21 +3,21 @@ name: docker-mn
 on:
   push:
     branch: master
+  pull_request:
+    branches:
+    - '**'
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v1
     - name: Run tests
       run: |
         make build
         make test
-
     - name: Build the Docker image
+      if: github.ref == 'refs/heads/master'
       env:
         DOCKER_LOGIN_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
         DOCKER_LOGIN_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
