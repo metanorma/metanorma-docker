@@ -13,7 +13,7 @@ RUN pip install --upgrade pip
 RUN pip install idnits xml2rfc --ignore-installed six chardet
 
 # install latest bundler
-RUN gem install bundler
+RUN gem install bundler -v "2.0.2"
 
 # install metanorma toolchain
 RUN mkdir -p /setup
