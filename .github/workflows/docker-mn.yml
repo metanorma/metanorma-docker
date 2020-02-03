@@ -3,6 +3,8 @@ name: docker-mn
 on:
   push:
     branch: master
+    tags:
+      - '*'
   pull_request:
     branches:
     - '**'
@@ -13,12 +15,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Build container
+      run: |
+        make build-mn
+
     - name: Run tests
       run: |
-        make build
-        make test
-    - name: Build the Docker image
-      if: github.ref == 'refs/heads/master'
+        make test-mn
+
+    - name: Squash and push container
+      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
       env:
         DOCKER_LOGIN_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
         DOCKER_LOGIN_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
