@@ -23,15 +23,15 @@ endif
 CONTAINER_COMMIT ?= $(shell git rev-parse --short HEAD)
 REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
-ITEMS       ?= 1 2
-IMAGE_TYPES ?= metanorma mn
-VERSIONS    ?= 1.2.8.6 latest
-ROOT_IMAGES ?= ruby:2.6-slim-buster ruby:2.6-slim-buster
+ITEMS       ?= 1 2 3 4
+IMAGE_TYPES ?= metanorma metanorma-ubuntu mn mn-ubuntu
+VERSIONS    ?= 1.2.8.6 1.2.8.6 1.2.8.6 1.2.8.6
+ROOT_PLATFORMS ?= ruby ubuntu ruby ubuntu
 
 # Getters
 GET_IMAGE_TYPE = $(word $1,$(IMAGE_TYPES))
 GET_VERSION = $(word $1,$(VERSIONS))
-GET_ROOT_IMAGE = $(word $1,$(ROOT_IMAGES))
+GET_ROOT_PLATFORM = $(word $1,$(ROOT_PLATFORMS))
 
 DOCKER_LOGIN_USERNAME ?=
 DOCKER_LOGIN_PASSWORD ?=
@@ -51,11 +51,11 @@ pull-build-$(1):	login
 	docker pull $(NS_REMOTE)/$(1):$(2);
 endef
 
-$(foreach i,$(ITEMS),$(eval $(call PULL_TASKS,$(call GET_IMAGE_TYPE,$i),$(call GET_VERSION,$i),$(call GET_ROOT_IMAGE,$i))))
+$(foreach i,$(ITEMS),$(eval $(call PULL_TASKS,$(call GET_IMAGE_TYPE,$i),$(call GET_VERSION,$i),$(call GET_ROOT_PLATFORM,$i))))
 
 
 ## Basic Containers
-define ROOT_IMAGE_TASKS
+define ROOT_PLATFORM_TASKS
 
 # All */Dockerfiles are intermediate files, removed after using
 # Comment this out when debugging
@@ -85,10 +85,10 @@ $(3)/Gemfile.lock: $(3)/Gemfile
 	bundle; \
 	popd
 
-$(3)/Dockerfile:
-	export ROOT_IMAGE=$(2); \
+$(3)/Dockerfile: Dockerfile.$(2).in
+	export ROOT_PLATFORM=$(2); \
 	export METANORMA_IMAGE_NAME=$(3); \
-	envsubst '$$$${ROOT_IMAGE},$$$${METANORMA_IMAGE_NAME}' < $$@.in > $$@
+	envsubst '$$$${METANORMA_IMAGE_NAME}' < $$< > $$@
 
 build-$(3): $(3)/Gemfile $(3)/Dockerfile
 	docker build --rm \
@@ -174,7 +174,7 @@ latest-tp-$(3):
 
 endef
 
-$(foreach i,$(ITEMS),$(eval $(call ROOT_IMAGE_TASKS,$(call GET_VERSION,$i),$(call GET_ROOT_IMAGE,$i),$(call GET_IMAGE_TYPE,$i),$(CONTAINER_TYPE))))
+$(foreach i,$(ITEMS),$(eval $(call ROOT_PLATFORM_TASKS,$(call GET_VERSION,$i),$(call GET_ROOT_PLATFORM,$i),$(call GET_IMAGE_TYPE,$i),$(CONTAINER_TYPE))))
 
 build: $(addprefix build-, $(notdir $(IMAGE_TYPES)))
 test: $(addprefix test-, $(notdir $(IMAGE_TYPES)))
