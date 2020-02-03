@@ -10,7 +10,7 @@ on:
   repository_dispatch:
 
 jobs:
-  build:
+  build-debian:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -29,3 +29,23 @@ jobs:
         DOCKER_LOGIN_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
       run: |
         make bsp-metanorma latest-tp-metanorma
+
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build container
+      run: |
+        make build-metanorma-ubuntu
+
+    - name: Run tests
+      run: |
+        make test-metanorma-ubuntu
+
+    - name: Squash and push container
+      if: startsWith(github.ref, 'refs/tags/v')
+      env:
+        DOCKER_LOGIN_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
+        DOCKER_LOGIN_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
+      run: |
+        make bsp-metanorma-ubuntu latest-tp-metanorma-ubuntu
