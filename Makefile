@@ -127,7 +127,7 @@ rmf-$(3):
 	-docker rm -f test-$(3)
 
 squash-$(3):	docker-squash-exists $(3)/Dockerfile
-	FROM_IMAGE=`head -1 $(3)/Dockerfile | cut -f 2 -d ' '`; \
+	FROM_IMAGE=`grep FROM $(3)/Dockerfile | head -1 | cut -f 2 -d ' '`; \
 	$(DOCKER_SQUASH_CMD) -t $(CONTAINER_REMOTE_NAME) \
 		-f $$$${FROM_IMAGE} \
 		$(CONTAINER_LOCAL_NAME) \
