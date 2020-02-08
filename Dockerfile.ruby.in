@@ -1,4 +1,4 @@
-FROM ${ROOT_IMAGE}
+FROM ruby:2.6-slim-buster
 USER root
 
 MAINTAINER Open Source at Ribose <open.source@ribose.com>
@@ -6,11 +6,11 @@ MAINTAINER Open Source at Ribose <open.source@ribose.com>
 # install dependencies
 RUN apt-get update && apt-get install -y \
   curl gnupg2 software-properties-common python3-pip
-RUN mkdir -p /usr/share/man/man1 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199
+
 RUN curl -sSL https://raw.githubusercontent.com/metanorma/metanorma-linux-setup/master/ubuntu.sh | bash -s
 
 # install latest bundler
-RUN gem install bundler -v "2.0.2"
+RUN gem install bundler
 
 # install metanorma toolchain
 RUN mkdir -p /setup
@@ -22,6 +22,11 @@ ENV JAVA_HOME /usr/lib/jvm/default-java
 ENV PATH $PATH:$JAVA_HOME/bin
 ENV RUBYOPT -rbundler/setup
 ENV BUNDLE_GEMFILE /setup/Gemfile
+
+# Workaround for rubygems/bundler#7494
+# TODO: Supposed to be already fixed but why is this necessary?
+ENV GEM_PATH $GEM_HOME:$GEM_HOME/ruby/$RUBY_MAJOR.0
+ENV PATH $GEM_HOME/bin:$GEM_HOME/ruby/$RUBY_MAJOR.0/bin:$PATH
 
 # cleanup and set base entrypoint
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
