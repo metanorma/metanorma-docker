@@ -54,7 +54,10 @@ RUN gem install bundler
 # install metanorma toolchain
 RUN mkdir -p /setup
 COPY ${METANORMA_IMAGE_NAME}/Gemfile /setup/Gemfile
-RUN cd /setup && bundle config --local build.sassc --disable-march-tune-native && bundle install --verbose
+# Specially build sassc due to incompatible binary metanorma/metanorma-docker#51
+RUN cd /setup \
+  && bundle config --local build.sassc --disable-march-tune-native \
+  && bundle install --verbose
 
 # cleanup and set base entrypoint
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
