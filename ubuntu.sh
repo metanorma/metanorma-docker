@@ -45,10 +45,10 @@ export NODE_PATH=$(npm root -g)
 curl -L "https://raw.githubusercontent.com/metanorma/plantuml-install/master/ubuntu.sh" | bash
 
 # Install latexml
-snap install latexml --edge
-
-# Install yq
-snap install yq
+command -v cpanm >/dev/null 2>&1 || {
+  curl -L http://cpanmin.us | perl - App::cpanminus
+}
+cpanm --notest XML::LibXSLT@1.96 git://github.com/brucemiller/LaTeXML.git@9a0e7dc5
 
 # Install idnits & xml2rfc
 apt-get -y install python3-pip python3-setuptools python3-wheel

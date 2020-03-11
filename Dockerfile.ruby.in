@@ -5,15 +5,20 @@ MAINTAINER Open Source at Ribose <open.source@ribose.com>
 
 # install dependencies
 RUN apt-get update && apt-get install -y \
-  curl gnupg2 software-properties-common python3-pip
+  curl gnupg2 software-properties-common python3-pip snapd
 
-RUN ./ubuntu.sh
+RUN mkdir -p /setup
+
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199#23
+RUN mkdir -p /usr/share/man/man1
+
+COPY ./ubuntu.sh /setup/ubuntu.sh
+RUN bash -c /setup/ubuntu.sh
 
 # install latest bundler
 RUN gem install bundler
 
 # install metanorma toolchain
-RUN mkdir -p /setup
 COPY ${METANORMA_IMAGE_NAME}/Gemfile /setup/Gemfile
 # Specially build sassc due to incompatible binary metanorma/metanorma-docker#51
 RUN cd /setup \

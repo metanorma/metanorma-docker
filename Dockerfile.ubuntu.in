@@ -18,7 +18,8 @@ RUN apt-get update && \
       libncurses5-dev \
       libffi-dev \
       libgdbm5 \
-      libgdbm-dev
+      libgdbm-dev \
+      snapd
 
 RUN git clone git://github.com/rbenv/ruby-build.git $RUBY_PATH/plugins/ruby-build \
   && $RUBY_PATH/plugins/ruby-build/install.sh
@@ -35,7 +36,11 @@ COPY --from=rubybuild $RUBY_PATH $RUBY_PATH
 # install dependencies
 RUN apt-get update && apt-get install -y \
   curl gnupg2 software-properties-common python3-pip
-RUN ./ubuntu.sh
+
+RUN mkdir -p /setup
+
+COPY ./ubuntu.sh /setup/ubuntu.sh
+RUN bash -c /setup/ubuntu.sh
 
 # From https://github.com/docker-library/ruby/blob/master/
 #   Dockerfile-debian.template
@@ -52,7 +57,6 @@ RUN mkdir -p "$GEM_HOME" && chmod 777 "$GEM_HOME"
 RUN gem install bundler
 
 # install metanorma toolchain
-RUN mkdir -p /setup
 COPY ${METANORMA_IMAGE_NAME}/Gemfile /setup/Gemfile
 # Specially build sassc due to incompatible binary metanorma/metanorma-docker#51
 RUN cd /setup \
