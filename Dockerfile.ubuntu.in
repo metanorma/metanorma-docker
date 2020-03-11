@@ -35,7 +35,7 @@ COPY --from=rubybuild $RUBY_PATH $RUBY_PATH
 # install dependencies
 RUN apt-get update && apt-get install -y \
   curl gnupg2 software-properties-common python3-pip
-RUN curl -sSL https://raw.githubusercontent.com/metanorma/metanorma-linux-setup/master/ubuntu.sh | bash -s
+RUN ./ubuntu.sh
 
 # From https://github.com/docker-library/ruby/blob/master/
 #   Dockerfile-debian.template

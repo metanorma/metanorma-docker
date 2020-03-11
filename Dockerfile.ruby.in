@@ -7,7 +7,7 @@ MAINTAINER Open Source at Ribose <open.source@ribose.com>
 RUN apt-get update && apt-get install -y \
   curl gnupg2 software-properties-common python3-pip
 
-RUN curl -sSL https://raw.githubusercontent.com/metanorma/metanorma-linux-setup/master/ubuntu.sh | bash -s
+RUN ./ubuntu.sh
 
 # install latest bundler
 RUN gem install bundler
