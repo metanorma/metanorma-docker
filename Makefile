@@ -116,9 +116,15 @@ run-$(3):
 	$(DOCKER_RUN) -it --name=test-$(3) --entrypoint="" $(CONTAINER_REMOTE_NAME) /bin/bash; \
 
 test-$(3):
-	git clone https://github.com/metanorma/mn-samples-iso
-	cd mn-samples-iso; $(DOCKER_RUN) -v $(shell pwd):/metanorma/ $(CONTAINER_LOCAL_NAME) metanorma sources/iso-rice-en.adoc
 	$(DOCKER_RUN) $(CONTAINER_LOCAL_NAME) metanorma help
+	samples=( iso cc gb iec ietf itu mpf ogc tex-iso un ) \
+	for s in "${samples[@]}" \
+	do
+		git clone https://github.com/metanorma/mn-samples-$s \
+		pushd mn-samples-$s \
+		$(DOCKER_RUN) -v $(shell pwd):/metanorma/ $(CONTAINER_LOCAL_NAME) make all \
+		popd \
+	done
 
 kill-$(3):
 	docker kill test-$(3)
