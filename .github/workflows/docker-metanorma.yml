@@ -3,7 +3,7 @@ name: docker-metanorma
 on:
   push:
     tags:
-      - '*'
+    - '*'
   pull_request:
     branches:
     - '**'
