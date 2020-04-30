@@ -214,7 +214,7 @@ its numbers are indexes to the content in `IMAGE_TYPES`
 to create a directory for each of these names with a `Dockerfile.in`
 within. See existing examples.
 
-`VERSIONS`:: how you want to tag the resulting image
+`VERSIONS`:: how you want to tag the resulting images, for now we use the same version across all images which defined in `VERSION.mak`
 
 `ROOT_IMAGES`:: the container your new image should be based on
 

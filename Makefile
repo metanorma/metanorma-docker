@@ -5,6 +5,8 @@ SHELL := /bin/bash
 NS_LOCAL := ribose-local
 NS_REMOTE ?= metanorma
 
+include ./VERSION.mak
+
 DOCKER_RUN := docker run
 DOCKER_EXEC := docker exec
 
@@ -25,7 +27,7 @@ REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
 ITEMS       ?= 1 2 3 4
 IMAGE_TYPES ?= metanorma metanorma-ubuntu mn mn-ubuntu
-VERSIONS    ?= 1.2.11.1 1.2.11.1 1.2.11.1 1.2.11.1
+VERSIONS    ?= $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION)
 ROOT_PLATFORMS ?= ruby ubuntu ruby ubuntu
 
 # Getters
