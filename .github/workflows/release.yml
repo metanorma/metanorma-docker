@@ -24,7 +24,7 @@ jobs:
         echo "IMAGE_VERSION := ${METANORMA_CLI_VERSION}" > VERSION.mak
     - name: Push commit and tag
       run: |
-        git add Formula/metanorma.rb
+        git add VERSION.mak
         git commit -m "Bump version to ${METANORMA_CLI_VERSION}"
         git tag v${METANORMA_CLI_VERSION}
         git push github HEAD:${GITHUB_REF} --tags
