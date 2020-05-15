@@ -118,7 +118,7 @@ run-$(3):
 
 test-$(3):
 	$(DOCKER_RUN) $(CONTAINER_LOCAL_NAME) metanorma help; \
-	processors=( iso cc gb iec itu ogc un ); \
+	processors=( iso cc gb iec itu ogc un iho nist ); \
 	errors=( ); \
 	for s in "$$$${processors[@]}"; do \
 		[[ -d mn-samples-$$$${s} ]] || git clone --recurse-submodules https://github.com/metanorma/mn-samples-$$$${s}; \
