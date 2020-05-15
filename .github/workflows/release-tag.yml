@@ -1,17 +1,19 @@
-name: release
+name: release-tag
 
 on:
   repository_dispatch:
     types: [ metanorma/metanorma-cli ]
 
 jobs:
-  build_linux:
+  push-tag:
     runs-on: ubuntu-18.04
     if: startsWith(github.event.client_payload.ref, 'refs/tags/v')
     steps:
     - uses: actions/checkout@v1
     - name: Add writable remote
       run: |
+        git config --global user.name "${GITHUB_ACTOR}"
+        git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
         git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git"
         git pull github ${GITHUB_REF} --ff-only
     - name: Parse metanorma-cli version
