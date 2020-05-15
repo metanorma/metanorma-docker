@@ -117,11 +117,23 @@ run-$(3):
 	$(DOCKER_RUN) -it --name=test-$(3) --entrypoint="" $(CONTAINER_REMOTE_NAME) /bin/bash; \
 
 test-$(3):
-	$(DOCKER_RUN) $(CONTAINER_LOCAL_NAME) metanorma help
-	for s in iso cc gb iec ietf itu mpf ogc tex-iso un; do \
-		git clone https://github.com/metanorma/mn-samples-$$$${s}; \
-		$(DOCKER_RUN) -v $(shell pwd)/mn-samples-$$$${s}:/metanorma/ $(CONTAINER_LOCAL_NAME) make all; \
-	done
+	$(DOCKER_RUN) $(CONTAINER_LOCAL_NAME) metanorma help; \
+	processors=( iso cc gb iec itu ogc un ); \
+	errors=( ); \
+	for s in "$$$${processors[@]}"; do \
+		[[ -d mn-samples-$$$${s} ]] || git clone --recurse-submodules https://github.com/metanorma/mn-samples-$$$${s}; \
+		$(DOCKER_RUN) -v $(shell pwd)/mn-samples-$$$${s}:/metanorma/ $(CONTAINER_LOCAL_NAME) make all &> test_$$$${s}.log; \
+		[ $$$$? -ne 0 ] && errors+=("$$$$s"); \
+	done; \
+	if [ $$$${#errors[@]} -ne 0 ]; then \
+		for s in "$$$${errors[@]}"; do \
+			echo "--------------- tail -50 test_$$$${s}.log ------------------"; \
+			tail -50 test_$$$${s}.log; \
+		done; \
+		echo "------------------------------------------------------------"; \
+		echo "Failed processors ($$$${errors[@]}) check details above"; \
+		exit 1; \
+	fi
 
 kill-$(3):
 	docker kill test-$(3)
