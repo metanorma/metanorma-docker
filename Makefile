@@ -121,7 +121,7 @@ test-$(3):
 	processors=( iso cc gb iec itu ogc un iho nist ); \
 	errors=( ); \
 	for s in "$$$${processors[@]}"; do \
-		[[ -d mn-samples-$$$${s} ]] || git clone --recurse-submodules https://github.com/metanorma/mn-samples-$$$${s}; \
+		[[ -d mn-samples-$$$${s} ]] || git clone --recurse-submodules https://${GITHUB_CREDENTIALS}@github.com/metanorma/mn-samples-$$$${s}; \
 		$(DOCKER_RUN) -v $(shell pwd)/mn-samples-$$$${s}:/metanorma/ $(CONTAINER_LOCAL_NAME) make all &> test_$$$${s}.log; \
 		[ $$$$? -ne 0 ] && errors+=("$$$$s"); \
 	done; \

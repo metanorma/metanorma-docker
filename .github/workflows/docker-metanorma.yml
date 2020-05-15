@@ -19,6 +19,8 @@ jobs:
         make build-metanorma
 
     - name: Run tests
+      env:
+        GITHUB_CREDENTIALS: "metanorma-ci:${{ secrets.METANORMA_CI_PAT_TOKEN }}"
       run: |
         make test-metanorma
 
@@ -39,6 +41,8 @@ jobs:
         make build-metanorma-ubuntu
 
     - name: Run tests
+      env:
+        GITHUB_CREDENTIALS: "metanorma-ci:${{ secrets.METANORMA_CI_PAT_TOKEN }}"
       run: |
         make test-metanorma-ubuntu
 
