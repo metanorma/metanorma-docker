@@ -39,6 +39,8 @@ DOCKER_LOGIN_USERNAME ?=
 DOCKER_LOGIN_PASSWORD ?=
 DOCKER_LOGIN_CMD ?= "echo \"$(DOCKER_LOGIN_PASSWORD)\" | docker login docker.io --username=$(DOCKER_LOGIN_USERNAME) --password-stdin"
 
+TEST_FLAVOR ?= iso
+
 login:
 	eval $(DOCKER_LOGIN_CMD)
 
@@ -118,22 +120,13 @@ run-$(3):
 
 test-$(3):
 	$(DOCKER_RUN) $(CONTAINER_LOCAL_NAME) metanorma help; \
-	processors=( iso cc gb iec itu ogc un iho nist ); \
-	errors=( ); \
-	for s in "$$$${processors[@]}"; do \
-		[[ -d mn-samples-$$$${s} ]] || git clone --recurse-submodules https://${GITHUB_CREDENTIALS}@github.com/metanorma/mn-samples-$$$${s}; \
-		$(DOCKER_RUN) -v $(shell pwd)/mn-samples-$$$${s}:/metanorma/ $(CONTAINER_LOCAL_NAME) make all &> test_$$$${s}.log; \
-		[ $$$$? -ne 0 ] && errors+=("$$$$s"); \
-	done; \
-	if [ $$$${#errors[@]} -ne 0 ]; then \
-		for s in "$$$${errors[@]}"; do \
-			echo "--------------- tail -50 test_$$$${s}.log ------------------"; \
-			tail -50 test_$$$${s}.log; \
-		done; \
-		echo "------------------------------------------------------------"; \
-		echo "Failed processors ($$$${errors[@]}) check details above"; \
-		exit 1; \
-	fi
+	TEST_FLAVORS="iso cc gb iec itu ogc un iho nist"; \
+	parallel -j+0 --joblog parallel.log --eta make test-flavor-$(3) TEST_FLAVOR={} "&>" test_{}.log ::: $$$${TEST_FLAVORS}; \
+	parallel -j+0 --joblog parallel.log --resume-failed 'echo ---- {} ----; cat test_{}.log; echo ---- --- ----' ::: $$$${TEST_FLAVORS}
+
+test-flavor-$(3):
+	[[ -d mn-samples-$(TEST_FLAVOR) ]] || git clone --recurse-submodules https://${GITHUB_CREDENTIALS}@github.com/metanorma/mn-samples-${TEST_FLAVOR}; \
+	$(DOCKER_RUN) -v $(shell pwd)/mn-samples-$(TEST_FLAVOR):/metanorma/ $(CONTAINER_LOCAL_NAME) make all
 
 kill-$(3):
 	docker kill test-$(3)
@@ -195,7 +188,7 @@ endef
 $(foreach i,$(ITEMS),$(eval $(call ROOT_PLATFORM_TASKS,$(call GET_VERSION,$i),$(call GET_ROOT_PLATFORM,$i),$(call GET_IMAGE_TYPE,$i),$(CONTAINER_TYPE))))
 
 build: $(addprefix build-, $(notdir $(IMAGE_TYPES)))
-test: $(addprefix test-, $(notdir $(IMAGE_TYPES)))
+test: $(addprefix test-, $(notdir $(IMAGE_TYPES))) $(addprefix test-flavor-, $(notdir $(IMAGE_TYPES)))
 tp: $(addprefix tp-, $(notdir $(IMAGE_TYPES)))
 sp: $(addprefix sp-, $(notdir $(IMAGE_TYPES)))
 clean: $(addprefix clean-, $(notdir $(IMAGE_TYPES)))
