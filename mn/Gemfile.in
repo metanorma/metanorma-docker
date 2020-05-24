@@ -1,3 +1,4 @@
 source "https://rubygems.org"
 
 gem "metanorma-cli", :github => "metanorma/metanorma-cli", :branch => "master"
+gem "metanorma-ogc", :github => "metanorma/metanorma-ogc", :ref => "d0d4b2b587c10cd5d143e89495b3467ed98251ba"
