@@ -3,6 +3,8 @@ USER root
 
 MAINTAINER Open Source at Ribose <open.source@ribose.com>
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 # install dependencies
 RUN apt-get update && apt-get install -y \
   curl gnupg2 software-properties-common python3-pip snapd
@@ -23,7 +25,7 @@ COPY ${METANORMA_IMAGE_NAME}/Gemfile /setup/Gemfile
 # Specially build sassc due to incompatible binary metanorma/metanorma-docker#51
 RUN cd /setup \
   && bundle config --local build.sassc --disable-march-tune-native \
-  && bundle install --verbose
+  && bundle install --redownload # --redownload need to fix rake Bundler::GemNotFound
 
 # export java executable path
 ENV JAVA_HOME /usr/lib/jvm/default-java

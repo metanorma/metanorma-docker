@@ -2,9 +2,9 @@ name: docker-mn
 
 on:
   push:
-    branch: master
+    branches: [ master ]
     tags:
-      - '*'
+    - '*'
   pull_request:
     branches:
     - '**'
@@ -20,6 +20,8 @@ jobs:
         make build-mn
 
     - name: Run tests
+      env:
+        GITHUB_CREDENTIALS: "metanorma-ci:${{ secrets.METANORMA_CI_PAT_TOKEN }}"
       run: |
         make test-mn
 
@@ -40,6 +42,8 @@ jobs:
         make build-mn-ubuntu
 
     - name: Run tests
+      env:
+        GITHUB_CREDENTIALS: "metanorma-ci:${{ secrets.METANORMA_CI_PAT_TOKEN }}"
       run: |
         make test-mn-ubuntu
 

@@ -5,6 +5,8 @@ SHELL := /bin/bash
 NS_LOCAL := ribose-local
 NS_REMOTE ?= metanorma
 
+include ./VERSION.mak
+
 DOCKER_RUN := docker run
 DOCKER_EXEC := docker exec
 
@@ -25,7 +27,7 @@ REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
 ITEMS       ?= 1 2 3 4
 IMAGE_TYPES ?= metanorma metanorma-ubuntu mn mn-ubuntu
-VERSIONS    ?= 1.2.11.2 1.2.11.2 1.2.11.2 1.2.11.2
+VERSIONS    ?= $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION)
 ROOT_PLATFORMS ?= ruby ubuntu ruby ubuntu
 
 # Getters
@@ -36,6 +38,8 @@ GET_ROOT_PLATFORM = $(word $1,$(ROOT_PLATFORMS))
 DOCKER_LOGIN_USERNAME ?=
 DOCKER_LOGIN_PASSWORD ?=
 DOCKER_LOGIN_CMD ?= "echo \"$(DOCKER_LOGIN_PASSWORD)\" | docker login docker.io --username=$(DOCKER_LOGIN_USERNAME) --password-stdin"
+
+TEST_FLAVOR ?= iso
 
 login:
 	eval $(DOCKER_LOGIN_CMD)
@@ -115,11 +119,14 @@ run-$(3):
 	$(DOCKER_RUN) -it --name=test-$(3) --entrypoint="" $(CONTAINER_REMOTE_NAME) /bin/bash; \
 
 test-$(3):
-	$(DOCKER_RUN) $(CONTAINER_LOCAL_NAME) metanorma help
-	for s in iso cc gb iec ietf itu mpf ogc tex-iso un; do \
-		git clone https://github.com/metanorma/mn-samples-$$$${s}; \
-		$(DOCKER_RUN) -v $(shell pwd)/mn-samples-$$$${s}:/metanorma/ $(CONTAINER_LOCAL_NAME) make all; \
-	done
+	$(DOCKER_RUN) $(CONTAINER_LOCAL_NAME) metanorma help; \
+	TEST_FLAVORS="iso cc gb iec itu ogc un iho nist"; \
+	parallel -j+0 --joblog parallel.log --eta make test-flavor-$(3) TEST_FLAVOR={} "&>" test_{}.log ::: $$$${TEST_FLAVORS}; \
+	parallel -j+0 --joblog parallel.log --resume-failed 'echo ---- {} ----; cat test_{}.log; echo ---- --- ----' ::: $$$${TEST_FLAVORS}
+
+test-flavor-$(3):
+	[[ -d mn-samples-$(TEST_FLAVOR) ]] || git clone --recurse-submodules https://${GITHUB_CREDENTIALS}@github.com/metanorma/mn-samples-${TEST_FLAVOR}; \
+	$(DOCKER_RUN) -v $(shell pwd)/mn-samples-$(TEST_FLAVOR):/metanorma/ $(CONTAINER_LOCAL_NAME) make all
 
 kill-$(3):
 	docker kill test-$(3)
@@ -181,7 +188,7 @@ endef
 $(foreach i,$(ITEMS),$(eval $(call ROOT_PLATFORM_TASKS,$(call GET_VERSION,$i),$(call GET_ROOT_PLATFORM,$i),$(call GET_IMAGE_TYPE,$i),$(CONTAINER_TYPE))))
 
 build: $(addprefix build-, $(notdir $(IMAGE_TYPES)))
-test: $(addprefix test-, $(notdir $(IMAGE_TYPES)))
+test: $(addprefix test-, $(notdir $(IMAGE_TYPES))) $(addprefix test-flavor-, $(notdir $(IMAGE_TYPES)))
 tp: $(addprefix tp-, $(notdir $(IMAGE_TYPES)))
 sp: $(addprefix sp-, $(notdir $(IMAGE_TYPES)))
 clean: $(addprefix clean-, $(notdir $(IMAGE_TYPES)))

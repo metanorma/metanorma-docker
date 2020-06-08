@@ -1,0 +1,32 @@
+name: release-tag
+
+on:
+  repository_dispatch:
+    types: [ metanorma/metanorma-cli ]
+
+jobs:
+  push-tag:
+    runs-on: ubuntu-18.04
+    if: startsWith(github.event.client_payload.ref, 'refs/tags/v')
+    steps:
+    - uses: actions/checkout@v1
+    - name: Add writable remote
+      run: |
+        git config --global user.name "metanorma-ci"
+        git config --global user.email "metanorma-ci@users.noreply.github.com"
+        git remote add github "https://metanorma-ci:${{ secrets.METANORMA_CI_PAT_TOKEN }}@github.com/$GITHUB_REPOSITORY.git"
+        git pull github ${GITHUB_REF} --ff-only
+    - name: Parse metanorma-cli version
+      env:
+        METANORMA_CLI_TAG: ${{ github.event.client_payload.ref }}
+      run: |
+        echo "::set-env name=METANORMA_CLI_VERSION::${METANORMA_CLI_TAG#*/v}"
+    - name: Update version
+      run: |
+        echo "IMAGE_VERSION := ${METANORMA_CLI_VERSION}" > VERSION.mak
+    - name: Push commit and tag
+      run: |
+        git add VERSION.mak
+        git commit -m "Bump version to ${METANORMA_CLI_VERSION}"
+        git tag v${METANORMA_CLI_VERSION}
+        git push github HEAD:${GITHUB_REF} --tags
