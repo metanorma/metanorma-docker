@@ -33,6 +33,18 @@ jobs:
       run: |
         make bsp-mn latest-tp-mn
 
+    - name: Trigger samples repositories
+      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
+      env:
+        GH_USERNAME: metanorma-ci
+        GH_ACCESS_TOKEN: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
+      run: |
+        curl -LO --retry 3 https://raw.githubusercontent.com/metanorma/metanorma-build-scripts/master/trigger-gh-actions.sh
+        for repo in "iso cc gb iec itu ogc un iho nist"
+        do
+          sh trigger-gh-actions.sh $ORGANISATION mn-samples-$repo $GH_USERNAME $GH_ACCESS_TOKEN $GITHUB_REPOSITORY
+        done
+
   build-ubuntu:
     runs-on: ubuntu-latest
     steps:
