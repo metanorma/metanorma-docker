@@ -20,7 +20,7 @@ jobs:
       env:
         METANORMA_CLI_TAG: ${{ github.event.client_payload.ref }}
       run: |
-        echo "::set-env name=METANORMA_CLI_VERSION::${METANORMA_CLI_TAG#*/v}"
+        echo METANORMA_CLI_VERSION=${METANORMA_CLI_TAG#*/v} >> ${GITHUB_ENV}
     - name: Update version
       run: |
         echo "IMAGE_VERSION := ${METANORMA_CLI_VERSION}" > VERSION.mak
