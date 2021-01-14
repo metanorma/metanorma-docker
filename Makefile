@@ -120,7 +120,7 @@ run-$(3):
 
 test-$(3):
 	$(DOCKER_RUN) $(CONTAINER_LOCAL_NAME) metanorma help; \
-	TEST_FLAVORS="iso cc gb iec itu ogc un iho nist"; \
+	TEST_FLAVORS="iso cc gb iec ogc un iho nist"; \
 	parallel -j+0 --joblog parallel.log --eta make test-flavor-$(3) TEST_FLAVOR={} "&>" test_{}.log ::: $$$${TEST_FLAVORS}; \
 	parallel -j+0 --joblog parallel.log --resume-failed 'echo ---- {} ----; cat test_{}.log; echo ---- --- ----' ::: $$$${TEST_FLAVORS}
 
