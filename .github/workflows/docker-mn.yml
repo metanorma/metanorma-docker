@@ -16,6 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+
+    - uses: metanorma/metanorma-build-scripts/gh-rubygems-setup-action@master
+      with:
+        token: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
+
     - name: Build container
       run: |
         make build-mn
@@ -50,6 +55,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+
+    - uses: metanorma/metanorma-build-scripts/gh-rubygems-setup-action@master
+      with:
+        token: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
+
     - name: Build container
       run: |
         make build-mn-ubuntu
