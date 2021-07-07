@@ -105,6 +105,7 @@ build-$(3): $(3)/Gemfile $(3)/Dockerfile
 		--label metanorma-container-version=$(1) \
 		--label metanorma-container-commit=$(CONTAINER_COMMIT) \
 		--label metanorma-container-commit-branch=$(CONTAINER_BRANCH) \
+		--build-arg BUNDLE_RUBYGEMS__PKG__GITHUB__COM \
 		.;\
 
 	$$(MAKE) clean-$(3)
