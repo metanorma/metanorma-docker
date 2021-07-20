@@ -121,13 +121,13 @@ run-$(3):
 
 test-$(3):
 	$(DOCKER_RUN) $(CONTAINER_LOCAL_NAME) metanorma help; \
-	TEST_FLAVORS="iso cc gb iec ogc un iho nist"; \
-	parallel -j+0 --joblog parallel.log --eta make test-flavor-$(3) TEST_FLAVOR={} "&>" test_{}.log ::: $$$${TEST_FLAVORS}; \
-	parallel -j+0 --joblog parallel.log --resume-failed 'echo ---- {} ----; cat test_{}.log; echo ---- --- ----' ::: $$$${TEST_FLAVORS}
+	TEST_FLAVORS="iso cc iec ogc un iho"; \
+	parallel --gnu --halt 0 -j+0 --joblog parallel.log --eta make test-flavor-$(3) TEST_FLAVOR={} "&>" test_{}.log ::: $$$${TEST_FLAVORS} || \
+	(parallel --gnu -j+0 --joblog parallel.log --resume-failed 'echo ---- {} ----; cat test_{}.log; echo ---- --- ----' ::: $$$${TEST_FLAVORS} && exit 1)
 
 test-flavor-$(3):
 	[[ -d mn-samples-$(TEST_FLAVOR) ]] || git clone --recurse-submodules https://${GITHUB_CREDENTIALS}@github.com/metanorma/mn-samples-${TEST_FLAVOR}; \
-	$(DOCKER_RUN) -v $(shell pwd)/mn-samples-$(TEST_FLAVOR):/metanorma/ $(CONTAINER_LOCAL_NAME) make all
+	$(DOCKER_RUN) -v $(shell pwd)/mn-samples-$(TEST_FLAVOR):/metanorma/ $(CONTAINER_LOCAL_NAME) metanorma site generate --agree-to-terms .
 
 kill-$(3):
 	docker kill test-$(3)
