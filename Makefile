@@ -20,7 +20,7 @@ DOCKER_SQUASH_CMD := $(DOCKER_RUN) --rm \
 # variable to set it
 CONTAINER_BRANCH ?= $(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
 ifeq ($(CONTAINER_BRANCH),HEAD)
-CONTAINER_BRANCH := master
+CONTAINER_BRANCH := main
 endif
 CONTAINER_COMMIT ?= $(shell git rev-parse --short HEAD)
 REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
