@@ -320,8 +320,6 @@ so you don't have to worry about anything.
 
 At a high level, the image includes the following:
 
-* Latest version of https://nodejs.org/en/download/[Node and NPM]
-* Headless Chrome: https://github.com/GoogleChrome/puppeteer[Puppeteer]
 * http://plantuml.com[PlantUML] with the Java subsystem
 * https://dlmf.nist.gov/LaTeXML/[LaTeXML] with Perl
 * https://ruby-lang.org[Ruby] with Metanorma and Metanorma CLI

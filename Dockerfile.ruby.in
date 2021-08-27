@@ -44,11 +44,6 @@ ENV PATH $GEM_HOME/bin:$GEM_HOME/ruby/$RUBY_MAJOR.0/bin:$PATH
 # cleanup and set base entrypoint
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# load NVM
-ENV NVM_DIR "/root/.nvm"
-ENV NODE_PATH "$NVM_DIR/versions/node/v12.4.0/lib/node_modules"
-ENV PATH "$PATH:$NVM_DIR/versions/node/v12.4.0/bin"
-
 ENV FONTIST_PATH "/config"
 VOLUME /config/fonts
 
