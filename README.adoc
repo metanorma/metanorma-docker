@@ -26,7 +26,28 @@ alternative Metanorma installation methods at
 https://metanorma.com/author/topics/install/.
 
 
-== Prerequisites
+== What's included?
+
+Under the hood, the Metanorma toolchain depends on couple of software/packages.
+
+To ease installation, the Docker image is already fully setup so you don't have
+to worry about anything.
+
+At a high level, the image includes the following:
+
+* http://plantuml.com[PlantUML] with the Java subsystem
+* https://dlmf.nist.gov/LaTeXML/[LaTeXML] with Perl
+* https://ruby-lang.org[Ruby]
+* Metanorma and Metanorma CLI
+
+To see the full list of packages/software included,
+check out the setup script used by the container:
+https://github.com/metanorma/metanorma-linux-setup/blob/master/ubuntu.sh[this script].
+
+
+== Usage
+
+=== Prerequisites
 
 All you need is install Docker as shown below.
 
@@ -46,57 +67,17 @@ Linux:
 * https://docs.docker.com/install/linux/docker-ce/debian/[Docker CE for Debian]
 
 
-== Pulling the container
+=== Pulling the container
 
 This container is published at the
-https://hub.docker.com/r/metanorma/metanorma/[Docker Registry] as `docker.io/metanorma/metanorma` or `metanorma/metanorma`,
+https://hub.docker.com/r/metanorma/metanorma/[Docker Registry] as
+`docker.io/metanorma/metanorma` or `metanorma/metanorma`,
 and can be pulled with the following command:
 
 [source,sh]
 ----
 docker pull metanorma/metanorma
 ----
-
-
-== Usage
-
-
-=== Setting document attributes for docker compilation
-
-The `:local-cache-only:` document attribute should be set in your
-document in order to take advantage of local caching of
-bibliographic items fetched from the Internet.
-
-NOTE: Normally, the Metanorma toolchain assumes that you have a global
-bibliographic cache located in `~/.relaton/cache` and
-`~/.iev.bib.pstore`. However, when run in a docker container,
-the global cache is not shared between the host and the container.
-
-By setting `:local-cache-only:`, Metanorma will not generate a global
-bibliographic cache, and will store a cache instance for each document
-in the local working directory, which is shared between the host
-and the container, as in:
-
-* `./relaton/cache`; and
-* `./{document-name}.iev.bib.pstore`.
-
-The document attribute is to be set in the document header, like this:
-
-[source,adoc]
-----
-= ISO 8601-2
-:docnumber: 8601
-:partnumber: 2
-:ref-docnumber: 8601-2:2018(E)
-:title-intro-en: Date and time
-:title-main-en: Representations for information interchange
-:title-part-en: Extensions
-// ...
-:local-cache-only:
-----
-
-These files can also be checked-in into version control.
-
 
 === Compiling a Metamorma document via docker
 
@@ -117,10 +98,8 @@ Example (real-life):
 
 [source,sh]
 ----
-docker run -v "$(pwd)":/metanorma metanorma/metanorma  metanorma compile -t iso -x xml,html,doc iso-tc154-8601-2-en.adoc
+docker run -v "$(pwd)":/metanorma metanorma/metanorma metanorma -t iso -x xml,html,doc,pdf iso-8601-2-en.adoc
 ----
-
-
 
 The above command actually uses a couple assumptions set in the
 built container itself, including:
@@ -135,14 +114,58 @@ The full command is actually this:
 docker run -v "$(pwd)":/metanorma/ -w /metanorma metanorma/metanorma metanorma compile -t iso -x {extensions} {my-document-file}
 ----
 
+=== Updating your document to support Docker compilation
 
+The `:local-cache-only:` document attribute should be set in your
+document in order to take advantage of local caching of
+bibliographic items fetched from the Internet.
+
+NOTE: Normally, the Metanorma toolchain assumes that you have a global
+bibliographic cache located in `~/.relaton/cache` and
+`~/.iev/cache`. However, when run in a docker container,
+the global cache is not shared between the host and the container.
+
+By setting `:local-cache-only:`, Metanorma will not generate a global
+bibliographic cache, and will store a cache instance for each document
+in the local working directory, which is shared between the host
+and the container, as in:
+
+* `./relaton/cache`; and
+* `./iev/cache`.
+
+The document attribute is to be set in the document header, like this:
+
+[source,adoc]
+----
+= ISO 8601-2
+:docnumber: 8601
+:partnumber: 2
+:copyright-year: 2019
+:title-intro-en: Date and time
+:title-main-en: Representations for information interchange
+:title-part-en: Extensions
+// ...
+:local-cache-only:
+----
+
+These files can also be checked-in into version control.
+
+
+== Development guide
+
+=== Container flavors
+
+There are two supported container flavors:
+
+* `metanorma`: official release of the Metanorma container, using released gems
+* `mn`: experimental release of the Metanorma container, using unreleased (but hopefully functional) gems
 
 
 === Running the Metamorma container via the Makefile
 
-The `Makefile` makes life much simpler.
-To start the `metanorma` container and enter it with `bash`,
-all you need is:
+The `Makefile` makes developing the container much simpler.
+
+To start the `metanorma` container and enter it with `bash`, all you need is:
 
 [source,sh]
 ----
@@ -164,20 +187,9 @@ make {run,kill,rm,rmf}-metanorma
 ----
 
 
-== Building the containers yourself
-
-=== Container flavors
-
-There are two supported container flavors:
-
-* `metanorma`: official release of the Metanorma container, using released gems
-* `mn`: experimental release of the Metanorma container, using unreleased (but hopefully functional) gems
-
-
 === Prerequisites
 
-This `Makefile` allows you to build the Metanorma container
-yourself.
+This `Makefile` allows you to build the Metanorma container yourself.
 
 All you have to set is a couple environment variables.
 
@@ -258,7 +270,7 @@ make latest-tp-metanorma
 ----
 
 
-== Chain commands
+=== Chain commands
 
 If you feel tired typing out this:
 
@@ -302,23 +314,6 @@ List of tags can be obtained with:
 ----
 git tag --list
 ----
-
-== What's included?
-
-Under the hood, the Metanorma toolchain depends on couple of
-software/packages.
-To ease installation, the Docker image is already fully setup
-so you don't have to worry about anything.
-
-At a high level, the image includes the following:
-
-* http://plantuml.com[PlantUML] with the Java subsystem
-* https://dlmf.nist.gov/LaTeXML/[LaTeXML] with Perl
-* https://ruby-lang.org[Ruby] with Metanorma and Metanorma CLI
-
-To see the full list of packages/software included,
-check out the setup script used by the container:
-https://github.com/metanorma/metanorma-linux-setup/blob/master/ubuntu.sh[this script].
 
 
 == License
