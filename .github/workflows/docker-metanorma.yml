@@ -50,6 +50,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Prepare Docker Environment
+      shell: bash
+      run: |
+        echo '{"cgroup-parent": "/actions_job", "experimental": true}' | sudo tee /etc/docker/daemon.json 2>/dev/null
+        sudo service docker restart
+
     - uses: metanorma/metanorma-build-scripts/gh-rubygems-setup-action@master
       with:
         token: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
