@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.event.client_payload.ref, 'refs/tags/v')
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Add writable remote
       run: |
         git config --global user.name "metanorma-ci"
