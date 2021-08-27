@@ -4,7 +4,7 @@ USER root
 ARG BUNDLE_RUBYGEMS__PKG__GITHUB__COM
 ENV BUNDLE_RUBYGEMS__PKG__GITHUB__COM=$BUNDLE_RUBYGEMS__PKG__GITHUB__COM
 
-MAINTAINER Open Source at Ribose <open.source@ribose.com>
+LABEL maintainer="open.source@ribose.com"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
