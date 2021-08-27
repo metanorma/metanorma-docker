@@ -1,4 +1,4 @@
-.PHONY: login pull %-chain docker-squash-exists
+.PHONY: login pull %-chain
 
 SHELL := /bin/bash
 
@@ -9,12 +9,6 @@ include ./VERSION.mak
 
 DOCKER_RUN := docker run
 DOCKER_EXEC := docker exec
-
-DOCKER_SQUASH_IMG := ribose/docker-squash
-DOCKER_SQUASH_CMD := $(DOCKER_RUN) --rm \
-  -v $(shell which docker):/usr/bin/docker \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /docker_tmp $(DOCKER_SQUASH_IMG)
 
 # On Jenkins we won't be on any branch, use the CONTAINER_BRANCH environment
 # variable to set it
@@ -44,11 +38,6 @@ TEST_FLAVOR ?= iso
 login:
 	eval $(DOCKER_LOGIN_CMD)
 
-docker-squash-exists:
-	if [ -z "$$(docker history -q $(DOCKER_SQUASH_IMG))" ]; then \
-		docker pull $(DOCKER_SQUASH_IMG); \
-	fi
-
 define PULL_TASKS
 pull-build-$(1):	login
 	docker pull $(3); \
@@ -66,8 +55,8 @@ define ROOT_PLATFORM_TASKS
 .INTERMEDIATE: $(3)/Gemfile $(3)/Dockerfile
 
 .PHONY: build-$(3) clean-local-$(3) kill-$(3) rm-$(3) \
-	rmf-$(3) squash-$(3) tag-$(3) push-$(3) sp-$(3) \
-	bsp-$(3) tp-$(3) btp-$(3) bt-$(3) bs-$(3) \
+	rmf-$(3) tag-$(3) push-$(3) \
+	tp-$(3) btp-$(3) bt-$(3) \
 	clean-remote-$(3) run-$(3) \
 	latest-tag-$(3) latest-push-$(3) latest-tp-$(3)
 
@@ -95,7 +84,7 @@ $(3)/Dockerfile: Dockerfile.$(2).in
 	envsubst '$$$${METANORMA_IMAGE_NAME}' < $$< > $$@
 
 build-$(3): $(3)/Gemfile $(3)/Dockerfile
-	docker build --rm \
+	docker build --squash --rm \
 		-t $(CONTAINER_LOCAL_NAME) \
 		-f $(3)/Dockerfile \
 		--label metanorma-container-root=$(2) \
@@ -138,13 +127,6 @@ rm-$(3):
 rmf-$(3):
 	-docker rm -f test-$(3)
 
-squash-$(3):	docker-squash-exists $(3)/Dockerfile
-	FROM_IMAGE=`grep FROM $(3)/Dockerfile | head -1 | cut -f 2 -d ' '`; \
-	$(DOCKER_SQUASH_CMD) -t $(CONTAINER_REMOTE_NAME) \
-		-f $$$${FROM_IMAGE} \
-		$(CONTAINER_LOCAL_NAME) \
-		&& $(MAKE) clean-local-$(3)
-
 tag-$(3):
 	CONTAINER_ID=`docker images -q $(CONTAINER_LOCAL_NAME)`; \
 	if [ "$$$${CONTAINER_ID}" == "" ]; then \
@@ -157,12 +139,6 @@ tag-$(3):
 push-$(3):	login
 	docker push $(CONTAINER_REMOTE_NAME)
 
-sp-$(3):
-	$(MAKE) squash-$(3) push-$(3)
-
-bsp-$(3):
-	$(MAKE) build-$(3) sp-$(3)
-
 tp-$(3):
 	$(MAKE) tag-$(3) push-$(3)
 
@@ -171,9 +147,6 @@ btp-$(3):
 
 bt-$(3):
 	$(MAKE) build-$(3) tag-$(3)
-
-bs-$(3):
-	$(MAKE) build-$(3) squash-$(3)
 
 latest-tag-$(3):
 	docker tag $(CONTAINER_REMOTE_NAME) $(CONTAINER_LATEST_NAME)
@@ -191,6 +164,5 @@ $(foreach i,$(ITEMS),$(eval $(call ROOT_PLATFORM_TASKS,$(call GET_VERSION,$i),$(
 build: $(addprefix build-, $(notdir $(IMAGE_TYPES)))
 test: $(addprefix test-, $(notdir $(IMAGE_TYPES))) $(addprefix test-flavor-, $(notdir $(IMAGE_TYPES)))
 tp: $(addprefix tp-, $(notdir $(IMAGE_TYPES)))
-sp: $(addprefix sp-, $(notdir $(IMAGE_TYPES)))
 clean: $(addprefix clean-, $(notdir $(IMAGE_TYPES)))
 latest-tp: $(addprefix latest-tp-, $(notdir $(IMAGE_TYPES)))
