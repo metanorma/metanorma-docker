@@ -22,6 +22,3 @@ export IDNITS_URL=https://tools.ietf.org/tools/idnits/
 export IDNITS_VER=$(curl -Ls $IDNITS_URL | grep -e 'tgz' | sed -e 's/.*\(idnits-.*\).tgz.*/\1/') ; echo ${IDNITS_VER}
 curl -SL ${IDNITS_URL}${IDNITS_VER} | tar xzv
 export PATH=$(pwd)/${IDNITS_VER}:${PATH}
-
-curl -Ls -o yq https://github.com/mikefarah/yq/releases/download/3.3.0/yq_linux_amd64
-chmod +x yq && mv yq /usr/bin
