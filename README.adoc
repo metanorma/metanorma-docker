@@ -195,9 +195,9 @@ If you want to build other containers you can add these:
 [source,sh]
 ----
 export ITEMS="1 2"
-export IMAGE_TYPES="metanorma metanorma-ubuntu-18.04"
+export IMAGE_TYPES="metanorma metanorma-ubuntu-21.10"
 export VERSIONS="1.0 1.0"
-export ROOT_IMAGES="ubuntu:18.10 ubuntu:18.04"
+export ROOT_IMAGES="ubuntu:20.04 ubuntu:21.10"
 ----
 
 The environment variables are used for:
