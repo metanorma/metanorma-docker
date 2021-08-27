@@ -94,7 +94,7 @@ build-$(3): $(3)/Gemfile $(3)/Dockerfile
 		--label metanorma-container-version=$(1) \
 		--label metanorma-container-commit=$(CONTAINER_COMMIT) \
 		--label metanorma-container-commit-branch=$(CONTAINER_BRANCH) \
-		--build-arg BUNDLE_RUBYGEMS__PKG__GITHUB__COM \
+		--secret id=bundle_rubygems__pkg__github__com,src=${HOME}/.bundle/config \
 		.;\
 
 	$$(MAKE) clean-$(3)

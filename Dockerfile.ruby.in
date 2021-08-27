@@ -1,9 +1,6 @@
 FROM ruby:2.7-slim-bullseye
 USER root
 
-ARG BUNDLE_RUBYGEMS__PKG__GITHUB__COM
-ENV BUNDLE_RUBYGEMS__PKG__GITHUB__COM=$BUNDLE_RUBYGEMS__PKG__GITHUB__COM
-
 LABEL maintainer="open.source@ribose.com"
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -25,10 +22,8 @@ RUN gem install bundler
 
 # install metanorma toolchain
 COPY ${METANORMA_IMAGE_NAME}/Gemfile /setup/Gemfile
-# Specially build sassc due to incompatible binary metanorma/metanorma-docker#51
-RUN cd /setup \
-  && bundle config --local build.sassc --disable-march-tune-native \
-  && bundle install --redownload # --redownload need to fix rake Bundler::GemNotFound
+# --redownload need to fix rake Bundler::GemNotFound
+RUN --mount=type=secret,id=bundle_rubygems__pkg__github__com,dst=/usr/local/bundle/config cd /setup && bundle install --redownload
 
 # export java executable path
 ENV JAVA_HOME /usr/lib/jvm/default-java

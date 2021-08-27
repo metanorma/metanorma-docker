@@ -1,11 +1,9 @@
 ARG RUBY_PATH=/usr/local/
 ARG RUBY_VERSION=2.7.4
-ARG BUNDLE_RUBYGEMS__PKG__GITHUB__COM
 
 FROM ubuntu:20.04 AS rubybuild
 ARG RUBY_PATH
 ARG RUBY_VERSION
-ARG BUNDLE_RUBYGEMS__PKG__GITHUB__COM
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -35,7 +33,6 @@ FROM ubuntu:20.04
 USER root
 LABEL maintainer="open.source@ribose.com"
 ARG RUBY_PATH
-ARG BUNDLE_RUBYGEMS__PKG__GITHUB__COM
 ENV PATH $RUBY_PATH/bin:$PATH
 COPY --from=rubybuild $RUBY_PATH $RUBY_PATH
 
@@ -67,14 +64,9 @@ RUN mkdir -p "$GEM_HOME" && chmod 777 "$GEM_HOME"
 # install latest bundler
 RUN gem install bundler
 
-ENV BUNDLE_RUBYGEMS__PKG__GITHUB__COM=$BUNDLE_RUBYGEMS__PKG__GITHUB__COM
-
 # install metanorma toolchain
 COPY ${METANORMA_IMAGE_NAME}/Gemfile /setup/Gemfile
-# Specially build sassc due to incompatible binary metanorma/metanorma-docker#51
-RUN cd /setup \
-  && bundle config --local build.sassc --disable-march-tune-native \
-  && bundle install --verbose
+RUN --mount=type=secret,id=bundle_rubygems__pkg__github__com,dst=/usr/local/bundle/config cd /setup && bundle install --verbose
 
 # cleanup and set base entrypoint
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
