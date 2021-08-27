@@ -1,29 +1,9 @@
 #!/bin/bash -e
 
 # Set up prerequisites
-apt-get install -y curl git make gcc ruby-bundler ruby-dev libxml2-dev libxslt-dev
-
-# Install libsass
-if [ -f "/usr/local/lib/libsass.a" ] || [ -f "/usr/lib/libsass.a" ]; then
-  echo '[libsass] libsass already installed.'
-else
-  # If no sassc package, manually install
-  # TODO: This install command is not idempotent
-  echo '[libsass] Installing libsass...'
-  if [ "$(apt-cache search --names-only '^libsass-dev$' | wc -l)" -eq "0" ]; then
-    if [ "$(apt-cache search --names-only '^sassc$' | wc -l)" -eq "0" ]; then
-      echo '[libsass] Packaged sassc not available. Compiling libsass...'
-      curl https://gist.githubusercontent.com/edouard-lopez/503d40a5c1a49cf8ae87/raw/6ee53f102b4ed97e78c356c471ccf82197a89578/libsass-install.bash \
-        | bash
-    else
-      echo '[libsass] Installing package sassc...'
-      apt-get install -y sassc
-    fi
-  else
-    echo '[libsass] Installing package libsass-dev...'
-    apt-get install -y libsass-dev
-  fi
-fi
+apt-get install -y curl git make gcc ruby-bundler ruby-dev \
+  libxml2-dev libxslt-dev \
+  libsass-dev sassc
 
 curl -L "https://raw.githubusercontent.com/metanorma/plantuml-install/master/ubuntu.sh" | bash
 
