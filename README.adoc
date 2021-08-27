@@ -225,13 +225,8 @@ The `Makefile` supports the following commands for building:
 
 [source,sh]
 ----
-make {build,push,tag,squash,clean-remote,clean-local}-{container-flavor}
+make {build,push,tag,clean-remote,clean-local}-{container-flavor}
 ----
-
-NOTE: The `squash-{container-flavor}` command relies on
-(and automatically pulls) the
-https://github.com/riboseinc/docker-squash-container[`docker-squash` container]
-
 
 === Updating container flavors
 
@@ -248,11 +243,11 @@ popd
 # Gemfile.lock is updated
 ----
 
-Then, we build, squash and push the container:
+Then, we build and push the container:
 
 [source,sh]
 ----
-make bsp-metanorma
+make btp-metanorma
 ----
 
 Lastly, we tag and push the built container as latest.
@@ -269,7 +264,7 @@ If you feel tired typing out this:
 
 [source,sh]
 ----
-make build-metanorma squash-metanorma push-metanorma
+make build-metanorma tag-metanorma push-metanorma
 ----
 
 We have a list of shortcut targets to save you from repeating fingers.
@@ -277,17 +272,14 @@ For example:
 
 [source,sh]
 ----
-# equivalent to make {build,squash,push}-{container-flavor} latest-{tag,push}-{container-flavor}
-make bsp-metanorma latest-tp-metanorma
+# equivalent to make {build,push}-{container-flavor} latest-{tag,push}-{container-flavor}
+make btp-metanorma latest-tp-metanorma
 ----
 
 The shortcut targets are:
 
-`bsp-{target}`:: build + squash + push
 `btp-{target}`:: build + tag + push
-`bs-{target}`:: build + squash
 `bt-{target}`:: build + tag
-`sp-{target}`:: squash + push
 `tp-{target}`:: tag + push
 
 == Push the container by CI
