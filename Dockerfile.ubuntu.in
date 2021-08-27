@@ -39,6 +39,11 @@ ARG BUNDLE_RUBYGEMS__PKG__GITHUB__COM
 ENV PATH $RUBY_PATH/bin:$PATH
 COPY --from=rubybuild $RUBY_PATH $RUBY_PATH
 
+ENV DEBIAN_FRONTEND=noninteractive
+ENV CONTAINER_TIMEZONE=Etc/UTC
+RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && \
+  echo $CONTAINER_TIMEZONE > /etc/timezone
+
 # install dependencies
 RUN apt-get update && apt-get install -y \
   curl gnupg2 software-properties-common python3-pip
