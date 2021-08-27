@@ -1,4 +1,4 @@
-FROM ruby:2.6-slim-buster
+FROM ruby:2.7-slim-bullseye
 USER root
 
 ARG BUNDLE_RUBYGEMS__PKG__GITHUB__COM
