@@ -33,7 +33,7 @@ RUN ruby-build $RUBY_VERSION $RUBY_PATH
 
 FROM ubuntu:20.04
 USER root
-MAINTAINER Open Source at Ribose <open.source@ribose.com>
+LABEL maintainer="open.source@ribose.com"
 ARG RUBY_PATH
 ARG BUNDLE_RUBYGEMS__PKG__GITHUB__COM
 ENV PATH $RUBY_PATH/bin:$PATH
