@@ -22,7 +22,7 @@ jobs:
     - name: Prepare Docker Environment
       shell: bash
       run: |
-        echo '{"cgroup-parent": "/actions_job", "experimental": true}' | sudo tee /etc/docker/daemon.json 2>/dev/null
+        echo '{"cgroup-parent": "/actions_job", "experimental": true, "features": { "buildkit": true }}' | sudo tee /etc/docker/daemon.json 2>/dev/null
         sudo service docker restart
 
     - uses: metanorma/metanorma-build-scripts/gh-rubygems-setup-action@master
@@ -67,7 +67,7 @@ jobs:
     - name: Prepare Docker Environment
       shell: bash
       run: |
-        echo '{"cgroup-parent": "/actions_job", "experimental": true}' | sudo tee /etc/docker/daemon.json 2>/dev/null
+        echo '{"cgroup-parent": "/actions_job", "experimental": true, "features": { "buildkit": true }}' | sudo tee /etc/docker/daemon.json 2>/dev/null
         sudo service docker restart
 
     - uses: metanorma/metanorma-build-scripts/gh-rubygems-setup-action@master

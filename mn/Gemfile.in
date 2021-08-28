@@ -1,4 +1,3 @@
 source "https://rubygems.org"
-source "https://rubygems.pkg.github.com/metanorma"
 
 gem "metanorma-cli", :github => "metanorma/metanorma-cli", :branch => "main"
