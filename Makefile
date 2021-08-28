@@ -136,7 +136,7 @@ tag-$(3):
 	docker tag $$$${CONTAINER_ID} $(CONTAINER_REMOTE_NAME) \
 		&& $(MAKE) clean-local-$(3)
 
-push-$(3):	login
+push-$(3): login
 	docker push $(CONTAINER_REMOTE_NAME)
 
 tp-$(3):
@@ -151,7 +151,7 @@ bt-$(3):
 latest-tag-$(3):
 	docker tag $(CONTAINER_REMOTE_NAME) $(CONTAINER_LATEST_NAME)
 
-latest-push-$(3):
+latest-push-$(3): login
 	docker push $(CONTAINER_LATEST_NAME)
 
 latest-tp-$(3):
