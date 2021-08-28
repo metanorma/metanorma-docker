@@ -157,6 +157,15 @@ latest-push-$(3):	login
 latest-tp-$(3):
 	$(MAKE) latest-tag-$(3) latest-push-$(3)
 
+print-local-name-$(3):
+	@echo $(CONTAINER_LOCAL_NAME)
+
+print-remote-name-$(3):
+	@echo $(CONTAINER_REMOTE_NAME)
+
+print-latest-name-$(3):
+	@echo $(CONTAINER_LATEST_NAME)
+
 endef
 
 $(foreach i,$(ITEMS),$(eval $(call ROOT_PLATFORM_TASKS,$(call GET_VERSION,$i),$(call GET_ROOT_PLATFORM,$i),$(call GET_IMAGE_TYPE,$i),$(CONTAINER_TYPE))))

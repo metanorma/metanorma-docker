@@ -30,8 +30,15 @@ jobs:
         token: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
 
     - name: Build container
+      id: build
       run: |
         make build-mn
+        echo "::set-output name=container_name::$(make print-local-name-mn)"
+
+    - uses: yuichielectric/dive-action@0.0.4
+      with:
+        image: ${{ steps.build.outputs.container_name }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run tests
       env:
@@ -83,8 +90,15 @@ jobs:
         token: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
 
     - name: Build container
+      id: build
       run: |
         make build-mn-ubuntu
+        echo "::set-output name=container_name::$(make print-local-name-mn-ubuntu)"
+
+    - uses: yuichielectric/dive-action@0.0.4
+      with:
+        image: ${{ steps.build.outputs.container_name }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run tests
       env:
