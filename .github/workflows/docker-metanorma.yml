@@ -43,7 +43,7 @@ jobs:
         DOCKER_LOGIN_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
         DOCKER_LOGIN_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
       run: |
-        make push-metanorma latest-tp-metanorma
+        make tp-metanorma latest-tp-metanorma
 
   build-ubuntu:
     runs-on: ubuntu-latest
@@ -76,4 +76,4 @@ jobs:
         DOCKER_LOGIN_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
         DOCKER_LOGIN_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
       run: |
-        make push-metanorma-ubuntu latest-tp-metanorma-ubuntu
+        make tp-metanorma-ubuntu latest-tp-metanorma-ubuntu

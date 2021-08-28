@@ -39,13 +39,21 @@ jobs:
       run: |
         make test-mn
 
-    - name: Tag and push container
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
+    - name: Tag and push container latest
+      if: github.ref == 'refs/heads/master'
       env:
         DOCKER_LOGIN_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
         DOCKER_LOGIN_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
       run: |
-        make push-mn latest-tp-mn
+        make latest-tp-mn
+
+    - name: Tag and push container versioned
+      if: startsWith(github.ref, 'refs/tags/v')
+      env:
+        DOCKER_LOGIN_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
+        DOCKER_LOGIN_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
+      run: |
+        make tp-mn latest-tp-mn
 
     - name: Trigger samples repositories
       if: startsWith(github.ref, 'refs/tags/v')
@@ -84,10 +92,18 @@ jobs:
       run: |
         make test-mn-ubuntu
 
-    - name: Tag and push container
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
+    - name: Tag and push container latest
+      if: github.ref == 'refs/heads/master'
       env:
         DOCKER_LOGIN_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
         DOCKER_LOGIN_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
       run: |
-        make push-mn-ubuntu latest-tp-mn-ubuntu
+        make latest-tp-mn-ubuntu
+
+    - name: Tag and push container versioned
+      if: startsWith(github.ref, 'refs/tags/v')
+      env:
+        DOCKER_LOGIN_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
+        DOCKER_LOGIN_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
+      run: |
+        make tp-mn-ubuntu
