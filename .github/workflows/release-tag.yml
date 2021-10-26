@@ -28,4 +28,4 @@ jobs:
         git add VERSION.mak
         git commit -m "Bump version to ${METANORMA_CLI_VERSION}"
         git tag v${METANORMA_CLI_VERSION}
-        git push github HEAD:${GITHUB_REF} --tags
+        git push origin HEAD:${GITHUB_REF} --tags
