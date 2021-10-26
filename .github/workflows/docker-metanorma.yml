@@ -59,7 +59,7 @@ jobs:
         DOCKER_LOGIN_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
         DOCKER_LOGIN_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
       run: |
-        make tag-mn tp-metanorma
+        make tag-metanorma tp-metanorma
 
   build-ubuntu:
     runs-on: ubuntu-latest
