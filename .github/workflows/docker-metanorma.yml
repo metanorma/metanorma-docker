@@ -24,7 +24,7 @@ jobs:
         echo '{"cgroup-parent": "/actions_job", "experimental": true, "features": { "buildkit": true }}' | sudo tee /etc/docker/daemon.json 2>/dev/null
         sudo service docker restart
 
-    - uses: metanorma/metanorma-build-scripts/gh-rubygems-setup-action@master
+    - uses: metanorma/metanorma-build-scripts/gh-rubygems-setup-action@main
       with:
         token: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
 
@@ -64,7 +64,7 @@ jobs:
         echo '{"cgroup-parent": "/actions_job", "experimental": true, "features": { "buildkit": true }}' | sudo tee /etc/docker/daemon.json 2>/dev/null
         sudo service docker restart
 
-    - uses: metanorma/metanorma-build-scripts/gh-rubygems-setup-action@master
+    - uses: metanorma/metanorma-build-scripts/gh-rubygems-setup-action@main
       with:
         token: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
 
