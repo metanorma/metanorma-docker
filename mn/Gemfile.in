@@ -1,3 +1,4 @@
 source "https://rubygems.org"
 
 gem "metanorma-cli", :github => "metanorma/metanorma-cli", :branch => "main"
+gem "sassc"
