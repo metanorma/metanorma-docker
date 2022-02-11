@@ -38,6 +38,7 @@ At a high level, the image includes the following:
 * http://plantuml.com[PlantUML] with the Java subsystem
 * https://dlmf.nist.gov/LaTeXML/[LaTeXML] with Perl
 * https://ruby-lang.org[Ruby]
+* https://inkscape.org[Inkscape]
 * Metanorma and Metanorma CLI
 
 To see the full list of packages/software included,
