@@ -69,24 +69,15 @@ $(eval CONTAINER_LATEST_NAME := $(NS_REMOTE)/$(3):latest)
 clean-$(3):
 	rm -f $(3)/Gemfile $(3)/Dockerfile
 
-$(3)/Gemfile:
-	export METANORMA_VERSION=$(1); \
-	envsubst '$$$${METANORMA_VERSION}' < $$@.in > $$@
-
 $(3)/Gemfile.lock: $(3)/Gemfile
 	pushd $(3); \
 	bundle; \
 	popd
 
-$(3)/Dockerfile: Dockerfile.$(2).in
-	export ROOT_PLATFORM=$(2); \
-	export METANORMA_IMAGE_NAME=$(3); \
-	envsubst '$$$${METANORMA_IMAGE_NAME}' < $$< > $$@
-
-build-$(3): $(3)/Gemfile $(3)/Dockerfile
+build-$(3): $(3)/Gemfile $(3)/Dockerfile.$(2)
 	docker build --squash --rm \
 		-t $(CONTAINER_LOCAL_NAME) \
-		-f $(3)/Dockerfile \
+		-f $(3)/Dockerfile.$(2) \
 		--label metanorma-container-root=$(2) \
 		--label metanorma-container-source=$(REPO_GIT_NAME)/$(3) \
 		--label metanorma-container=$(CONTAINER_LOCAL_NAME) \
@@ -94,6 +85,7 @@ build-$(3): $(3)/Gemfile $(3)/Dockerfile
 		--label metanorma-container-version=$(1) \
 		--label metanorma-container-commit=$(CONTAINER_COMMIT) \
 		--label metanorma-container-commit-branch=$(CONTAINER_BRANCH) \
+		--build-arg METANORMA_IMAGE_NAME=$(3) \
 		--secret id=bundle_rubygems__pkg__github__com,src=${HOME}/.bundle/config \
 		.;\
 
@@ -125,7 +117,7 @@ rm-$(3):
 	docker rm test-$(3)
 
 rmf-$(3):
-	-docker rm -f test-$(3)
+	docker rm -f test-$(3)
 
 tag-$(3):
 	CONTAINER_ID=`docker images -q $(CONTAINER_LOCAL_NAME)`; \
@@ -159,12 +151,6 @@ latest-tp-$(3):
 
 print-local-name-$(3):
 	@echo $(CONTAINER_LOCAL_NAME)
-
-print-remote-name-$(3):
-	@echo $(CONTAINER_REMOTE_NAME)
-
-print-latest-name-$(3):
-	@echo $(CONTAINER_LATEST_NAME)
 
 endef
 

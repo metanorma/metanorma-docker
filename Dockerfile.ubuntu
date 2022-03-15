@@ -36,6 +36,7 @@ FROM ubuntu:20.04
 USER root
 LABEL maintainer="open.source@ribose.com"
 ARG RUBY_PATH
+ARG METANORMA_IMAGE_NAME=metanorma
 ENV PATH $RUBY_PATH/bin:$PATH
 COPY --from=rubybuild $RUBY_PATH $RUBY_PATH
 
@@ -72,7 +73,7 @@ RUN mkdir -p "$GEM_HOME" && chmod 777 "$GEM_HOME"
 RUN gem install bundler
 
 # install metanorma toolchain
-COPY ${METANORMA_IMAGE_NAME}/Gemfile /setup/Gemfile
+COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
 # --no-cache https://github.com/rubygems/rubygems/issues/3225
 RUN --mount=type=secret,id=bundle_rubygems__pkg__github__com,dst=/usr/local/bundle/config \
   cd /setup && \

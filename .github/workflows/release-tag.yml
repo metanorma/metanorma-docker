@@ -23,6 +23,10 @@ jobs:
     - name: Update version
       run: |
         echo "IMAGE_VERSION := ${METANORMA_CLI_VERSION}" > VERSION.mak
+        pushd metanorma
+        bundle remove metanorma-cli
+        bundle add metanorma-cli -v ${METANORMA_CLI_VERSION}
+        popd
     - name: Push commit and tag
       run: |
         git add VERSION.mak

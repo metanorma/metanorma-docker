@@ -3,6 +3,8 @@ USER root
 
 LABEL maintainer="open.source@ribose.com"
 
+ARG METANORMA_IMAGE_NAME=metanorma
+
 ENV DEBIAN_FRONTEND=noninteractive
 
 # install dependencies
@@ -24,7 +26,7 @@ RUN apt-get update && bash -c /setup/ubuntu.sh && \
 RUN gem install bundler
 
 # install metanorma toolchain
-COPY ${METANORMA_IMAGE_NAME}/Gemfile /setup/Gemfile
+COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
 # --redownload need to fix rake Bundler::GemNotFound
 # --no-cache https://github.com/rubygems/rubygems/issues/3225
 RUN --mount=type=secret,id=bundle_rubygems__pkg__github__com,dst=/usr/local/bundle/config \
