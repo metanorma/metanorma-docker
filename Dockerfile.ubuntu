@@ -12,7 +12,6 @@ RUN apt-get update && \
       git \
       curl \
       autoconf \
-      cmake \
       bison \
       build-essential \
       libssl-dev \
