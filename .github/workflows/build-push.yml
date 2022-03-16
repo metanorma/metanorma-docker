@@ -22,18 +22,45 @@ jobs:
           root: ruby
           image: mn
           publish: true
+          platforms: linux/amd64
+        - dockerfile: Dockerfile.ruby
+          root: ruby
+          image: mn
+          publish: true
+          platforms: linux/arm64
+
         - dockerfile: Dockerfile.ruby
           root: ruby
           image: metanorma
           publish: true
+          platforms: linux/amd64
+        - dockerfile: Dockerfile.ruby
+          root: ruby
+          image: metanorma
+          publish: true
+          platforms: linux/arm64
+
         - dockerfile: Dockerfile.ubuntu
           root: ubuntu
           image: mn-ubuntu
           publish: true
+          platforms: linux/amd64
+        - dockerfile: Dockerfile.ubuntu
+          root: ubuntu
+          image: mn-ubuntu
+          publish: true
+          platforms: linux/arm64
+
         - dockerfile: Dockerfile.ubuntu
           root: ubuntu
           image: metanorma-ubuntu
           publish: true
+          platforms: linux/amd64
+        - dockerfile: Dockerfile.ubuntu
+          root: ubuntu
+          image: metanorma-ubuntu
+          publish: true
+          platforms: linux/arm64
     steps:
     - uses: actions/checkout@v2
 
@@ -86,23 +113,7 @@ jobs:
     - uses: docker/build-push-action@v2
       with:
         context: .
-        platforms: linux/amd64
-        load: true
-        push: false
-        file: ${{ matrix.dockerfile }}
-        tags: |
-          ${{ steps.meta.outputs.tags }}
-          ribose-local/${{ matrix.image }}:${{ steps.tag.outputs.result }}
-        labels: ${{ steps.meta.outputs.labels }}
-        build-args: |
-          METANORMA_IMAGE_NAME=${{ matrix.image }}
-        secret-files: |
-          bundle_config=.bundle/config
-
-    - uses: docker/build-push-action@v2
-      with:
-        context: .
-        platforms: linux/arm64
+        platforms: ${{ matrix.platform }}
         load: true
         push: false
         file: ${{ matrix.dockerfile }}
@@ -141,7 +152,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         context: .
-        platforms: linux/amd64,linux/arm64
+        platforms: ${{ matrix.platform }}
         push: ${{ matrix.publish }}
         file: ${{ matrix.dockerfile }}
         tags: ${{ steps.meta.outputs.tags }}
