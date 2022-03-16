@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # Set up prerequisites
-apt-get install -y curl git make gcc ruby-bundler ruby-dev \
+apt-get install -y curl git make gcc ruby-bundler ruby-dev cmake \
   libxml2-dev libxslt-dev \
   libsass-dev sassc
 
