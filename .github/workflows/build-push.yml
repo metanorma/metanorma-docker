@@ -14,6 +14,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.platforms == 'linux/arm64' }} # remove after https://github.com/metanorma/emf2svg-ruby/issues/9
     strategy:
       fail-fast: false
       matrix:
