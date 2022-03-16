@@ -60,7 +60,7 @@ define ROOT_PLATFORM_TASKS
 	clean-remote-$(3) run-$(3) \
 	latest-tag-$(3) latest-push-$(3) latest-tp-$(3)
 
-$(eval CONTAINER_LOCAL_NAME := $(NS_LOCAL)/$(3):$(1))
+$(eval CONTAINER_LOCAL_NAME := $(NS_LOCAL)/$(3):latest)
 $(eval CONTAINER_REMOTE_NAME := $(NS_REMOTE)/$(3):$(1))
 $(eval CONTAINER_LATEST_NAME := $(NS_REMOTE)/$(3):latest)
 
