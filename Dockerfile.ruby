@@ -29,7 +29,7 @@ RUN gem install bundler
 COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
 # --redownload need to fix rake Bundler::GemNotFound
 # --no-cache https://github.com/rubygems/rubygems/issues/3225
-RUN --mount=type=secret,id=bundle_rubygems__pkg__github__com,dst=/usr/local/bundle/config \
+RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
   cd /setup && \
   bundle install --no-cache --redownload && \
   rm -rf /usr/local/bundle/cache

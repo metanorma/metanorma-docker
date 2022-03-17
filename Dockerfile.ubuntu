@@ -75,7 +75,7 @@ RUN gem install bundler
 # install metanorma toolchain
 COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
 # --no-cache https://github.com/rubygems/rubygems/issues/3225
-RUN --mount=type=secret,id=bundle_rubygems__pkg__github__com,dst=/usr/local/bundle/config \
+RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
   cd /setup && \
   bundle install --no-cache --verbose && \
   rm -rf /usr/local/bundle/cache
