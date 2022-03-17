@@ -14,6 +14,7 @@ RUN apt-get update && \
       autoconf \
       bison \
       build-essential \
+      cmake \
       libssl-dev \
       libyaml-dev \
       libreadline6-dev \
