@@ -156,7 +156,9 @@ jobs:
         platforms: ${{ matrix.platforms }}
         push: ${{ matrix.publish }}
         file: ${{ matrix.dockerfile }}
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: |
+          ${{ steps.meta.outputs.tags }}
+          ghcr.io/metanorma/${{ matrix.image }}:${{ steps.tag.outputs.result }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
           METANORMA_IMAGE_NAME=${{ matrix.image }}
