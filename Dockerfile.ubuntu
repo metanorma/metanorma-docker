@@ -86,6 +86,9 @@ ENV PATH $PATH:$JAVA_HOME/bin
 ENV RUBYOPT -rbundler/setup
 ENV BUNDLE_GEMFILE /setup/Gemfile
 
+# Workaround for https://github.com/relaton/relaton/issues/99
+ENV RELATON_FETCH_PARALLEL 1
+
 ENV FONTIST_PATH "/config"
 VOLUME /config/fonts
 

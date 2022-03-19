@@ -45,6 +45,9 @@ ENV BUNDLE_GEMFILE /setup/Gemfile
 ENV GEM_PATH $GEM_HOME:$GEM_HOME/ruby/$RUBY_MAJOR.0
 ENV PATH $GEM_HOME/bin:$GEM_HOME/ruby/$RUBY_MAJOR.0/bin:$PATH
 
+# Workaround for https://github.com/relaton/relaton/issues/99
+ENV RELATON_FETCH_PARALLEL 1
+
 ENV FONTIST_PATH "/config"
 VOLUME /config/fonts
 
