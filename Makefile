@@ -46,7 +46,6 @@ endef
 
 $(foreach i,$(ITEMS),$(eval $(call PULL_TASKS,$(call GET_IMAGE_TYPE,$i),$(call GET_VERSION,$i),$(call GET_ROOT_PLATFORM,$i))))
 
-
 ## Basic Containers
 define ROOT_PLATFORM_TASKS
 
@@ -74,10 +73,11 @@ $(3)/Gemfile.lock: $(3)/Gemfile
 	bundle; \
 	popd
 
-build-$(3): $(3)/Gemfile $(3)/Dockerfile.$(2)
+build-$(3): $(3)/Gemfile
 	docker build --squash --rm \
 		-t $(CONTAINER_LOCAL_NAME) \
-		-f $(3)/Dockerfile.$(2) \
+		-f Dockerfile.$(2) \
+		--platform linux/amd64 \
 		--label metanorma-container-root=$(2) \
 		--label metanorma-container-source=$(REPO_GIT_NAME)/$(3) \
 		--label metanorma-container=$(CONTAINER_LOCAL_NAME) \

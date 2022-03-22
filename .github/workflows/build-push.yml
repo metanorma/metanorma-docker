@@ -41,6 +41,7 @@ jobs:
           image: metanorma
           publish: true
           platforms: linux/arm64
+          experimental: [true]
 
         - dockerfile: Dockerfile.ubuntu
           root: ubuntu
@@ -52,6 +53,7 @@ jobs:
           image: mn-ubuntu
           publish: true
           platforms: linux/arm64
+          experimental: [true]
 
         - dockerfile: Dockerfile.ubuntu
           root: ubuntu
@@ -63,6 +65,8 @@ jobs:
           image: metanorma-ubuntu
           publish: true
           platforms: linux/arm64
+          experimental: [true]
+
     steps:
     - uses: actions/checkout@v2
 
