@@ -5,7 +5,7 @@ apt-get install -y curl git make gcc ruby-bundler ruby-dev cmake \
   libxml2-dev libxslt-dev \
   libsass-dev sassc
 
-curl -L "https://raw.githubusercontent.com/metanorma/plantuml-install/master/ubuntu.sh" | bash
+curl -L "https://raw.githubusercontent.com/metanorma/plantuml-install/main/ubuntu.sh" | bash
 
 # Install xml2rfc
 apt-get -y install python3-pip python3-setuptools python3-wheel
