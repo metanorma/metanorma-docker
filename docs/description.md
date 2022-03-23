@@ -123,7 +123,6 @@ docker pull metanorma/metanorma
 # docker pull metanorma/metanorma:latest
 ```
 
-
 ### License
 
 The image is available open source under the terms of the
