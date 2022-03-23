@@ -10,79 +10,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  job_info:
     runs-on: ubuntu-latest
-
-    # remove after https://github.com/metanorma/emf2svg-ruby/issues/9
-    continue-on-error: ${{ matrix.platforms == 'linux/arm64' }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-        - dockerfile: Dockerfile.ruby
-          root: ruby
-          image: mn
-          publish: true
-          platforms: linux/amd64
-        - dockerfile: Dockerfile.ruby
-          root: ruby
-          image: mn
-          publish: true
-          platforms: linux/arm64
-
-        - dockerfile: Dockerfile.ruby
-          root: ruby
-          image: metanorma
-          publish: true
-          platforms: linux/amd64
-        - dockerfile: Dockerfile.ruby
-          root: ruby
-          image: metanorma
-          publish: true
-          platforms: linux/arm64
-          experimental: [true]
-
-        - dockerfile: Dockerfile.ubuntu
-          root: ubuntu
-          image: mn-ubuntu
-          publish: true
-          platforms: linux/amd64
-        - dockerfile: Dockerfile.ubuntu
-          root: ubuntu
-          image: mn-ubuntu
-          publish: true
-          platforms: linux/arm64
-          experimental: [true]
-
-        - dockerfile: Dockerfile.ubuntu
-          root: ubuntu
-          image: metanorma-ubuntu
-          publish: true
-          platforms: linux/amd64
-        - dockerfile: Dockerfile.ubuntu
-          root: ubuntu
-          image: metanorma-ubuntu
-          publish: true
-          platforms: linux/arm64
-          experimental: [true]
-
+    outputs:
+      tag: ${{ steps.tag.outputs.result }}
+      version: ${{ steps.version.outputs.result }}
     steps:
-    - uses: actions/checkout@v2
-
-    - uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.1'
-
-    - uses: metanorma/metanorma-build-scripts/gh-rubygems-setup-action@main
-      with:
-        token: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
-        local: true
-
-    - uses: docker/setup-qemu-action@v1
-
-    - uses: docker/setup-buildx-action@v1
-
     - id: tag
       env:
         IS_TAG_PUSHED: startsWith(github.ref, 'refs/tags/v')
@@ -95,53 +28,197 @@ jobs:
         else
           echo "::set-output name=result::latest"
         fi
+    - id: version
+      run: |
+        export CLI_VERSION=$(cat VERSION.mak | cut -d ' ' -f 3)
+        echo "::set-output name=result::${CLI_VERSION}"
 
-    - id: image
-      uses: actions/github-script@v4
-      with:
-        result-encoding: string
-        script: return 'metanorma/${{ matrix.image }}'.toLowerCase()
+  build:
+    name: build (${{ matrix.image_type }}-${{ matrix.root_image.id }})
+    runs-on: ubuntu-latest
+    needs: job_info
+    continue-on-error: ${{ matrix.experimental }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        root_image:
+        - id: ruby
+          image: ruby:3.1.1-slim-bullseye
+        - id: ubuntu
+          image: ubuntu:20.04
+        image_type: [metanorma, mn]
+        experimental: [false]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: docker/setup-qemu-action@v1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
 
     - id: meta
       uses: docker/metadata-action@v3
       with:
-        images: ${{ steps.image.outputs.result }}
+        images: metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}
         tags: |
-          ${{ steps.tag.outputs.result }}
+          ${{needs.job_info.outputs.tag}}
         labels: |
-          metanorma-container-root=${{ matrix.root }}
-          metanorma-container-source=https://github.com/metanorma/metanorma-docker
-          metanorma-container-remote=${{ steps.image.outputs.result }}:${{ steps.tag.outputs.result }}
-          metanorma-container-version=${{ steps.tag.outputs.result }}
-          metanorma-container-commit=${{ github.sha }}
-          metanorma-container-commit-branch=${{ github.ref_name }}
+          org.opencontainers.image.vendor=Ribose Inc.
+          org.opencontainers.image.licenses=BSD-3-Clause
+          org.opencontainers.image.documentation=https://www.metanorma.org
+          org.opencontainers.image.ref.name=metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}
+          org.opencontainers.image.base.name=${{ matrix.root_image.image }}
+          org.opencontainers.image.title=Metanorma official public image
+          org.opencontainers.image.description=Metanorma official public image on ${{ matrix.root_image.image }}
+          org.opencontainers.image.version=${{needs.job_info.outputs.version}}
 
-    - uses: docker/build-push-action@v2
+    # Build on linux/amd64 for testing first as it is fastest
+    - id: build_container
+      name: Build and export
+      uses: docker/build-push-action@v2
       with:
         context: .
-        platforms: ${{ matrix.platforms }}
-        load: true
-        push: false
-        file: ${{ matrix.dockerfile }}
+        platforms: linux/amd64
+        file: Dockerfile.${{ matrix.root_image.id }}
         tags: |
-          ${{ steps.meta.outputs.tags }}
-          ribose-local/${{ matrix.image }}:${{ steps.tag.outputs.result }}
+          metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}:${{needs.job_info.outputs.tag}}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
-          METANORMA_IMAGE_NAME=${{ matrix.image }}
+          METANORMA_IMAGE_NAME=${{ matrix.image_type }}-${{ matrix.root_image.id }}
         secret-files: |
           bundle_config=.bundle/config
+        outputs: type=docker,dest=/tmp/docker-image.tar
 
-    - uses: yuichielectric/dive-action@0.0.4
+    # - uses: yuichielectric/dive-action@0.0.4
+    #   with:
+    #     image: metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}:${{needs.job_info.outputs.tag}}
+    #     github-token: ${{ github.token }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
       with:
-        image: ${{ steps.image.outputs.result }}
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.sha }}
+        path: /tmp/docker-image.tar
+
+  test:
+    name: test (${{ matrix.image_type }}-${{ matrix.root_image.id }}, ${{ matrix.flavor.id }})
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - job_info
+    continue-on-error: ${{ matrix.flavor.experimental }}
+    strategy:
+      max-parallel: 3
+      fail-fast: false
+      matrix:
+        root_image:
+        - id: ruby
+        - id: ubuntu
+
+        image_type:
+        - metanorma
+        - mn
+
+        flavor:
+        - id: iso
+          experimental: false
+        - id: cc
+          experimental: false
+        - id: iec
+          experimental: false
+        - id: ogc
+          experimental: false
+        - id: un
+          experimental: false
+        - id: iho
+          experimental: false
+        - id: gb
+          experimental: true
+        - id: itu
+          experimental: true
+        - id: nist
+          experimental: true
+
+    steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.sha }}
+        path: /tmp
+
+    - name: Load image
+      run: |
+        docker load --input /tmp/docker-image.tar
+        docker image ls -a
+
+    - name: Fetch samples (${{ matrix.flavor.id }})
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        repository: metanorma/mn-samples-${{ matrix.flavor.id }}
+        token: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
+        path: ${{ github.workspace }}/samples
+        fetch-depth: 1
 
     - name: Run tests
-      env:
-        GITHUB_CREDENTIALS: "metanorma-ci:${{ secrets.METANORMA_CI_PAT_TOKEN }}"
       run: |
-        make test-${{ matrix.image }}
+        docker run --rm \
+          -v ${{ github.workspace }}/samples:/metanorma \
+          -w /metanorma \
+          metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}:${{needs.job_info.outputs.tag}} \
+          metanorma site generate --agree-to-terms .
+
+  publish:
+    name: Build other platforms and publish
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    needs:
+    - test
+    - job_info
+
+    # remove after https://github.com/metanorma/emf2svg-ruby/issues/9
+    continue-on-error: ${{ matrix.platform == 'linux/arm64' }}
+
+    strategy:
+      max-parallel: 3
+      fail-fast: false
+      matrix:
+        root_image:
+        - id: ruby
+          image: ruby:3.1.1-slim-bullseye
+        - id: ubuntu
+          image: ubuntu:20.04
+
+        image_type:
+        - metanorma
+        - mn
+
+        platform:
+        - linux/amd64
+        - linux/arm64
+
+    steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    # We have previously built linux/amd64 images, just download them here.
+    - name: Download artifact
+      if: ${{ matrix.platform == 'linux/amd64' }}
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.sha }}
+        path: /tmp
+
+    - name: Load image
+      if: ${{ matrix.platform == 'linux/amd64' }}
+      run: |
+        docker load --input /tmp/docker-image.tar
+        docker image ls -a
 
     - uses: docker/login-action@v1
       with:
@@ -154,21 +231,51 @@ jobs:
         username: metanorma-ci
         password: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
 
-    - if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
-      uses: docker/build-push-action@v2
+    - id: meta
+      uses: docker/metadata-action@v3
+      with:
+        images: metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}
+        tags: |
+          ${{needs.job_info.outputs.tag}}
+        labels: |
+          org.opencontainers.image.vendor=Ribose Inc.
+          org.opencontainers.image.licenses=BSD-3-Clause
+          org.opencontainers.image.documentation=https://www.metanorma.org
+          org.opencontainers.image.ref.name=metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}
+          org.opencontainers.image.base.name=${{ matrix.root_image.image }}
+          org.opencontainers.image.title=Metanorma official public image
+          org.opencontainers.image.description=Metanorma official public image on ${{ matrix.root_image.image }}
+          org.opencontainers.image.version=${{needs.job_info.outputs.version}}
+
+    - uses: docker/build-push-action@v2
       with:
         context: .
-        platforms: ${{ matrix.platforms }}
-        push: ${{ matrix.publish }}
-        file: ${{ matrix.dockerfile }}
+        platforms: ${{ matrix.platform }}
+        push: true
+        file: Dockerfile.${{ matrix.root_image.id }}
         tags: |
-          ${{ steps.meta.outputs.tags }}
-          ghcr.io/${{ steps.meta.outputs.tags }}
+          metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}:${{needs.job_info.outputs.tag}}
+          ghcr.io/${{ matrix.image_type }}-${{ matrix.root_image.id }}:${{needs.job_info.outputs.tag}}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
-          METANORMA_IMAGE_NAME=${{ matrix.image }}
+          METANORMA_IMAGE_NAME=${{ matrix.image_type }}-${{ matrix.root_image.id }}
         secret-files: |
           bundle_config=.bundle/config
+
+    # announce:
+    #   name: Announce to other repositories after publishing
+    #   runs-on: ubuntu-latest
+    #   if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    #   needs:
+    #   - publish
+
+    #   strategy:
+    #     max-parallel: 3
+    #     fail-fast: false
+    #     matrix:
+    #       image_type:
+    #       - metanorma
+    #       - mn
 
     - name: Trigger samples repositories
       if: startsWith(github.ref, 'refs/tags/v') && matrix.image == 'mn'
