@@ -13,21 +13,8 @@ jobs:
   job_info:
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.tag.outputs.result }}
       version: ${{ steps.version.outputs.result }}
     steps:
-    - id: tag
-      env:
-        IS_TAG_PUSHED: startsWith(github.ref, 'refs/tags/v')
-        IS_PULL_REQUEST: github.event_name == 'pull_request'
-      run: |
-        if [ "$IS_PULL_REQUEST" == "true" ]; then
-          echo "::set-output name=result::${GITHUB_REF_NAME}"
-        elif [ "$IS_TAG_PUSHED" == "true" ]; then
-          echo "::set-output name=result::${GITHUB_REF#*/v}\nlatest"
-        else
-          echo "::set-output name=result::latest"
-        fi
     - id: version
       run: |
         export CLI_VERSION=$(cat VERSION.mak | cut -d ' ' -f 3)
@@ -61,9 +48,15 @@ jobs:
     - id: meta
       uses: docker/metadata-action@v3
       with:
-        images: metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}
+        images: |
+          metanorma/${{ matrix.image_type }}
+          ghcr.io/${{ matrix.image_type }}
         tags: |
-          ${{needs.job_info.outputs.tag}}
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
         labels: |
           org.opencontainers.image.vendor=Ribose Inc.
           org.opencontainers.image.licenses=BSD-3-Clause
@@ -82,14 +75,15 @@ jobs:
         context: .
         platforms: linux/amd64
         file: Dockerfile.${{ matrix.root_image.id }}
-        tags: |
-          metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}:${{needs.job_info.outputs.tag}}
+        tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
           METANORMA_IMAGE_NAME=${{ matrix.image_type }}-${{ matrix.root_image.id }}
         secret-files: |
           bundle_config=.bundle/config
         outputs: type=docker,dest=/tmp/docker-image.tar
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     # - uses: yuichielectric/dive-action@0.0.4
     #   with:
@@ -171,7 +165,7 @@ jobs:
         docker run --rm \
           -v ${{ github.workspace }}/samples:/metanorma \
           -w /metanorma \
-          metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}:${{needs.job_info.outputs.tag}} \
+          $(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/${{ matrix.image_type }}) \
           metanorma site generate --agree-to-terms .
 
   publish:
@@ -239,9 +233,15 @@ jobs:
     - id: meta
       uses: docker/metadata-action@v3
       with:
-        images: metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}
+        images: |
+          metanorma/${{ matrix.image_type }}
+          ghcr.io/${{ matrix.image_type }}
         tags: |
-          ${{needs.job_info.outputs.tag}}
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
         labels: |
           org.opencontainers.image.vendor=Ribose Inc.
           org.opencontainers.image.licenses=BSD-3-Clause
@@ -252,7 +252,7 @@ jobs:
           org.opencontainers.image.description=Metanorma official public image on ${{ matrix.root_image.image }}
           org.opencontainers.image.version=${{needs.job_info.outputs.version}}
 
-    # Build on linux/amd64 for testing first as it is fastest
+    # Push the loaded image on linux/amd64, build image on linux/arm64
     - id: build_container
       name: Build and export
       uses: docker/build-push-action@v2
@@ -261,14 +261,14 @@ jobs:
         platforms: ${{ matrix.platform }}
         push: true
         file: Dockerfile.${{ matrix.root_image.id }}
-        tags: |
-          metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}:${{needs.job_info.outputs.tag}}
-          ghcr.io/${{ matrix.image_type }}-${{ matrix.root_image.id }}:${{needs.job_info.outputs.tag}}
+        tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
           METANORMA_IMAGE_NAME=${{ matrix.image_type }}-${{ matrix.root_image.id }}
         secret-files: |
           bundle_config=.bundle/config
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
   announce:
     name: Announce to mn-samples-*
