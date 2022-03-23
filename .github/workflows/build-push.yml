@@ -111,7 +111,7 @@ jobs:
       - job_info
     continue-on-error: ${{ matrix.flavor.experimental }}
     strategy:
-      max-parallel: 3
+      max-parallel: 5
       fail-fast: false
       matrix:
         root_image:
