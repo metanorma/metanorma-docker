@@ -101,6 +101,7 @@ jobs:
       with:
         name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
         path: /tmp/docker-image.tar
+        retention-days: 1
 
   test:
     name: Test (${{ matrix.image_type }}-${{ matrix.root_image.id }}, ${{ matrix.flavor.id }})
