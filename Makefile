@@ -19,10 +19,10 @@ endif
 CONTAINER_COMMIT ?= $(shell git rev-parse --short HEAD)
 REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
-ITEMS       ?= 1 2 3 4
-IMAGE_TYPES ?= metanorma metanorma-ubuntu mn mn-ubuntu
-VERSIONS    ?= $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION)
-ROOT_PLATFORMS ?= ruby ubuntu ruby ubuntu
+ITEMS       ?= 1 2 3 4 5 6
+IMAGE_TYPES ?= metanorma metanorma-ubuntu metanorma-alpine mn mn-ubuntu mn-alpine
+VERSIONS    ?= $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION)
+ROOT_PLATFORMS ?= ruby ubuntu alpine ruby ubuntu alpine
 
 # Getters
 GET_IMAGE_TYPE = $(word $1,$(IMAGE_TYPES))

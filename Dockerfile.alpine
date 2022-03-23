@@ -1,0 +1,57 @@
+FROM ruby:3.1.1-alpine
+USER root
+
+LABEL maintainer="open.source@ribose.com"
+
+ARG METANORMA_IMAGE_NAME=metanorma
+
+# Install dependencies
+RUN apk update && apk upgrade
+RUN apk add curl unzip bash make tzdata coreutils git coreutils \
+  gcc g++ musl-dev cmake \
+  libxml2 libxml2-dev libxslt libxslt-dev libsass libsass-dev sassc \
+  openjdk17 \
+  inkscape nss
+
+# Install plantuml
+RUN apk add graphviz ttf-droid ttf-droid-nonlatin fontconfig
+RUN apk add plantuml --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
+
+# Install xml2rf
+ENV PYTHONUNBUFFERED=1
+RUN apk add python3 python3-dev && ln -sf python3 /usr/bin/python
+RUN python3 -m ensurepip
+RUN pip3 install --no-cache --upgrade pip wheel
+RUN pip3 install --no-cache --upgrade idnits xml2rfc --ignore-installed six chardet
+
+# Delete cache
+RUN rm -rf /var/cache/apk/*
+
+RUN mkdir -p /setup
+
+# Update to latest bundler
+RUN gem install bundler
+
+# Install metanorma toolchain
+COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
+# --redownload need to fix rake Bundler::GemNotFound
+# --no-cache https://github.com/rubygems/rubygems/issues/3225
+RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
+  cd /setup && \
+  bundle install --no-cache --redownload && \
+  rm -rf /usr/local/bundle/cache
+
+# export java executable path
+ENV JAVA_HOME /usr/lib/jvm/default-jvm
+ENV PATH $PATH:$JAVA_HOME/bin
+ENV RUBYOPT -rbundler/setup
+ENV BUNDLE_GEMFILE /setup/Gemfile
+
+# Workaround for https://github.com/relaton/relaton/issues/99
+ENV RELATON_FETCH_PARALLEL 1
+
+ENV FONTIST_PATH "/config"
+VOLUME /config/fonts
+
+WORKDIR /metanorma
+CMD metanorma

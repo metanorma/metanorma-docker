@@ -37,6 +37,8 @@ jobs:
           image: ruby:3.1.1-slim-bullseye
         - id: ubuntu
           image: ubuntu:20.04
+        - id: alpine
+          image: ruby:3.1.1-alpine
         image_type: [metanorma, mn]
         experimental: [false]
 
@@ -134,6 +136,7 @@ jobs:
         root_image:
         - id: ruby
         - id: ubuntu
+        - id: alpine
 
         image_type:
         - metanorma
@@ -229,6 +232,8 @@ jobs:
           image: ruby:3.1.1-slim-bullseye
         - id: ubuntu
           image: ubuntu:20.04
+        - id: alpine
+          image: ruby:3.1.1-alpine
 
         image_type:
         - metanorma
