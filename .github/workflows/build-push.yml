@@ -159,10 +159,16 @@ jobs:
           experimental: false
         - id: iho
           experimental: false
+        - id: ietf
+          experimental: false
+        - id: bipm
+          experimental: false
+        - id: itu
+          experimental: false
+        - id: csa
+          experimental: false
         # - id: gb
         #   experimental: true
-        - id: itu
-          experimental: true
         # - id: nist
         #   experimental: true
 
