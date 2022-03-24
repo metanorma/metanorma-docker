@@ -186,7 +186,7 @@ jobs:
         docker load --input /tmp/docker-image.tar
         docker image ls -a
         docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma
-        echo "::set-output name=result::$(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma | tr -d '\n')"
+        echo "::set-output name=result::$(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma | head -1 | tr -d '\n')"
 
     - name: Fetch samples (${{ matrix.flavor.id }})
       uses: actions/checkout@v3
@@ -206,7 +206,7 @@ jobs:
         docker run --rm \
           -v ${{ github.workspace }}/samples:/metanorma \
           -w /metanorma \
-          $(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma | tr -d '\n') \
+          $(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma | head -1 | tr -d '\n') \
           metanorma site generate --agree-to-terms .
 
   publish:
