@@ -277,6 +277,9 @@ jobs:
           echo "::set-output name=result::prefix=${{ matrix.root_image.id }},onlatest=true"
         fi
 
+    -
+      run: echo ${{ steps.label_prefix.output.result }}
+
     - id: meta
       uses: docker/metadata-action@v3
       with:
