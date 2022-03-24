@@ -15,6 +15,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.result }}
     steps:
+    - uses: actions/checkout@v3
     - id: version
       run: |
         export CLI_VERSION=$(cat VERSION.mak | cut -d ' ' -f 3)
