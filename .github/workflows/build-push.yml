@@ -60,7 +60,7 @@ jobs:
         fi
 
     -
-      run: echo ${{ steps.label_prefix.output.result }}
+      run: echo ${{ steps.label_prefix.outputs.result }}
 
     - id: meta
       uses: docker/metadata-action@v3
@@ -69,7 +69,7 @@ jobs:
           metanorma/metanorma
           ghcr.io/metanorma/metanorma
         flavor: |
-          ${{ steps.label_prefix.output.result }}
+          ${{ steps.label_prefix.outputs.result }}
         tags: |
           type=edge,branch=main
           type=ref,event=branch
@@ -197,7 +197,7 @@ jobs:
     -
       name: Run tests
       env:
-        IMAGE_NAME: ${{ steps.loaded_image.output.result }}
+        IMAGE_NAME: ${{ steps.loaded_image.outputs.result }}
       run: |
         echo $IMAGE_NAME; \
         docker run --rm \
@@ -282,7 +282,7 @@ jobs:
         fi
 
     -
-      run: echo ${{ steps.label_prefix.output.result }}
+      run: echo ${{ steps.label_prefix.outputs.result }}
 
     - id: meta
       uses: docker/metadata-action@v3
@@ -291,7 +291,7 @@ jobs:
           metanorma/metanorma
           ghcr.io/metanorma/metanorma
         flavor: |
-          ${{ steps.label_prefix.output.result }}
+          ${{ steps.label_prefix.outputs.result }}
         tags: |
           type=edge,branch=main
           type=ref,event=branch
