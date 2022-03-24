@@ -45,42 +45,28 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
-    - id: meta
-      uses: docker/metadata-action@v3
-      if: ${{ matrix.image_type == 'metanorma' && matrix.root_image.id == 'ruby' }}
-      with:
-        images: |
-          metanorma/${{ matrix.image_type }}
-          ghcr.io/${{ matrix.image_type }}
-        tags: |
-          ${{ matrix.root_image.image }}
-          type=edge,branch=main
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=semver,pattern={{major}}
-        labels: |
-          org.opencontainers.image.vendor=Ribose Inc.
-          org.opencontainers.image.licenses=BSD-3-Clause
-          org.opencontainers.image.documentation=https://www.metanorma.org
-          org.opencontainers.image.ref.name=metanorma/${{ matrix.image_type }}:${{ matrix.root_image.id }}
-          org.opencontainers.image.base.name=${{ matrix.root_image.image }}
-          org.opencontainers.image.title=Metanorma official public image
-          org.opencontainers.image.description=Metanorma official public image on ${{ matrix.root_image.image }}
-          org.opencontainers.image.version=${{needs.job_info.outputs.version}}
+    - id: label_prefix
+      env:
+        IS_EDGE: matrix.image_type == 'mn'
+        IS_MAIN: matrix.image_type == 'metanorma' && matrix.root_image.id != 'ruby'
+      run: |
+        if [ "$IS_MAIN" == "true" ]; then
+          echo "::set-output name=result::"
+        elif [ "$IS_EDGE" == "true" ]; then
+          echo "::set-output name=result::prefix=edge,onlatest=true"
+        else
+          echo "::set-output name=result::prefix=${{ matrix.root_image.id }},onlatest=true"
+        fi
 
     - id: meta
       uses: docker/metadata-action@v3
-      if: ${{ matrix.image_type != 'metanorma' || matrix.root_image.id != 'ruby' }}
       with:
         images: |
-          metanorma/${{ matrix.image_type }}
-          ghcr.io/${{ matrix.image_type }}
+          metanorma/metanorma
+          ghcr.io/metanorma/metanorma
         flavor: |
-          prefix=${{ matrix.root_image.image }},onlatest=true
+          ${{ steps.label_prefix.output.result }}
         tags: |
-          ${{ matrix.root_image.image }}
           type=edge,branch=main
           type=ref,event=branch
           type=ref,event=pr
@@ -182,10 +168,13 @@ jobs:
         name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
         path: /tmp
 
-    - name: Load image
+    -
+      id: loaded_image
+      name: Load image
       run: |
         docker load --input /tmp/docker-image.tar
         docker image ls -a
+        echo "::set-output name=result::$(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma)"
 
     - name: Fetch samples (${{ matrix.flavor.id }})
       uses: actions/checkout@v3
@@ -196,12 +185,15 @@ jobs:
         path: ${{ github.workspace }}/samples
         fetch-depth: 1
 
-    - name: Run tests
+    -
+      name: Run tests
+      env:
+        IMAGE_NAME: steps.loaded_image.output.result
       run: |
         docker run --rm \
           -v ${{ github.workspace }}/samples:/metanorma \
           -w /metanorma \
-          $(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/${{ matrix.image_type }}) \
+          ${IMAGE_NAME} \
           metanorma site generate --agree-to-terms .
 
   publish:
@@ -266,42 +258,28 @@ jobs:
         username: metanorma-ci
         password: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
 
-    - id: meta
-      uses: docker/metadata-action@v3
-      if: ${{ matrix.image_type == 'metanorma' && matrix.root_image.id == 'ruby' }}
-      with:
-        images: |
-          metanorma/${{ matrix.image_type }}
-          ghcr.io/${{ matrix.image_type }}
-        tags: |
-          ${{ matrix.root_image.image }}
-          type=edge,branch=main
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=semver,pattern={{major}}
-        labels: |
-          org.opencontainers.image.vendor=Ribose Inc.
-          org.opencontainers.image.licenses=BSD-3-Clause
-          org.opencontainers.image.documentation=https://www.metanorma.org
-          org.opencontainers.image.ref.name=metanorma/${{ matrix.image_type }}:${{ matrix.root_image.id }}
-          org.opencontainers.image.base.name=${{ matrix.root_image.image }}
-          org.opencontainers.image.title=Metanorma official public image
-          org.opencontainers.image.description=Metanorma official public image on ${{ matrix.root_image.image }}
-          org.opencontainers.image.version=${{needs.job_info.outputs.version}}
+    - id: label_prefix
+      env:
+        IS_EDGE: matrix.image_type == 'mn'
+        IS_MAIN: matrix.image_type == 'metanorma' && matrix.root_image.id != 'ruby'
+      run: |
+        if [ "$IS_MAIN" == "true" ]; then
+          echo "::set-output name=result::"
+        elif [ "$IS_EDGE" == "true" ]; then
+          echo "::set-output name=result::prefix=edge,onlatest=true"
+        else
+          echo "::set-output name=result::prefix=${{ matrix.root_image.id }},onlatest=true"
+        fi
 
     - id: meta
       uses: docker/metadata-action@v3
-      if: ${{ matrix.image_type != 'metanorma' || matrix.root_image.id != 'ruby' }}
       with:
         images: |
-          metanorma/${{ matrix.image_type }}
-          ghcr.io/${{ matrix.image_type }}
+          metanorma/metanorma
+          ghcr.io/metanorma/metanorma
         flavor: |
-          prefix=${{ matrix.root_image.image }},onlatest=true
+          ${{ steps.label_prefix.output.result }}
         tags: |
-          ${{ matrix.root_image.image }}
           type=edge,branch=main
           type=ref,event=branch
           type=ref,event=pr
