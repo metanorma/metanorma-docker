@@ -90,11 +90,6 @@ jobs:
           org.opencontainers.image.description=Metanorma official public image on ${{ matrix.root_image.image }}
           org.opencontainers.image.version=${{needs.job_info.outputs.version}}
 
-    - uses: int128/docker-build-cache-config-action@v1
-      id: cache
-      with:
-        image: ghcr.io/metanorma/metanorma/cache
-
     # Build on linux/amd64 for testing first as it is fastest
     - id: build_container
       name: Build and export
@@ -110,8 +105,8 @@ jobs:
         secret-files: |
           bundle_config=.bundle/config
         outputs: type=docker,dest=/tmp/docker-image.tar
-        cache-from: ${{ steps.cache.outputs.cache-from }}
-        cache-to: ${{ steps.cache.outputs.cache-to }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=min
 
     # - uses: yuichielectric/dive-action@0.0.4
     #   with:
@@ -322,11 +317,6 @@ jobs:
           org.opencontainers.image.description=Metanorma official public image on ${{ matrix.root_image.image }}
           org.opencontainers.image.version=${{needs.job_info.outputs.version}}
 
-    - uses: int128/docker-build-cache-config-action@v1
-      id: cache
-      with:
-        image: ghcr.io/metanorma/metanorma/cache
-
     # Push the loaded image on linux/amd64
     # - id: push_image
     #   if: ${{ matrix.platform == 'linux/amd64' }}
@@ -353,8 +343,8 @@ jobs:
           METANORMA_IMAGE_NAME=${{ matrix.image_type }}-${{ matrix.root_image.id }}
         secret-files: |
           bundle_config=.bundle/config
-        cache-from: ${{ steps.cache.outputs.cache-from }}
-        cache-to: ${{ steps.cache.outputs.cache-to }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=min
 
   announce:
     name: Announce to mn-samples-*
