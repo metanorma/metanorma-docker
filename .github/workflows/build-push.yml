@@ -90,6 +90,11 @@ jobs:
           org.opencontainers.image.description=Metanorma official public image on ${{ matrix.root_image.image }}
           org.opencontainers.image.version=${{needs.job_info.outputs.version}}
 
+    - uses: int128/docker-build-cache-config-action@v1
+      id: cache
+      with:
+        image: ghcr.io/${{ github.repository }}/cache
+
     # Build on linux/amd64 for testing first as it is fastest
     - id: build_container
       name: Build and export
@@ -105,8 +110,8 @@ jobs:
         secret-files: |
           bundle_config=.bundle/config
         outputs: type=docker,dest=/tmp/docker-image.tar
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: ${{ steps.cache.outputs.cache-from }}
+        cache-to: ${{ steps.cache.outputs.cache-to }}
 
     # - uses: yuichielectric/dive-action@0.0.4
     #   with:
@@ -296,7 +301,7 @@ jobs:
       uses: docker/metadata-action@v3
       with:
         images: |
-          metanorma/metanorma
+          docker.io/metanorma/metanorma
           ghcr.io/metanorma/metanorma
         flavor: |
           ${{ steps.label_prefix.outputs.result }}
@@ -317,19 +322,24 @@ jobs:
           org.opencontainers.image.description=Metanorma official public image on ${{ matrix.root_image.image }}
           org.opencontainers.image.version=${{needs.job_info.outputs.version}}
 
-    # Push the loaded image on linux/amd64
-    - id: push_image
-      if: ${{ matrix.platform == 'linux/amd64' }}
-      name: Push to registries (${{ matrix.platform }})
-      uses: akhilerm/tag-push-action@v2.0.0
+    - uses: int128/docker-build-cache-config-action@v1
+      id: cache
       with:
-        src: ${{ steps.loaded_image.outputs.result }}
-        dst: |
-          ${{ steps.meta.outputs.tags }}
+        image: ghcr.io/${{ github.repository }}/cache
+
+    # Push the loaded image on linux/amd64
+    # - id: push_image
+    #   if: ${{ matrix.platform == 'linux/amd64' }}
+    #   name: Push to registries (${{ matrix.platform }})
+    #   uses: akhilerm/tag-push-action@v2.0.0
+    #   with:
+    #     src: ${{ steps.loaded_image.outputs.result }}
+    #     dst: |
+    #       ${{ steps.meta.outputs.tags }}
 
     # Build image on linux/arm64
     - id: build_container
-      if: ${{ matrix.platform != 'linux/amd64' }}
+      # if: ${{ matrix.platform != 'linux/amd64' }}
       name: Build+push to registries (${{ matrix.platform }})
       uses: docker/build-push-action@v2
       with:
@@ -343,8 +353,8 @@ jobs:
           METANORMA_IMAGE_NAME=${{ matrix.image_type }}-${{ matrix.root_image.id }}
         secret-files: |
           bundle_config=.bundle/config
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: ${{ steps.cache.outputs.cache-from }}
+        cache-to: ${{ steps.cache.outputs.cache-to }}
 
   announce:
     name: Announce to mn-samples-*
