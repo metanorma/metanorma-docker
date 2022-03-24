@@ -50,13 +50,14 @@ jobs:
 
     - id: label_prefix
       env:
-        IS_EDGE: matrix.image_type == 'mn'
-        IS_MAIN: matrix.image_type == 'metanorma' && matrix.root_image.id != 'ruby'
+        IS_PRERELEASE: ${{matrix.image_type == 'mn'}}
+        IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'ruby'}}
       run: |
+        echo '::echo::on'
         if [ "$IS_MAIN" == "true" ]; then
           echo "::set-output name=result::"
-        elif [ "$IS_EDGE" == "true" ]; then
-          echo "::set-output name=result::prefix=edge,onlatest=true"
+        elif [ "$IS_PRERELEASE" == "true" ]; then
+          echo "::set-output name=result::prefix=prerelease,onlatest=true"
         else
           echo "::set-output name=result::prefix=${{ matrix.root_image.id }},onlatest=true"
         fi
@@ -272,9 +273,10 @@ jobs:
 
     - id: label_prefix
       env:
-        IS_PRERELEASE: matrix.image_type == 'mn'
-        IS_MAIN: matrix.image_type == 'metanorma' && matrix.root_image.id != 'ruby'
+        IS_PRERELEASE: ${{matrix.image_type == 'mn'}}
+        IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'ruby'}}
       run: |
+        echo '::echo::on'
         if [ "$IS_MAIN" == "true" ]; then
           echo "::set-output name=result::"
         elif [ "$IS_PRERELEASE" == "true" ]; then
@@ -284,7 +286,7 @@ jobs:
         fi
 
     - name: Show label prefix calculation
-      run: echo ${{ steps.label_prefix.outputs.result }}
+      run: echo "${{ steps.label_prefix.outputs.result }}"
 
     - id: meta
       uses: docker/metadata-action@v3
