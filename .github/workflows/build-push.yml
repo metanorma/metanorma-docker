@@ -93,7 +93,7 @@ jobs:
     - uses: int128/docker-build-cache-config-action@v1
       id: cache
       with:
-        image: ghcr.io/${{ github.repository }}/cache
+        image: ghcr.io/metanorma/metanorma
 
     # Build on linux/amd64 for testing first as it is fastest
     - id: build_container
@@ -325,7 +325,7 @@ jobs:
     - uses: int128/docker-build-cache-config-action@v1
       id: cache
       with:
-        image: ghcr.io/${{ github.repository }}/cache
+        image: ghcr.io/metanorma/metanorma
 
     # Push the loaded image on linux/amd64
     # - id: push_image
