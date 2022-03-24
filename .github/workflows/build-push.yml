@@ -153,6 +153,10 @@ jobs:
           experimental: false
         - id: csa
           experimental: false
+        - id: m3aawg
+          experimental: true
+        - id: jcgm
+          experimental: true
         # - id: gb
         #   experimental: true
         # - id: nist
