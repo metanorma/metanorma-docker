@@ -20,6 +20,8 @@ jobs:
       run: |
         export CLI_VERSION=$(cat VERSION.mak | cut -d ' ' -f 3)
         echo "::set-output name=result::${CLI_VERSION}"
+    - name: Show version number
+      run: echo ${{ steps.version.outputs.result }}
 
   build:
     name: Build (${{ matrix.image_type }}-${{ matrix.root_image.id }})
@@ -59,7 +61,7 @@ jobs:
           echo "::set-output name=result::prefix=${{ matrix.root_image.id }},onlatest=true"
         fi
 
-    -
+    - name: Show label prefix calculation
       run: echo ${{ steps.label_prefix.outputs.result }}
 
     - id: meta
@@ -281,7 +283,7 @@ jobs:
           echo "::set-output name=result::prefix=${{ matrix.root_image.id }},onlatest=true"
         fi
 
-    -
+    - name: Show label prefix calculation
       run: echo ${{ steps.label_prefix.outputs.result }}
 
     - id: meta
