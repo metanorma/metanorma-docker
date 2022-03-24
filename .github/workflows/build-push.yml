@@ -50,16 +50,16 @@ jobs:
 
     - id: label_prefix
       env:
-        IS_PRERELEASE: ${{matrix.image_type == 'mn'}}
+        IS_PRERELEASE: ${{matrix.image_type == 'mn' && matrix.root_image.id == 'ruby'}}
         IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'ruby'}}
       run: |
         echo '::echo::on'
         if [ "$IS_MAIN" == "true" ]; then
           echo "::set-output name=result::"
         elif [ "$IS_PRERELEASE" == "true" ]; then
-          echo "::set-output name=result::prefix=prerelease,onlatest=true"
+          echo "::set-output name=result::prefix=prerelease-,onlatest=true"
         else
-          echo "::set-output name=result::prefix=${{ matrix.root_image.id }},onlatest=true"
+          echo "::set-output name=result::prefix=${{ matrix.root_image.id }}-,onlatest=true"
         fi
 
     - name: Show label prefix calculation
