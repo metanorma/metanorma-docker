@@ -266,13 +266,13 @@ jobs:
 
     - id: label_prefix
       env:
-        IS_EDGE: matrix.image_type == 'mn'
+        IS_PRERELEASE: matrix.image_type == 'mn'
         IS_MAIN: matrix.image_type == 'metanorma' && matrix.root_image.id != 'ruby'
       run: |
         if [ "$IS_MAIN" == "true" ]; then
           echo "::set-output name=result::"
-        elif [ "$IS_EDGE" == "true" ]; then
-          echo "::set-output name=result::prefix=edge,onlatest=true"
+        elif [ "$IS_PRERELEASE" == "true" ]; then
+          echo "::set-output name=result::prefix=prerelease,onlatest=true"
         else
           echo "::set-output name=result::prefix=${{ matrix.root_image.id }},onlatest=true"
         fi
