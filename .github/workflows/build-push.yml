@@ -336,7 +336,6 @@ jobs:
         context: .
         platforms: ${{ matrix.platform }}
         push: true
-        load: true
         file: Dockerfile.${{ matrix.root_image.id }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
