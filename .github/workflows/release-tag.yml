@@ -3,6 +3,12 @@ name: release-tag
 on:
   repository_dispatch:
     types: [ metanorma/metanorma-cli ]
+  workflow_dispatch:
+    inputs:
+      next_version:
+        description: |
+          Next version. Should correspond to the released metanorma-cli gem
+        required: true
 
 jobs:
   push-tag:
@@ -20,11 +26,19 @@ jobs:
     - run: |
         git config --global user.name "metanorma-ci"
         git config --global user.email "metanorma-ci@users.noreply.github.com"
-    - name: Parse metanorma-cli version
+
+    - if: github.event_name == 'repository_dispatch'
+      name: Parse metanorma-cli version (repository_dispatch)
       env:
         METANORMA_CLI_TAG: ${{ github.event.client_payload.ref }}
       run: |
         echo METANORMA_CLI_VERSION=${METANORMA_CLI_TAG#*/v} >> ${GITHUB_ENV}
+
+    - if: github.event_name == 'workflow_dispatch'
+      name: Parse metanorma-cli version (workflow_dispatch)
+      run: |
+        echo METANORMA_CLI_VERSION=${{ inputs.next_version }} >> ${GITHUB_ENV}
+
     - name: Update version
       run: |
         echo "IMAGE_VERSION := ${METANORMA_CLI_VERSION}" > VERSION.mak
@@ -32,6 +46,7 @@ jobs:
         bundle remove metanorma-cli
         bundle add metanorma-cli -v ${METANORMA_CLI_VERSION}
         popd
+
     - name: Push commit and tag
       run: |
         git add VERSION.mak metanorma/Gemfile
