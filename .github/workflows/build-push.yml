@@ -208,8 +208,7 @@ jobs:
         echo $IMAGE_NAME; \
         docker run --rm \
           -v ${{ github.workspace }}/samples:/metanorma \
-          -w /metanorma \
-          $(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma | head -1 | tr -d '\n') \
+          -w /metanorma $IMAGE_NAME \
           metanorma site generate --agree-to-terms .
 
   publish:
