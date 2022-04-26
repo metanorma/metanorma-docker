@@ -219,7 +219,7 @@ jobs:
 
     - name: Run tests
       env:
-        IMAGE_NAME: ${{ steps.loaded_image.outputs.result }}
+        IMAGE_NAME: ${{ steps.loaded_image.outputs.full_name }}
       run: |
         docker run --rm \
           -v ${{ github.workspace }}/samples:/metanorma \
