@@ -48,7 +48,7 @@ jobs:
 
     - name: Push commit and tag
       run: |
-        git add VERSION.mak metanorma/Gemfile
+        git add VERSION.mak metanorma-ruby/Gemfile
         git commit -m "Bump version to ${METANORMA_CLI_VERSION}"
         git tag v${METANORMA_CLI_VERSION}
         git push origin HEAD:${GITHUB_REF} --tags
