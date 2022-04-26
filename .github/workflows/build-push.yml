@@ -115,11 +115,27 @@ jobs:
     #     image: metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}:${{needs.job_info.outputs.tag}}
     #     github-token: ${{ github.token }}
 
+    - run: |
+        echo "${{ steps.meta.outputs.tags }}" > /tmp/docker-tags.txt
+        echo "${{ steps.meta.outputs.labels }}" > /tmp/docker-labels.txt
+
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
         path: /tmp/docker-image.tar
+        retention-days: 1
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: tags-${{ matrix.image-type }}-${{ matrix.root-image.id }}-${{ github.run_id }}
+        path: /tmp/docker-tags.txt
+        retention-days: 1
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: labels-${{ matrix.image-type }}-${{ matrix.root-image.id }}-${{ github.run_id }}
+        path: /tmp/docker-labels.txt
         retention-days: 1
 
   test:
@@ -176,20 +192,21 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
-    - name: Download artifact
-      uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v3
       with:
-        name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
+        name: ${{ matrix.image-type }}-${{ matrix.root-image.id }}-${{ github.run_id }}
         path: /tmp
 
-    -
-      id: loaded_image
+    - uses: actions/download-artifact@v3
+      with:
+        name: tags-${{ matrix.image-type }}-${{ matrix.root-image.id }}-${{ github.run_id }}
+        path: /tmp
+
+    - id: loaded_image
       name: Load image
       run: |
         docker load --input /tmp/docker-image.tar
-        docker image ls -a
-        docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma
-        echo "::set-output name=result::$(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma | head -1 | tr -d '\n')"
+        echo "::set-output name=full_name::$(cat /tmp/docker-tags.txt)"
 
     - name: Fetch samples (${{ matrix.flavor.id }})
       uses: actions/checkout@v3
@@ -200,15 +217,14 @@ jobs:
         path: ${{ github.workspace }}/samples
         fetch-depth: 1
 
-    -
-      name: Run tests
+    - name: Run tests
       env:
         IMAGE_NAME: ${{ steps.loaded_image.outputs.result }}
       run: |
-        echo $IMAGE_NAME; \
         docker run --rm \
           -v ${{ github.workspace }}/samples:/metanorma \
-          -w /metanorma $IMAGE_NAME \
+          -w /metanorma \
+          ${IMAGE_NAME} \
           metanorma site generate --agree-to-terms .
 
   publish:
