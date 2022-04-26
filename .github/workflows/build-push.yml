@@ -110,11 +110,6 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=min
 
-    # - uses: yuichielectric/dive-action@0.0.4
-    #   with:
-    #     image: metanorma/${{ matrix.image_type }}-${{ matrix.root_image.id }}:${{needs.job_info.outputs.tag}}
-    #     github-token: ${{ github.token }}
-
     - run: |
         echo "${{ steps.meta.outputs.tags }}" > /tmp/docker-tags.txt
         echo "${{ steps.meta.outputs.labels }}" > /tmp/docker-labels.txt
@@ -206,7 +201,15 @@ jobs:
       name: Load image
       run: |
         docker load --input /tmp/docker-image.tar
+        echo "---"
+        cat /tmp/docker-tags.txt
+        echo "---"
         echo "::set-output name=full_name::$(cat /tmp/docker-tags.txt)"
+
+    - uses: yuichielectric/dive-action@0.0.4
+      with:
+        image: ${{ steps.loaded_image.outputs.full_name }}
+        github-token: ${{ github.token }}
 
     - name: Fetch samples (${{ matrix.flavor.id }})
       uses: actions/checkout@v3
