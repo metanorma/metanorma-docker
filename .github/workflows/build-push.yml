@@ -128,13 +128,13 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: tags-${{ matrix.image-type }}-${{ matrix.root-image.id }}-${{ github.run_id }}
+        name: tags-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
         path: /tmp/docker-tags.txt
         retention-days: 1
 
     - uses: actions/upload-artifact@v3
       with:
-        name: labels-${{ matrix.image-type }}-${{ matrix.root-image.id }}-${{ github.run_id }}
+        name: labels-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
         path: /tmp/docker-labels.txt
         retention-days: 1
 
@@ -194,12 +194,12 @@ jobs:
 
     - uses: actions/download-artifact@v3
       with:
-        name: ${{ matrix.image-type }}-${{ matrix.root-image.id }}-${{ github.run_id }}
+        name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
         path: /tmp
 
     - uses: actions/download-artifact@v3
       with:
-        name: tags-${{ matrix.image-type }}-${{ matrix.root-image.id }}-${{ github.run_id }}
+        name: tags-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
         path: /tmp
 
     - id: loaded_image
