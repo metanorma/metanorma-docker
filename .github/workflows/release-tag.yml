@@ -38,6 +38,11 @@ jobs:
       run: |
         echo METANORMA_CLI_VERSION=${{ github.event.inputs.next_version }} >> ${GITHUB_ENV}
 
+    - name: Docker tag version
+      run: |
+        curl -LO --retry 3 https://raw.githubusercontent.com/metanorma/metanorma-build-scripts/main/gemver-to-semver.rb && chmod +x gemver-to-semver.rb
+        echo "DOCKER_TAG=$(./gemver-to-semver.rb ${METANORMA_CLI_VERSION})" >> $GITHUB_ENV
+
     - name: Update version
       run: |
         echo "IMAGE_VERSION := ${METANORMA_CLI_VERSION}" > VERSION.mak
@@ -49,6 +54,6 @@ jobs:
     - name: Push commit and tag
       run: |
         git add VERSION.mak metanorma-ruby/Gemfile
-        git commit -m "Bump version to ${METANORMA_CLI_VERSION}"
-        git tag v${METANORMA_CLI_VERSION}
+        git commit -m "Bump version to ${DOCKER_TAG}"
+        git tag v${DOCKER_TAG}
         git push origin HEAD:${GITHUB_REF} --tags
