@@ -41,7 +41,7 @@ jobs:
     - name: Docker tag version
       run: |
         curl -LO --retry 3 https://raw.githubusercontent.com/metanorma/metanorma-build-scripts/main/gemver-to-semver.rb && chmod +x gemver-to-semver.rb
-        echo "DOCKER_TAG=$(./gemver-to-semver.rb ${METANORMA_CLI_VERSION})" >> $GITHUB_ENV
+        echo "DOCKER_TAG=$(./gemver-to-semver.rb --strip-prefix ${METANORMA_CLI_VERSION})" >> $GITHUB_ENV
 
     - name: Update version
       run: |
