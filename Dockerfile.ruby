@@ -32,7 +32,7 @@ COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
 RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
     --mount=type=secret,id=gemrc_config,dst=$GEM_HOME/.gemrc \
   cd /setup && \
-  bundle install --no-cache --redownload && \
+  bundle install --no-cache --redownload --without aarch64-linux --without x86_64-linux && \
   rm -rf /usr/local/bundle/cache
 
 # export java executable path
