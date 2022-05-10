@@ -1,1 +1,1 @@
-IMAGE_VERSION := 1.5.15pre1
+IMAGE_VERSION := 1.5.15.pre.alpha
