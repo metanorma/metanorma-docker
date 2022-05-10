@@ -39,7 +39,9 @@ jobs:
           image: ubuntu:20.04
         - id: alpine
           image: ruby:3.1.1-alpine
-        image_type: [metanorma, mn]
+        image_type:
+        - metanorma
+        # - mn
         experimental: [false]
 
     steps:
@@ -151,7 +153,7 @@ jobs:
 
         image_type:
         - metanorma
-        - mn
+        # - mn
 
         flavor:
         - id: iso
@@ -255,7 +257,7 @@ jobs:
 
         image_type:
         - metanorma
-        - mn
+        # - mn
 
         platform:
         - linux/amd64
