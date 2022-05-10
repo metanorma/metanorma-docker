@@ -34,11 +34,11 @@ jobs:
       matrix:
         root_image:
         - id: ruby
-          image: ruby:3.1.1-slim-bullseye
+          image: ruby:3.0.4-slim-bullseye
         - id: ubuntu
           image: ubuntu:20.04
         - id: alpine
-          image: ruby:3.1.1-alpine
+          image: ruby:3.0.4-alpine
         image_type:
         - metanorma
         # - mn
@@ -249,11 +249,11 @@ jobs:
       matrix:
         root_image:
         - id: ruby
-          image: ruby:3.1.1-slim-bullseye
+          image: ruby:3.0.4-slim-bullseye
         - id: ubuntu
           image: ubuntu:20.04
         - id: alpine
-          image: ruby:3.1.1-alpine
+          image: ruby:3.0.4-alpine
 
         image_type:
         - metanorma
