@@ -187,7 +187,6 @@ jobs:
   test:
     name: Test (${{ matrix.image_type }}-${{ matrix.root_image.id }}, ${{ matrix.flavor.id }})
     runs-on: ubuntu-latest
-    if: false # temporal block
     needs:
       - build
       - job_info
