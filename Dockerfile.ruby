@@ -7,20 +7,18 @@ ARG METANORMA_IMAGE_NAME=metanorma
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# install dependencies
-RUN apt-get update && \
-  apt-get install -y curl gnupg2 software-properties-common python3-pip snapd && \
-  apt-get clean && rm -rf /var/lib/apt/lists/*
-
 RUN mkdir -p /setup
 
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199#23
 RUN mkdir -p /usr/share/man/man1
 
 COPY ./ubuntu.sh /setup/ubuntu.sh
-RUN apt-get update && bash -c /setup/ubuntu.sh && \
-  apt-get clean && rm -rf /var/lib/apt/lists/* && \
-  rm -rf /root/.cpan/build
+
+# install dependencies
+RUN apt-get update && \
+  apt-get install -y curl gnupg2 software-properties-common python3-pip snapd && \
+  bash -c /setup/ubuntu.sh && \
+  apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # install latest bundler
 RUN gem install bundler
