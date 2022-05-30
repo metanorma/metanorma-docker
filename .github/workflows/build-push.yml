@@ -175,6 +175,10 @@ jobs:
         echo "---"
         echo "::set-output name=full_name::$(cat /tmp/docker-tags.txt)"
 
+    - run: docker history ${{ steps.loaded_image.outputs.full_name }}
+
+    - run: docker inspect -f "{{ .Size }}" ${{ steps.loaded_image.outputs.full_name }}
+
     - uses: yuichielectric/dive-action@0.0.4
       with:
         image: ${{ steps.loaded_image.outputs.full_name }}
