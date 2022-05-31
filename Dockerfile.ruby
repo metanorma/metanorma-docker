@@ -30,7 +30,7 @@ COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
 RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
     --mount=type=secret,id=gemrc_config,dst=$GEM_HOME/.gemrc \
   cd /setup && \
-  bundle config set without development test \
+  bundle config set without development test && \
   bundle install --no-cache --redownload && \
   rm -rf /usr/local/bundle/cache
 
