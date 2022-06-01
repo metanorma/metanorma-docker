@@ -7,9 +7,8 @@ ARG METANORMA_IMAGE_NAME=metanorma
 
 # Install dependencies
 RUN apk add --no-cache curl unzip bash make tzdata coreutils git coreutils \
-  gcc g++ musl-dev gcompat cmake \
   libxml2 libxml2-dev libxslt libxslt-dev libsass libsass-dev sassc \
-  openjdk17 \
+  openjdk8-jre \
   inkscape nss
 
 # Install plantuml
@@ -20,11 +19,7 @@ RUN apk add --no-cache plantuml --repository=http://dl-cdn.alpinelinux.org/alpin
 ENV PYTHONUNBUFFERED=1
 RUN apk add --no-cache python3 python3-dev && ln -sf python3 /usr/bin/python
 RUN python3 -m ensurepip
-RUN pip3 install --no-cache --upgrade pip wheel
-RUN pip3 install --no-cache --upgrade idnits xml2rfc --ignore-installed six chardet
-
-# Delete cache
-RUN rm -rf /var/cache/apk/*
+RUN pip3 install --no-cache --upgrade pip wheel idnits xml2rfc --ignore-installed six chardet && rm -rf /root/.cache/pip
 
 RUN mkdir -p /setup
 
@@ -34,12 +29,13 @@ RUN gem install bundler
 # Install metanorma toolchain
 COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
 # --redownload need to fix rake Bundler::GemNotFound
-# --no-cache https://github.com/rubygems/rubygems/issues/3225
 RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
   cd /setup && \
+  apk add --no-cache gcc g++ musl-dev gcompat cmake && \
   bundle config set without development test && \
   bundle install --no-cache --redownload && \
-  rm -rf /usr/local/bundle/cache
+  apk del gcc g++ musl-dev gcompat cmake && \
+  rm -rf /root/.bundle/cache
 
 # export java executable path
 ENV JAVA_HOME /usr/lib/jvm/default-jvm
