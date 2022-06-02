@@ -9,7 +9,8 @@ ARG METANORMA_IMAGE_NAME=metanorma
 RUN apk add --no-cache curl unzip bash make tzdata coreutils git coreutils \
   gcompat libxml2 libxslt libsass sassc \
   openjdk8-jre \
-  inkscape nss
+  inkscape nss && \
+  rm -rf /usr/share/inkscape/tutorials
 
 # Install plantuml
 RUN apk add --no-cache graphviz ttf-droid ttf-droid-nonlatin fontconfig
