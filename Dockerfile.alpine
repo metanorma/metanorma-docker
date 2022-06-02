@@ -7,7 +7,7 @@ ARG METANORMA_IMAGE_NAME=metanorma
 
 # Install dependencies
 RUN apk add --no-cache curl unzip bash make tzdata coreutils git coreutils \
-  libxml2 libxml2-dev libxslt libxslt-dev libsass libsass-dev sassc \
+  gcompat libxml2 libxslt libsass sassc \
   openjdk8-jre \
   inkscape nss
 
@@ -17,9 +17,10 @@ RUN apk add --no-cache plantuml --repository=http://dl-cdn.alpinelinux.org/alpin
 
 # Install xml2rf
 ENV PYTHONUNBUFFERED=1
-RUN apk add --no-cache python3 python3-dev && ln -sf python3 /usr/bin/python
-RUN python3 -m ensurepip
-RUN pip3 install --no-cache --upgrade pip wheel idnits xml2rfc --ignore-installed six chardet && rm -rf /root/.cache/pip
+RUN apk add --no-cache python3 python3-dev && ln -sf python3 /usr/bin/python && \
+    python3 -m ensurepip && \
+    pip3 install --no-cache --upgrade pip wheel idnits xml2rfc --ignore-installed six chardet && \
+    rm -rf /root/.cache/pip
 
 RUN mkdir -p /setup
 
@@ -31,11 +32,13 @@ COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
 # --redownload need to fix rake Bundler::GemNotFound
 RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
   cd /setup && \
-  apk add --no-cache gcc g++ musl-dev gcompat cmake && \
+  apk add --no-cache gcc g++ musl-dev cmake libxml2-dev libxslt-dev libsass-dev && \
   bundle config set without development test && \
   bundle install --no-cache --redownload && \
-  apk del gcc g++ musl-dev gcompat cmake && \
-  rm -rf /root/.bundle/cache
+  apk del gcc g++ musl-dev cmake libxml2-dev libxslt-dev libsass-dev && \
+  rm -rf /root/.bundle/cache /usr/local/bundle/cache && \
+  find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
+  find /usr/local/bundle/gems -type d -name 'test' -prune -exec rm -r "{}" \;
 
 # export java executable path
 ENV JAVA_HOME /usr/lib/jvm/default-jvm
