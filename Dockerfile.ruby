@@ -29,12 +29,12 @@ RUN apt-get update && \
 # install metanorma toolchain
 RUN mkdir -p /setup
 COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
+ENV BUNDLE_WITHOUT="development:test"
 RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
     --mount=type=secret,id=gemrc_config,dst=$GEM_HOME/.gemrc \
   gem install bundler && \
   apt-get update && apt-get --no-install-recommends install -y gcc g++ cmake libxml2-dev libxslt-dev libsass-dev && \
   cd /setup && \
-  bundle config --local set without development test && \
   bundle install --no-cache --redownload && \
   rm -rf /usr/local/bundle/cache && \
   find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \

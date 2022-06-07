@@ -64,7 +64,8 @@ RUN apt-get update && \
 # don't create ".bundle" in all our apps
 ENV GEM_HOME /usr/local/bundle
 ENV BUNDLE_SILENCE_ROOT_WARNING=1 \
-	BUNDLE_APP_CONFIG="$GEM_HOME"
+    BUNDLE_APP_CONFIG="$GEM_HOME" \
+    BUNDLE_WITHOUT="development:test"
 ENV PATH $GEM_HOME/bin:$PATH
 # adjust permissions of a few directories for running "gem install" as an arbitrary user
 RUN mkdir -p "$GEM_HOME" && chmod 777 "$GEM_HOME"
@@ -79,7 +80,6 @@ RUN --mount=type=secret,id=bundle_config,dst=$GEM_HOME/config \
   apt-get update && \
   apt-get --no-install-recommends install -y make gcc g++ ruby-dev cmake libxml2-dev libxslt-dev libsass-dev && \
   cd /setup && \
-  bundle config --local set without development test && \
   bundle install --no-cache --verbose && \
   rm -rf /usr/local/bundle/cache && \
   find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
