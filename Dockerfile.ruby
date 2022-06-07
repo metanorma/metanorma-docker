@@ -34,13 +34,15 @@ RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
   gem install bundler && \
   apt-get update && apt-get --no-install-recommends install -y gcc g++ cmake libxml2-dev libxslt-dev libsass-dev && \
   cd /setup && \
-  bundle config set without development test && \
+  bundle config --local set without development test && \
   bundle install --no-cache --redownload && \
   rm -rf /usr/local/bundle/cache && \
   find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
   find /usr/local/bundle/gems -type d -name 'test' -prune -exec rm -r "{}" \; && \
   apt-get purge -y gcc g++ ruby-dev cmake libxml2-dev libxslt-dev libsass-dev && \
   apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN fontist update
 
 # export java executable path
 ENV JAVA_HOME /usr/lib/jvm/default-java
