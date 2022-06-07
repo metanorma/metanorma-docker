@@ -34,7 +34,7 @@ COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
 RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
   cd /setup && \
   apk add --no-cache gcc g++ musl-dev cmake libxml2-dev libxslt-dev libsass-dev && \
-  bundle config set without development test && \
+  bundle config --local set without development test && \
   bundle install --no-cache --redownload && \
   apk del gcc g++ musl-dev cmake libxml2-dev libxslt-dev libsass-dev && \
   rm -rf /root/.bundle/cache /usr/local/bundle/cache && \
