@@ -7,33 +7,40 @@ ARG METANORMA_IMAGE_NAME=metanorma
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# install dependencies
-RUN apt-get update && \
-  apt-get install -y curl gnupg2 software-properties-common python3-pip snapd && \
-  apt-get clean && rm -rf /var/lib/apt/lists/*
-
-RUN mkdir -p /setup
-
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199#23
 RUN mkdir -p /usr/share/man/man1
 
-COPY ./ubuntu.sh /setup/ubuntu.sh
-RUN apt-get update && bash -c /setup/ubuntu.sh && \
-  apt-get clean && rm -rf /var/lib/apt/lists/* && \
-  rm -rf /root/.cpan/build
-
-# install latest bundler
-RUN gem install bundler
+# install dependencies
+RUN apt-get update && \
+    apt-get --no-install-recommends install -y curl git make sassc && \
+    apt-get update && curl -L "https://raw.githubusercontent.com/metanorma/plantuml-install/main/ubuntu.sh" | bash && \
+    apt-get --no-install-recommends install -y software-properties-common gnupg2 && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9DA4BD18B9A06DE3 && \
+    add-apt-repository ppa:inkscape.dev/stable && \
+    apt-get --no-install-recommends install -y inkscape && \
+    rm -rf /usr/share/inkscape/tutorials && \
+    apt-get --no-install-recommends install -y python3-pip python3-setuptools python3-wheel && \
+    pip3 install --no-cache-dir idnits xml2rfc --ignore-installed six chardet && rm -rf /root/.cache/pip && \
+    apt-get purge -y python3-pip python3-setuptools python3-wheel && \
+    apt-get autoremove -y && apt-get clean && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # install metanorma toolchain
+RUN mkdir -p /setup
 COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
-# --redownload need to fix rake Bundler::GemNotFound
-# --no-cache https://github.com/rubygems/rubygems/issues/3225
 RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
     --mount=type=secret,id=gemrc_config,dst=$GEM_HOME/.gemrc \
+  gem install bundler && \
+  apt-get update && apt-get --no-install-recommends install -y gcc g++ cmake libxml2-dev libxslt-dev libsass-dev && \
   cd /setup && \
+  bundle config set without development test && \
   bundle install --no-cache --redownload && \
-  rm -rf /usr/local/bundle/cache
+  rm -rf /usr/local/bundle/cache && \
+  find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
+  find /usr/local/bundle/gems -type d -name 'test' -prune -exec rm -r "{}" \; && \
+  apt-get purge -y gcc g++ ruby-dev cmake libxml2-dev libxslt-dev libsass-dev && \
+  apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # export java executable path
 ENV JAVA_HOME /usr/lib/jvm/default-java
