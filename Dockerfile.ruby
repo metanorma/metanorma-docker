@@ -42,6 +42,8 @@ RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
   apt-get purge -y gcc g++ ruby-dev cmake libxml2-dev libxslt-dev libsass-dev && \
   apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+RUN fontist update
+
 # export java executable path
 ENV JAVA_HOME /usr/lib/jvm/default-java
 ENV PATH $PATH:$JAVA_HOME/bin

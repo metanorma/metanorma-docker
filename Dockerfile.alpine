@@ -41,6 +41,8 @@ RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
   find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
   find /usr/local/bundle/gems -type d -name 'test' -prune -exec rm -r "{}" \;
 
+RUN fontist update
+
 # export java executable path
 ENV JAVA_HOME /usr/lib/jvm/default-jvm
 ENV PATH $PATH:$JAVA_HOME/bin
