@@ -161,10 +161,13 @@ jobs:
         root_image:
         - id: ruby
           image: ruby:3.1.1-slim-bullseye
+          max_size: '1.5 GiB'
         - id: ubuntu
           image: ubuntu:20.04
+          max_size: '1.5 GB'
         - id: alpine
           image: ruby:3.1.1-alpine
+          max_size: '1.2 GB'
         image_type:
         - metanorma
         experimental: [false]
@@ -197,6 +200,11 @@ jobs:
       with:
         image: ${{ steps.loaded_image.outputs.full_name }}
         github-token: ${{ github.token }}
+
+    - uses: wemake-services/docker-image-size-limit@master
+      with:
+        image: ${{ steps.loaded_image.outputs.full_name }}
+        size: ${{ matrix.root_image.max_size }}
 
   test:
     name: Test (${{ matrix.image_type }}-${{ matrix.root_image.id }}, ${{ matrix.flavor.id }})
