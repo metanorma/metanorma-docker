@@ -18,10 +18,10 @@ RUN apk add --no-cache plantuml --repository=http://dl-cdn.alpinelinux.org/alpin
 
 # Install xml2rf
 ENV PYTHONUNBUFFERED=1
-RUN apk add --no-cache gcc python3 python3-dev && ln -sf python3 /usr/bin/python && \
+RUN apk add --no-cache python3 gcc musl-dev libxml2-dev libxslt-dev python3-dev && ln -sf python3 /usr/bin/python && \
     python3 -m ensurepip && \
     pip3 install --no-cache --upgrade pip wheel idnits xml2rfc --ignore-installed six chardet && \
-    apk del gcc && \
+    apk del gcc musl-dev libxml2-dev libxslt-dev python3-dev && \
     rm -rf /root/.cache/pip
 
 RUN mkdir -p /setup
