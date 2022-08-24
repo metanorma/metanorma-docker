@@ -2,4 +2,4 @@ source "https://rubygems.org"
 
 gem "sassc"
 
-gem "metanorma-cli", "= 1.5.22"
+gem "metanorma-cli", "= 1.5.23.pre"
