@@ -36,7 +36,7 @@ ENV BUNDLE_WITHOUT="development:test"
 RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
   cd /setup && \
   apk add --no-cache gcc g++ musl-dev cmake libxml2-dev libxslt-dev libsass-dev && \
-  bundle install --no-cache --redownload --verbose && \
+  bundle install --no-cache --redownload -j1 --verbose && \
   apk del gcc g++ musl-dev cmake libxml2-dev libxslt-dev libsass-dev && \
   rm -rf /root/.bundle/cache /usr/local/bundle/cache && \
   find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
