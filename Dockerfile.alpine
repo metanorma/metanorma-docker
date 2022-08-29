@@ -27,7 +27,8 @@ RUN apk add --no-cache python3 gcc musl-dev libxml2-dev libxslt-dev python3-dev 
 RUN mkdir -p /setup
 
 # Update to latest bundler
-RUN gem install bundler
+# 2.3.21 brokend for alpine https://github.com/rubygems/rubygems/issues/5871
+RUN gem install bundler -v "~> 2.2, != 2.3.21"
 
 # Install metanorma toolchain
 COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
@@ -36,7 +37,7 @@ ENV BUNDLE_WITHOUT="development:test"
 RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
   cd /setup && \
   apk add --no-cache gcc g++ musl-dev cmake libxml2-dev libxslt-dev libsass-dev && \
-  bundle install --no-cache --redownload -j1 --verbose && \
+  bundle install --no-cache --redownload && \
   apk del gcc g++ musl-dev cmake libxml2-dev libxslt-dev libsass-dev && \
   rm -rf /root/.bundle/cache /usr/local/bundle/cache && \
   find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
