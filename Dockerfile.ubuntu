@@ -78,13 +78,13 @@ RUN --mount=type=secret,id=bundle_config,dst=$GEM_HOME/config \
     --mount=type=secret,id=gemrc_config,dst=$GEM_HOME/.gemrc \
   gem install bundler && \
   apt-get update && \
-  apt-get --no-install-recommends install -y make gcc g++ ruby-dev cmake libxml2-dev libxslt-dev libsass-dev && \
+  apt-get --no-install-recommends install -y make gcc g++ ruby-dev cmake libxml2-dev libxslt-dev libsass-dev zlib1g-dev && \
   cd /setup && \
   bundle install --no-cache --verbose && \
   rm -rf /usr/local/bundle/cache && \
   find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
   find /usr/local/bundle/gems -type d -name 'test' -prune -exec rm -r "{}" \; && \
-  apt-get purge -y make gcc g++ ruby-dev cmake libxml2-dev libxslt-dev libsass-dev && \
+  apt-get purge -y make gcc g++ ruby-dev cmake libxml2-dev libxslt-dev libsass-dev zlib1g-dev && \
   apt-get autoremove -y && apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
