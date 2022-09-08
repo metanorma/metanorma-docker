@@ -218,7 +218,7 @@ jobs:
     needs:
       - build
       - job_info
-    continue-on-error: ${{ matrix.flavor.experimental }}
+    continue-on-error: ${{ matrix.flavor.experimental || matrix.root_image.id == 'alpine' }}
     strategy:
       max-parallel: 5
       fail-fast: false
@@ -258,8 +258,6 @@ jobs:
         - id: jcgm
           experimental: true
         # - id: gb
-        #   experimental: true
-        # - id: nist
         #   experimental: true
 
     steps:
