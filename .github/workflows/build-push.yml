@@ -129,8 +129,8 @@ jobs:
         secret-files: |
           bundle_config=.bundle/config
         outputs: type=docker,dest=/tmp/docker-image.tar
-        cache-from: type=gha
-        cache-to: type=gha,mode=min
+        # cache-from: type=gha
+        # cache-to: type=gha,mode=min
 
     - run: |
         echo "${{ steps.meta.outputs.tags }}" > /tmp/docker-tags.txt
@@ -417,8 +417,8 @@ jobs:
           METANORMA_IMAGE_NAME=${{ matrix.image_type }}-${{ matrix.root_image.id }}
         secret-files: |
           bundle_config=.bundle/config
-        cache-from: type=gha
-        cache-to: type=gha,mode=min
+        # cache-from: type=gha
+        # cache-to: type=gha,mode=min
 
   announce:
     name: Announce to mn-samples-*
