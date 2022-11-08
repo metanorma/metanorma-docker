@@ -12,17 +12,14 @@ RUN mkdir -p /usr/share/man/man1
 
 # install dependencies
 RUN apt-get update && \
-    apt-get --no-install-recommends install -y curl git make sassc && \
-    apt-get update && curl -L "https://raw.githubusercontent.com/metanorma/plantuml-install/main/ubuntu.sh" | bash && \
     apt-get --no-install-recommends install -y software-properties-common gnupg2 && \
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9DA4BD18B9A06DE3 && \
-    add-apt-repository ppa:inkscape.dev/stable && \
-    apt-get --no-install-recommends install -y inkscape && \
+    apt-get --no-install-recommends install -y curl git make sassc inkscape && \
+    apt-get update && curl -L "https://raw.githubusercontent.com/metanorma/plantuml-install/main/ubuntu.sh" | bash && \
     rm -rf /usr/share/inkscape/tutorials && \
     apt-get --no-install-recommends install -y python3-pip python3-setuptools python3-wheel && \
     pip3 install --no-cache-dir idnits xml2rfc --ignore-installed six chardet && rm -rf /root/.cache/pip && \
     apt-get purge -y python3-pip python3-setuptools python3-wheel && \
-    apt-get autoremove -y && apt-get clean && \
+    apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
