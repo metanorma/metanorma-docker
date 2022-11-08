@@ -117,7 +117,7 @@ jobs:
     # Build on linux/amd64 for testing first as it is fastest
     - id: build_container
       name: Build and export
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v3
       with:
         context: .
         platforms: linux/amd64
@@ -407,7 +407,7 @@ jobs:
 
     - id: build_container
       name: Build+push to registries
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v3
       with:
         context: .
         platforms: linux/amd64,linux/arm64
