@@ -80,9 +80,9 @@ jobs:
         if [ "$IS_MAIN" == "true" ]; then
           echo "result=" >> $GITHUB_OUTPUT
         elif [ "$IS_PRERELEASE" == "true" ]; then
-          echo "::set-output name=result::prefix=pre-${{ matrix.root_image.id }}-,onlatest=true"
+          echo "result=prefix=pre-${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
         else
-          echo "::set-output name=result::prefix=${{ matrix.root_image.id }}-,onlatest=true"
+          echo "result=prefix=${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
         fi
 
     - name: Show label prefix calculation
@@ -372,9 +372,9 @@ jobs:
         if [ "$IS_MAIN" == "true" ]; then
           echo "result=" >> $GITHUB_OUTPUT
         elif [ "$IS_PRERELEASE" == "true" ]; then
-          echo "::set-output name=result::prefix=pre-${{ matrix.root_image.id }}-,onlatest=true"
+          echo "result=prefix=pre-${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
         else
-          echo "::set-output name=result::prefix=${{ matrix.root_image.id }}-,onlatest=true"
+          echo "result=prefix=${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
         fi
 
     - name: Show label prefix calculation
