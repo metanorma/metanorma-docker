@@ -24,7 +24,7 @@ jobs:
     - id: version
       run: |
         export CLI_VERSION=$(cat VERSION.mak | cut -d ' ' -f 3)
-        echo "::set-output name=result::${CLI_VERSION}"
+        echo "result=${CLI_VERSION}" >> $GITHUB_OUTPUT
     - name: Show version number
       run: echo ${{ steps.version.outputs.result }}
     - name: Retrieve tags
@@ -39,8 +39,8 @@ jobs:
         elif [[ "${{ github.ref }}" == refs/pull/* ]] && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.event.pull_request.base.repo.full_name }}" ]; then
           fpr="yes"
         fi
-        echo "::set-output name=foreign_pr::${fpr}"
-        echo "::set-output name=head_tag::${tag}"
+        echo "foreign_pr=${fpr}" >> $GITHUB_OUTPUT
+        echo "head_tag=${tag}" >> $GITHUB_OUTPUT
 
   build:
     name: Build (${{ matrix.image_type }}-${{ matrix.root_image.id }})
@@ -77,9 +77,8 @@ jobs:
         IS_PRERELEASE: ${{matrix.image_type == 'mn'}}
         IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'ruby'}}
       run: |
-        echo '::echo::on'
         if [ "$IS_MAIN" == "true" ]; then
-          echo "::set-output name=result::"
+          echo "result=" >> $GITHUB_OUTPUT
         elif [ "$IS_PRERELEASE" == "true" ]; then
           echo "::set-output name=result::prefix=pre-${{ matrix.root_image.id }}-,onlatest=true"
         else
@@ -350,7 +349,8 @@ jobs:
         docker load --input /tmp/docker-image.tar
         docker image ls -a
         docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma
-        echo "::set-output name=result::$(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma | head -1 | tr -d '\n')"
+        result=$(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma | head -1 | tr -d '\n')
+        echo "result=${result}" >> $GITHUB_OUTPUT
 
     - uses: docker/login-action@v1
       with:
@@ -370,7 +370,7 @@ jobs:
       run: |
         echo '::echo::on'
         if [ "$IS_MAIN" == "true" ]; then
-          echo "::set-output name=result::"
+          echo "result=" >> $GITHUB_OUTPUT
         elif [ "$IS_PRERELEASE" == "true" ]; then
           echo "::set-output name=result::prefix=pre-${{ matrix.root_image.id }}-,onlatest=true"
         else
