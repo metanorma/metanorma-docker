@@ -251,6 +251,8 @@ jobs:
           experimental: false
         - id: csa
           experimental: false
+        - id: ieee
+          experimental: false
         - id: ieee-private
           experimental: false
         - id: m3aawg
