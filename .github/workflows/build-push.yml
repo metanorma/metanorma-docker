@@ -299,7 +299,7 @@ jobs:
           -v ${{ github.workspace }}/samples:/metanorma \
           -w /metanorma \
           ${IMAGE_NAME} \
-          metanorma site generate --agree-to-terms .
+          metanorma site generate --strict --agree-to-terms .
 
   publish:
     name: Build+publish (${{ matrix.image_type }}-${{ matrix.root_image.id }}
