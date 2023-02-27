@@ -1,1 +1,1 @@
-IMAGE_VERSION := 1.6.14.pre.pre2
+IMAGE_VERSION := 1.6.14.pre.pre3
