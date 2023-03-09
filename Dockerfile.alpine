@@ -8,7 +8,7 @@ ARG METANORMA_IMAGE_NAME=metanorma
 # Install dependencies
 RUN apk add --no-cache curl unzip bash make tzdata coreutils git coreutils \
   gcompat libxml2 libxslt libsass sassc \
-  openjdk8-jre \
+  openjdk8-jre fontconfig ttf-dejavu \
   inkscape nss && \
   rm -rf /usr/share/inkscape/tutorials
 
