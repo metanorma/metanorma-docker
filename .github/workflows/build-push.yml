@@ -210,57 +210,40 @@ jobs:
         image: ${{ steps.loaded_image.outputs.full_name }}
         size: ${{ matrix.root_image.max_size }}
 
+  samples-matrix:
+    name: Samples matrix
+    uses: metanorma/ci/.github/workflows/build-sample-matrix.yml@main
+    with:
+      smoke: false
+      flavors-only: true
+      public-only: true
+
+  test-matrix:
+    name: Test matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+    needs: samples-matrix
+    steps:
+    - name: Build full test matrix
+      id: build
+      run: |
+        echo "{\"root_image\": [\"ruby\", \"ubuntu\", \"alpine\"], \"image_type\": [\"metanorma\"]}" > docker-matrix.json
+        echo '${{ needs.samples-matrix.outputs.samples-matrix }}' > samples-matrix.json
+        echo "matrix=$(jq -s add docker-matrix.json samples-matrix.json | tr '\n' ' ')" >> $GITHUB_OUTPUT
+
   test:
-    name: Test (${{ matrix.image_type }}-${{ matrix.root_image.id }}, ${{ matrix.flavor.id }})
+    name: Test (${{ matrix.image_type }}-${{ matrix.root_image }}, ${{ matrix.flavor.id }})
     runs-on: ubuntu-latest
     needs:
       - build
       - job_info
-    continue-on-error: ${{ matrix.flavor.experimental || matrix.root_image.id == 'alpine' }}
+      - test-matrix
+    continue-on-error: ${{ matrix.flavor.experimental || matrix.root_image == 'alpine' }}
     strategy:
       max-parallel: 5
       fail-fast: false
-      matrix:
-        root_image:
-        - id: ruby
-        - id: ubuntu
-        - id: alpine
-
-        image_type:
-        - metanorma
-        # - mn
-
-        flavor:
-        - id: iso
-          experimental: false
-        - id: cc
-          experimental: false
-        - id: iec
-          experimental: false
-        - id: ogc
-          experimental: false
-        - id: un
-          experimental: false
-        - id: iho
-          experimental: false
-        - id: ietf
-          experimental: false
-        - id: bipm
-          experimental: false
-        - id: itu
-          experimental: false
-        - id: csa
-          experimental: false
-        - id: ieee
-          experimental: false
-        - id: ieee-private
-          experimental: false
-        - id: m3aawg
-          experimental: true
-        - id: jcgm
-          experimental: true
-        # - id: gb
-        #   experimental: true
+      matrix: ${{ fromJson(needs.test-matrix.outputs.matrix) }}
 
     steps:
     - name: Set up Docker Buildx
@@ -268,12 +251,12 @@ jobs:
 
     - uses: actions/download-artifact@v3
       with:
-        name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
+        name: ${{ matrix.image_type }}-${{ matrix.root_image }}-${{ github.run_id }}
         path: /tmp
 
     - uses: actions/download-artifact@v3
       with:
-        name: tags-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
+        name: tags-${{ matrix.image_type }}-${{ matrix.root_image }}-${{ github.run_id }}
         path: /tmp
 
     - id: loaded_image
