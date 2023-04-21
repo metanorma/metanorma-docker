@@ -44,7 +44,7 @@ jobs:
         curl -LO --retry 3 https://raw.githubusercontent.com/metanorma/metanorma-build-scripts/main/gemver-to-semver.rb && chmod +x gemver-to-semver.rb
         echo "DOCKER_TAG=$(./gemver-to-semver.rb --strip-prefix ${METANORMA_CLI_VERSION})" >> $GITHUB_ENV
 
-    - uses: rubenesp87/semver-validation-action@0.0.6
+    - uses: rubenesp87/semver-validation-action@0.1.0
       with:
         version: ${{ env.DOCKER_TAG }}
 
