@@ -1,1 +1,1 @@
-IMAGE_VERSION := 1.8.2.pre2
+IMAGE_VERSION := 1.8.3.pre
