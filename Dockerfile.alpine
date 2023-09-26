@@ -14,7 +14,7 @@ RUN apk add --no-cache curl unzip bash make tzdata coreutils git coreutils \
 
 # Install plantuml
 RUN apk add --no-cache graphviz ttf-droid ttf-droid-nonlatin fontconfig
-RUN apk add --no-cache plantuml --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
+RUN apk add --no-cache plantuml --repository=http://dl-cdn.alpinelinux.org/alpine/v3.18/community
 
 # Install xml2rf
 ENV PYTHONUNBUFFERED=1
