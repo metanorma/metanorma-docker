@@ -200,7 +200,7 @@ jobs:
 
     - run: docker inspect -f "{{ .Size }}" ${{ steps.loaded_image.outputs.full_name }}
 
-    - uses: metanorma/ci/dive-action@main
+    - uses: stackabletech/dive-action@rel/0.0.1
       with:
         image: ${{ steps.loaded_image.outputs.full_name }}
         github-token: ${{ github.token }}
