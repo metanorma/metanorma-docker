@@ -28,7 +28,7 @@ RUN mkdir -p /setup
 
 # Update to latest bundler
 # 2.3.21 brokend for alpine https://github.com/rubygems/rubygems/issues/5871
-RUN gem install bundler -v "~> 2.2, != 2.3.21"
+RUN gem install bundler -v "~> 2.4.22"
 
 # Install metanorma toolchain
 COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
