@@ -1,4 +1,4 @@
-FROM ruby:3.1.2-slim-bullseye
+FROM ruby:3.1.4-slim-bullseye
 USER root
 
 LABEL maintainer="open.source@ribose.com"

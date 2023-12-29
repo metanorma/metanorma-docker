@@ -1,5 +1,5 @@
 ARG RUBY_PATH=/usr/local/
-ARG RUBY_VERSION=3.1.1
+ARG RUBY_VERSION=3.1.4
 
 FROM ubuntu:20.04 AS rubybuild
 ARG RUBY_PATH
