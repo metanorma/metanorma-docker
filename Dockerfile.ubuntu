@@ -52,7 +52,7 @@ RUN apt-get update && \
     add-apt-repository ppa:inkscape.dev/stable && \
     apt-get --no-install-recommends install -y inkscape && \
     rm -rf /usr/share/inkscape/tutorials && \
-    apt-get --no-install-recommends install -y python3-pip python3-setuptools python3-wheel && \
+    apt-get --no-install-recommends install -y python3-pip python3-setuptools python3-wheel python3-lxml && \
     pip3 install --no-cache-dir idnits xml2rfc --ignore-installed six chardet && rm -rf /root/.cache/pip && \
     apt-get purge -y python3-pip python3-setuptools python3-wheel && \
     apt-get autoremove -y && apt-get clean && \
