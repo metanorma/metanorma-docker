@@ -20,7 +20,7 @@ jobs:
       head_tag: ${{ steps.check.outputs.head_tag }}
       foreign_pr: ${{ steps.check.outputs.foreign_pr }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - id: version
       run: |
         export CLI_VERSION=$(cat VERSION.mak | cut -d ' ' -f 3)
@@ -65,12 +65,12 @@ jobs:
         experimental: [false]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - uses: docker/setup-qemu-action@v2
+    - uses: docker/setup-qemu-action@v3
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
     - id: label_prefix
       env:
@@ -89,7 +89,7 @@ jobs:
       run: echo ${{ steps.label_prefix.outputs.result }}
 
     - id: meta
-      uses: docker/metadata-action@v4
+      uses: docker/metadata-action@v5
       with:
         images: |
           metanorma/metanorma
@@ -116,7 +116,7 @@ jobs:
     # Build on linux/amd64 for testing first as it is fastest
     - id: build_container
       name: Build and export
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v5
       with:
         context: .
         platforms: linux/amd64
@@ -136,19 +136,19 @@ jobs:
         echo "${{ steps.meta.outputs.labels }}" > /tmp/docker-labels.txt
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
         path: /tmp/docker-image.tar
         retention-days: 1
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: tags-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
         path: /tmp/docker-tags.txt
         retention-days: 1
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: labels-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
         path: /tmp/docker-labels.txt
@@ -178,12 +178,12 @@ jobs:
         experimental: [false]
 
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
         path: /tmp
 
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: tags-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
         path: /tmp
@@ -247,14 +247,14 @@ jobs:
 
     steps:
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: ${{ matrix.image_type }}-${{ matrix.root_image }}-${{ github.run_id }}
         path: /tmp
 
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: tags-${{ matrix.image_type }}-${{ matrix.root_image }}-${{ github.run_id }}
         path: /tmp
@@ -266,7 +266,7 @@ jobs:
         echo "full_name=$(head -n 1 /tmp/docker-tags.txt)" >> $GITHUB_OUTPUT
 
     - name: Fetch samples (${{ matrix.flavor.id }})
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
         repository: metanorma/mn-samples-${{ matrix.flavor.id }}
@@ -309,17 +309,17 @@ jobs:
         # - mn
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - uses: docker/setup-qemu-action@v2
+    - uses: docker/setup-qemu-action@v3
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
       with:
         driver-opts: image=moby/buildkit:master
 
     - name: Download artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
         path: /tmp
@@ -333,12 +333,12 @@ jobs:
         result=$(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma | head -1 | tr -d '\n')
         echo "result=${result}" >> $GITHUB_OUTPUT
 
-    - uses: docker/login-action@v2
+    - uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_LOGIN_USERNAME }}
         password: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
 
-    - uses: docker/login-action@v2
+    - uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: metanorma-ci
@@ -362,7 +362,7 @@ jobs:
       run: echo "${{ steps.label_prefix.outputs.result }}"
 
     - id: meta
-      uses: docker/metadata-action@v4
+      uses: docker/metadata-action@v5
       with:
         images: |
           docker.io/metanorma/metanorma
@@ -388,7 +388,7 @@ jobs:
 
     - id: build_container
       name: Build+push to registries
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v5
       with:
         context: .
         platforms: linux/amd64,linux/arm64
