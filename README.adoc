@@ -4,9 +4,9 @@ image:https://github.com/metanorma/metanorma-docker/workflows/build-push/badge.s
 image:https://img.shields.io/github/issues-pr-raw/metanorma/metanorma-docker.svg["Pull Requests", link="https://github.com/metanorma/metanorma-docker/pulls"]
 image:https://img.shields.io/github/commits-since/metanorma/metanorma-docker/latest.svg["Commits since latest",link="https://github.com/metanorma/metanorma-docker/releases"]
 
-image:https://badgen.net/docker/size/metanorma/metanorma/alpine-latest?icon=docker&label=alpine["metanorma:alpine-latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=alpine"]
-image:https://badgen.net/docker/size/metanorma/metanorma/ubuntu-latest?icon=docker&label=ubuntu["metanorma:ubuntu-latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=ubuntu"]
-image:https://badgen.net/docker/size/metanorma/metanorma/ruby-latest?icon=docker&label=ruby["metanorma:ruby-latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=ruby"]
+image:https://badgen.net/docker/size/metanorma/metanorma/alpine-latest?icon=docker&label=alpine-latest["metanorma:alpine-latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=alpine"]
+image:https://badgen.net/docker/size/metanorma/metanorma/ubuntu-latest?icon=docker&label=ubuntu-latest["metanorma:ubuntu-latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=ubuntu"]
+image:https://badgen.net/docker/size/metanorma/metanorma/latest?icon=docker&label=latest["metanorma:latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=latest"]
 
 https://hub.docker.com/r/metanorma/metanorma/tags[Docker Hub: metanorma/metanorma]
 
