@@ -13,6 +13,11 @@ ignored:
   # We need to install dev dependencies in some containers that are removed later
   - DL3015
 
+  # Ignore "Pin versions in pip. Instead of pip install <package> use pip
+  # install <package>==<version> or pip install --requirement <requirements
+  # file>"
+  - DL3013
+
 # Trust specific registries
 trustedRegistries:
   - docker.io
