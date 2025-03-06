@@ -41,7 +41,7 @@ RUN apk add --no-cache python3 py3-pip && \
         libxml2-dev \
         libxslt-dev \
         python3-dev && \
-    pip3 install --break-system-packages --no-cache \
+    pip3 install --break-system-packages --no-cache-dir \
       --upgrade pip wheel idnits xml2rfc \
       --ignore-installed six chardet && \
     apk del .build-deps && \
