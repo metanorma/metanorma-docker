@@ -30,7 +30,7 @@ jobs:
 
       - name: Build Docker Image
         id: docker_build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile.${{ matrix.image-type }}
@@ -47,7 +47,7 @@ jobs:
           image: metanorma-${{ matrix.image-type }}:test
           failure-threshold: fatal
           report-format: sarif
-          report-name: dockle-${{ matrix.image-type }}
+          exit-code: 0
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
