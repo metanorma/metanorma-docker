@@ -2,7 +2,7 @@ name: Docker Security Scan with Dockle
 
 on:
   push:
-    branches: [ rt-upgrade-containers, main ]
+    branches: [ main ]
     paths:
       - 'Dockerfile.*'
       - '.dockle.toml'

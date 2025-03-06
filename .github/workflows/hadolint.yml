@@ -2,7 +2,7 @@ name: Docker Lint with Hadolint
 
 on:
   push:
-    branches: [ rt-upgrade-containers, main ]
+    branches: [ main ]
     paths:
       - 'Dockerfile.*'
       - '.hadolint.yaml'

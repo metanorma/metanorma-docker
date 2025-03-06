@@ -2,7 +2,7 @@ name: Container Vulnerability Scan with Trivy
 
 on:
   push:
-    branches: [ rt-upgrade-containers, main ]
+    branches: [ main ]
     paths:
       - 'Dockerfile.*'
       - '.github/workflows/trivy.yml'
