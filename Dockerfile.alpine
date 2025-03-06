@@ -1,60 +1,96 @@
-FROM ruby:3.1.4-alpine3.16
+FROM ruby:3.3.7-alpine3.21
 USER root
 
-LABEL maintainer="open.source@ribose.com"
+LABEL maintainer="open.source@ribose.com" \
+      org.opencontainers.image.authors="open.source@ribose.com" \
+      org.opencontainers.image.url="https://www.metanorma.org" \
+      org.opencontainers.image.documentation="https://www.metanorma.org" \
+      org.opencontainers.image.title="Metanorma" \
+      org.opencontainers.image.description="Metanorma document processing toolchain (Alpine variant)"
 
 ARG METANORMA_IMAGE_NAME=metanorma
 
-# Install dependencies
-RUN apk add --no-cache curl unzip bash make tzdata coreutils git coreutils \
-  gcompat libxml2 libxslt libsass sassc \
-  openjdk8-jre fontconfig ttf-dejavu \
-  inkscape nss && \
-  rm -rf /usr/share/inkscape/tutorials
+# Install runtime dependencies
+RUN apk add --no-cache \
+    bash \
+    coreutils \
+    curl \
+    fontconfig \
+    git \
+    gcompat \
+    inkscape \
+    libxml2 \
+    libxslt \
+    make \
+    nss \
+    openjdk11-jre \
+    ttf-dejavu \
+    tzdata \
+    unzip \
+    && rm -rf /usr/share/inkscape/tutorials
 
 # Install plantuml
 RUN curl -L "https://raw.githubusercontent.com/metanorma/plantuml-install/main/alpine.sh" | sh
 
-# Install xml2rf
+# Install xml2rfc with optimized layer
 ENV PYTHONUNBUFFERED=1
-RUN apk add --no-cache python3 gcc musl-dev libxml2-dev libxslt-dev python3-dev && ln -sf python3 /usr/bin/python && \
-    python3 -m ensurepip && \
-    pip3 install --no-cache --upgrade pip wheel idnits xml2rfc --ignore-installed six chardet && \
-    apk del gcc musl-dev libxml2-dev libxslt-dev python3-dev && \
+RUN apk add --no-cache python3 py3-pip && \
+    apk add --no-cache --virtual .build-deps \
+        gcc \
+        musl-dev \
+        libxml2-dev \
+        libxslt-dev \
+        python3-dev && \
+    pip3 install --break-system-packages --no-cache \
+      --upgrade pip wheel idnits xml2rfc \
+      --ignore-installed six chardet && \
+    apk del .build-deps && \
     rm -rf /root/.cache/pip
 
+# Setup directory for app
 RUN mkdir -p /setup
 
-# Update to latest bundler
-# 2.3.21 brokend for alpine https://github.com/rubygems/rubygems/issues/5871
-RUN gem install bundler -v "~> 2.4.22"
+# Install bundler with specific version
+RUN gem install bundler -v "~> 2.6.5"
 
-# Install metanorma toolchain
+# Install metanorma toolchain with optimized layers
 COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
 ENV BUNDLE_WITHOUT="development:test"
-# --redownload need to fix rake Bundler::GemNotFound
-RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
-  cd /setup && \
-  apk add --no-cache gcc g++ musl-dev cmake libxml2-dev libxslt-dev libsass-dev zlib-dev && \
-  bundle install --no-cache --redownload && \
-  apk del gcc g++ musl-dev cmake libxml2-dev libxslt-dev libsass-dev zlib-dev && \
-  rm -rf /root/.bundle/cache /usr/local/bundle/cache && \
-  find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
-  find /usr/local/bundle/gems -type d -name 'test' -prune -exec rm -r "{}" \;
 
+# Use build dependencies in a single layer to reduce image size
+RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
+    cd /setup && \
+    apk add --no-cache --virtual .build-deps \
+        gcc \
+        g++ \
+        musl-dev \
+        cmake \
+        libxml2-dev \
+        libxslt-dev \
+        yaml-dev \
+        zlib-dev && \
+    bundle install --no-cache --redownload && \
+    apk del .build-deps && \
+    rm -rf /root/.bundle/cache /usr/local/bundle/cache && \
+    find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
+    find /usr/local/bundle/gems -type d -name 'test' -prune -exec rm -r "{}" \;
+
+# Update fontist
 RUN fontist update
 
-# export java executable path
-ENV JAVA_HOME /usr/lib/jvm/default-jvm
-ENV PATH $PATH:$JAVA_HOME/bin
-ENV RUBYOPT -rbundler/setup
-ENV BUNDLE_GEMFILE /setup/Gemfile
+# Set environment variables
+ENV JAVA_HOME=/usr/lib/jvm/default-jvm \
+    PATH=$PATH:/usr/lib/jvm/default-jvm/bin \
+    RUBYOPT=-rbundler/setup \
+    BUNDLE_GEMFILE=/setup/Gemfile \
+    RELATON_FETCH_PARALLEL=1 \
+    FONTIST_PATH="/config"
 
-# Workaround for https://github.com/relaton/relaton/issues/99
-ENV RELATON_FETCH_PARALLEL 1
-
-ENV FONTIST_PATH "/config"
+# Set up volume for fonts
 VOLUME /config/fonts
 
+# Set working directory
 WORKDIR /metanorma
-CMD metanorma
+
+# Set entrypoint
+CMD ["metanorma"]

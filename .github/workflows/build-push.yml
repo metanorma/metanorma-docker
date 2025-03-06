@@ -54,11 +54,11 @@ jobs:
       matrix:
         root_image:
         - id: ruby
-          image: ruby:3.1.1-slim-bullseye
+          image: ruby:3.3.7-slim-bookworm
         - id: ubuntu
           image: ubuntu:20.04
         - id: alpine
-          image: ruby:3.1.1-alpine
+          image: ruby:3.3.7-alpine
         image_type:
         - metanorma
         # - mn
@@ -165,13 +165,13 @@ jobs:
       matrix:
         root_image:
         - id: ruby
-          image: ruby:3.1.1-slim-bullseye
+          image: ruby:3.3.7-slim-bookworm
           max_size: '2.0 GiB'
         - id: ubuntu
-          image: ubuntu:20.04
+          image: ubuntu:22.04
           max_size: '2.0 GB'
         - id: alpine
-          image: ruby:3.1.1-alpine
+          image: ruby:3.3.7-alpine
           max_size: '1.8 GB'
         image_type:
         - metanorma
@@ -298,11 +298,11 @@ jobs:
       matrix:
         root_image:
         - id: ruby
-          image: ruby:3.1.1-slim-bullseye
+          image: ruby:3.3.7-slim-bookworm
         - id: ubuntu
           image: ubuntu:20.04
         - id: alpine
-          image: ruby:3.1.1-alpine
+          image: ruby:3.3.7-alpine
 
         image_type:
         - metanorma

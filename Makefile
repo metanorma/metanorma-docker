@@ -20,7 +20,7 @@ CONTAINER_COMMIT ?= $(shell git rev-parse --short HEAD)
 REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
 ITEMS       ?= 1 2 3 4 5 6
-IMAGE_TYPES ?= metanorma metanorma-ubuntu metanorma-alpine mn mn-ubuntu mn-alpine
+IMAGE_TYPES ?= metanorma-ruby metanorma-ubuntu metanorma-alpine mn-ruby mn-ubuntu mn-alpine
 VERSIONS    ?= $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION)
 ROOT_PLATFORMS ?= ruby ubuntu alpine ruby ubuntu alpine
 
@@ -67,6 +67,9 @@ $(eval CONTAINER_LATEST_NAME := $(NS_REMOTE)/$(3):latest)
 
 clean-$(3):
 	rm -f $(3)/Gemfile $(3)/Dockerfile
+
+$(3)/Gemfile: Gemfile
+	cp $$< $$@
 
 $(3)/Gemfile.lock: $(3)/Gemfile
 	pushd $(3); \

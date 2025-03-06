@@ -1,0 +1,1 @@
+. ~/.ribose/docker.creds

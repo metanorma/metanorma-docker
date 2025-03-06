@@ -1,14 +1,16 @@
 ARG RUBY_PATH=/usr/local/
-ARG RUBY_VERSION=3.1.4
+ARG RUBY_VERSION=3.3.7
 
-FROM ubuntu:20.04 AS rubybuild
+# Stage 1: Build Ruby
+FROM ubuntu:22.04 AS rubybuild
 ARG RUBY_PATH
 ARG RUBY_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Install Ruby build dependencies
 RUN apt-get update && \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
       git \
       curl \
       autoconf \
@@ -16,91 +18,145 @@ RUN apt-get update && \
       build-essential \
       libssl-dev \
       libyaml-dev \
-      libreadline6-dev \
+      libreadline-dev \
       zlib1g-dev \
       libncurses5-dev \
       libffi-dev \
+      ca-certificates \
+      snapd \
       libgdbm6 \
-      libgdbm-dev \
-      snapd && \
+      libgdbm-dev && \
     git clone https://github.com/rbenv/ruby-build.git $RUBY_PATH/plugins/ruby-build && \
     $RUBY_PATH/plugins/ruby-build/install.sh && \
     ruby-build $RUBY_VERSION $RUBY_PATH && \
     rm -rf ~/.rbenv/cache && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-FROM ubuntu:20.04
-USER root
-LABEL maintainer="open.source@ribose.com"
-ARG RUBY_PATH
-ARG METANORMA_IMAGE_NAME=metanorma
-ENV PATH $RUBY_PATH/bin:$PATH
-COPY --from=rubybuild $RUBY_PATH $RUBY_PATH
-
-ENV DEBIAN_FRONTEND=noninteractive
-ENV CONTAINER_TIMEZONE=Etc/UTC
-RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && \
-  echo $CONTAINER_TIMEZONE > /etc/timezone
-
-# install dependencies
-RUN apt-get update && \
-    apt-get --no-install-recommends install -y curl git make sassc && \
-    apt-get update && curl -L "https://raw.githubusercontent.com/metanorma/plantuml-install/main/ubuntu.sh" | bash && \
-    apt-get purge -y default-jre && \
-    apt-get autoremove -y && \
-    apt-get --no-install-recommends install -y openjdk-8-jre software-properties-common && \
-    add-apt-repository ppa:inkscape.dev/stable && \
-    apt-get --no-install-recommends install -y inkscape && \
-    rm -rf /usr/share/inkscape/tutorials && \
-    apt-get --no-install-recommends install -y python3-pip python3-setuptools python3-wheel python3-lxml && \
-    pip3 install --no-cache-dir idnits xml2rfc --ignore-installed six chardet && rm -rf /root/.cache/pip && \
-    apt-get purge -y python3-pip python3-setuptools python3-wheel && \
-    apt-get autoremove -y && apt-get clean && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# From https://github.com/docker-library/ruby/blob/master/
-#   Dockerfile-debian.template
-# don't create ".bundle" in all our apps
-ENV GEM_HOME /usr/local/bundle
+# Stage 2: Final image
+FROM ubuntu:22.04
+USER root
+
+LABEL maintainer="open.source@ribose.com" \
+      org.opencontainers.image.authors="open.source@ribose.com" \
+      org.opencontainers.image.url="https://www.metanorma.org" \
+      org.opencontainers.image.documentation="https://www.metanorma.org" \
+      org.opencontainers.image.title="Metanorma" \
+      org.opencontainers.image.description="Metanorma document processing toolchain (Ubuntu variant)"
+
+ARG RUBY_PATH
+ARG METANORMA_IMAGE_NAME=metanorma
+
+# Copy Ruby from build stage
+ENV PATH $RUBY_PATH/bin:$PATH
+COPY --from=rubybuild $RUBY_PATH $RUBY_PATH
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV CONTAINER_TIMEZONE=Etc/UTC
+
+# Configure timezone
+RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && \
+    echo $CONTAINER_TIMEZONE > /etc/timezone
+
+# Install runtime dependencies
+RUN apt-get update && \
+    apt-get --no-install-recommends install -y \
+        curl \
+        git \
+        make \
+        software-properties-common \
+        gnupg \
+        gpg-agent \
+        python3 \
+        python3-lxml && \
+    # Install PlantUML
+    curl -L "https://raw.githubusercontent.com/metanorma/plantuml-install/main/ubuntu.sh" | bash && \
+    # Update Inkscape repository and install
+    add-apt-repository -y ppa:inkscape.dev/stable && \
+    apt-get --no-install-recommends install -y inkscape && \
+    rm -rf /usr/share/inkscape/tutorials && \
+    apt-get --no-install-recommends install -y openjdk-11-jre && \
+    # Clean up
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install XML2RFC in a separate layer
+RUN apt-get update && \
+    apt-get --no-install-recommends install -y \
+        python3-pip \
+        python3-setuptools \
+        python3-wheel && \
+    pip3 install --no-cache \
+      --upgrade pip wheel idnits xml2rfc \
+      --ignore-installed six chardet && \
+    rm -rf /root/.cache/pip && \
+    apt-get purge -y python3-pip python3-setuptools python3-wheel && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configure Ruby gems environment
+ENV GEM_HOME=/usr/local/bundle
 ENV BUNDLE_SILENCE_ROOT_WARNING=1 \
     BUNDLE_APP_CONFIG="$GEM_HOME" \
     BUNDLE_WITHOUT="development:test"
 ENV PATH $GEM_HOME/bin:$PATH
-# adjust permissions of a few directories for running "gem install" as an arbitrary user
-RUN mkdir -p "$GEM_HOME" && chmod 777 "$GEM_HOME"
-# End From
 
-# install metanorma toolchain
-RUN mkdir -p /setup
+# Set up directories with proper permissions
+RUN mkdir -p "$GEM_HOME" && chmod 777 "$GEM_HOME" && mkdir -p /setup
+
+# Copy Gemfile and install metanorma toolchain
 COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
+
+# Install bundler and metanorma dependencies
 RUN --mount=type=secret,id=bundle_config,dst=$GEM_HOME/config \
     --mount=type=secret,id=gemrc_config,dst=$GEM_HOME/.gemrc \
-  gem install bundler && \
-  apt-get update && \
-  apt-get --no-install-recommends install -y make gcc g++ ruby-dev cmake libxml2-dev libxslt-dev libsass-dev zlib1g-dev libyaml-dev && \
-  cd /setup && \
-  bundle install --no-cache --verbose && \
-  rm -rf /usr/local/bundle/cache && \
-  find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
-  find /usr/local/bundle/gems -type d -name 'test' -prune -exec rm -r "{}" \; && \
-  apt-get purge -y make gcc g++ ruby-dev cmake libxml2-dev libxslt-dev libsass-dev zlib1g-dev libyaml-dev && \
-  apt-get autoremove -y && apt-get clean && \
-  rm -rf /var/lib/apt/lists/*
+    gem install bundler -v "~> 2.6.5" && \
+    apt-get update && \
+    apt-get --no-install-recommends install -y \
+        gcc \
+        g++ \
+        cmake \
+        libxml2-dev \
+        libxslt-dev \
+        zlib1g-dev \
+        libyaml-dev && \
+    cd /setup && \
+    bundle install --no-cache --redownload && \
+    # Clean up bundle cache and test files
+    rm -rf /usr/local/bundle/cache && \
+    find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
+    find /usr/local/bundle/gems -type d -name 'test' -prune -exec rm -r "{}" \; && \
+    # Remove build dependencies
+    apt-get purge -y \
+        gcc \
+        g++ \
+        cmake \
+        libxml2-dev \
+        libxslt-dev \
+        zlib1g-dev \
+        libyaml-dev && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
+# Update fontist
 RUN fontist update
 
-# export java executable path
-ENV JAVA_HOME /usr/lib/jvm/default-java
-ENV PATH $PATH:$JAVA_HOME/bin
-ENV RUBYOPT -rbundler/setup
-ENV BUNDLE_GEMFILE /setup/Gemfile
+# Set environment variables
+ENV JAVA_HOME=/usr/lib/jvm/default-java \
+    PATH=$PATH:/usr/lib/jvm/default-java/bin \
+    RUBYOPT=-rbundler/setup \
+    BUNDLE_GEMFILE=/setup/Gemfile \
+    RELATON_FETCH_PARALLEL=1 \
+    FONTIST_PATH="/config"
 
-# Workaround for https://github.com/relaton/relaton/issues/99
-ENV RELATON_FETCH_PARALLEL 1
-
-ENV FONTIST_PATH "/config"
+# Configure volume for fonts
 VOLUME /config/fonts
 
+# Set working directory
 WORKDIR /metanorma
-CMD metanorma
+
+# Default command
+CMD ["metanorma"]
