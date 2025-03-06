@@ -14,10 +14,17 @@ on:
       - '.github/workflows/hadolint.yml'
   workflow_dispatch:
 
+permissions:
+ contents: read
+ security-events: write
+
 jobs:
   hadolint:
-    name: Lint Dockerfiles with Hadolint
+    name: Hadolint (${{ matrix.image_type }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image-type: [alpine, ruby, ubuntu]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,33 +32,15 @@ jobs:
       - name: Run Hadolint
         uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: Dockerfile.alpine
+          dockerfile: Dockerfile.${{ matrix.image-type }}
           config: .hadolint.yaml
           format: sarif
-          output-file: hadolint-alpine.sarif
-          no-fail: true
-
-      - name: Run Hadolint (Ruby)
-        uses: hadolint/hadolint-action@v3.1.0
-        with:
-          dockerfile: Dockerfile.ruby
-          config: .hadolint.yaml
-          format: sarif
-          output-file: hadolint-ruby.sarif
-          no-fail: true
-
-      - name: Run Hadolint (Ubuntu)
-        uses: hadolint/hadolint-action@v3.1.0
-        with:
-          dockerfile: Dockerfile.ubuntu
-          config: .hadolint.yaml
-          format: sarif
-          output-file: hadolint-ubuntu.sarif
+          output-file: hadolint-${{ matrix.image-type }}.sarif
           no-fail: true
 
       - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: hadolint-*.sarif
-          category: hadolint
+          sarif_file: hadolint-${{ matrix.image-type }}.sarif
+          category: hadolint-${{ matrix.image-type }}
