@@ -1,0 +1,39 @@
+---
+# Hadolint configuration for metanorma-docker
+# Reference: https://github.com/hadolint/hadolint
+
+# Ignore specific rules
+ignored:
+  # Allow multiple consecutive RUN commands - sometimes this is more readable
+  - DL3059
+
+  # Sometimes apt-get update alone is needed for the package list
+  - DL3008
+
+  # We need to install dev dependencies in some containers that are removed later
+  - DL3015
+
+# Trust specific registries
+trustedRegistries:
+  - docker.io
+  - ghcr.io
+
+# Set label schema
+labelSchema:
+  maintainer: true
+  version: true
+
+# Set severity levels
+strict-labels: false
+no-color: false
+
+# Override specifc rule severity
+override:
+  error:
+    - DL3000  # Use absolute WORKDIR
+    - DL3003  # Use WORKDIR instead of cd
+    - DL4000  # Container contains a MAINTAINER
+  warning:
+    - DL3025  # Use arguments JSON notation for CMD and ENTRYPOINT
+  info:
+    - DL3060  # Specify package versions

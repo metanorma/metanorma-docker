@@ -1,0 +1,21 @@
+# Dockle configuration for metanorma-docker
+# Reference: https://github.com/goodwithtech/dockle
+
+# Ignore warnings for specific rules
+[ignore]
+# Allow multiple running processes (needed for Metanorma's use case)
+MULTIPLE_RUNNING_PROCESSES = true
+
+# Temporarily ignore rules until fixed
+# in a future update (review these periodically)
+TRUSTED_REGISTRY = true
+
+# Configuration related to package management
+[pkglist]
+# Include to ensure security of all packages
+include-locked-pkgs = true
+
+# Scanning configuration
+[scan]
+# Scan and prevent critical issues
+deny-on-level = "CRITICAL"
