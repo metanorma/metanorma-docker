@@ -14,6 +14,10 @@ on:
       - '.github/workflows/dockle.yml'
   workflow_dispatch:
 
+permissions:
+ contents: read
+ security-events: write
+
 jobs:
   dockle-scan:
     name: Scan Docker images with Dockle
