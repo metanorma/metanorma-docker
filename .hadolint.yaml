@@ -43,5 +43,6 @@ override:
     - DL4000  # Container contains a MAINTAINER
   warning:
     - DL3025  # Use arguments JSON notation for CMD and ENTRYPOINT
+    - DL3044  # "Do not refer to an environment variable within the same ENV statement where it is defined." But we need to update PATH.
   info:
     - DL3060  # Specify package versions
