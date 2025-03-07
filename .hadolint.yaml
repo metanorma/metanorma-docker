@@ -18,6 +18,9 @@ ignored:
   # file>"
   - DL3013
 
+  # Ignore "Pin versions in apk"
+  - DL3018
+
 # Trust specific registries
 trustedRegistries:
   - docker.io
