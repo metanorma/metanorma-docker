@@ -52,6 +52,7 @@ jobs:
           failure-threshold: fatal
           report-format: sarif
           exit-code: 0
+          sarif_file: dockle-${{ matrix.image-type }}.sarif
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
