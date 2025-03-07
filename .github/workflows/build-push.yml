@@ -116,7 +116,7 @@ jobs:
     # Build on linux/amd64 for testing first as it is fastest
     - id: build_container
       name: Build and export
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: .
         platforms: linux/amd64
@@ -388,7 +388,7 @@ jobs:
 
     - id: build_container
       name: Build+push to registries
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: .
         platforms: linux/amd64,linux/arm64
@@ -415,7 +415,7 @@ jobs:
         GH_ACCESS_TOKEN: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
       run: |
         curl -LO --retry 3 https://raw.githubusercontent.com/metanorma/metanorma-build-scripts/main/trigger-gh-actions.sh
-        for repo in iso cc gb iec itu ogc un iho nist
+        for repo in iso cc gb iec itu ogc un iho nist plateau
         do
           sh trigger-gh-actions.sh $ORGANISATION mn-samples-$repo $GH_USERNAME $GH_ACCESS_TOKEN $GITHUB_REPOSITORY
         done
