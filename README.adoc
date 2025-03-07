@@ -38,21 +38,20 @@ to worry about anything.
 
 At a high level, the image includes the following:
 
-* http://plantuml.com[PlantUML] with the Java subsystem
-* https://ruby-lang.org[Ruby]
-* https://inkscape.org[Inkscape]
-* Metanorma and Metanorma CLI
+* Metanorma and Metanorma CLI on https://ruby-lang.org[Ruby]
+* `mn2pdf` on the Java subsystem
+* Other tools
+** https://inkscape.org[Inkscape]
+** https://plantuml.com[PlantUML]
 
-To see the full list of packages/software included,
-check out the setup script used by the container:
-https://github.com/metanorma/metanorma-linux-setup/blob/master/ubuntu.sh[this script].
+To see the full list of packages/software included, check out the Dockerfiles.
 
 
 == Usage
 
 === Prerequisites
 
-All you need is install Docker as shown below.
+All you need is to install Docker as shown below.
 
 macOS:
 
