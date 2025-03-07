@@ -1,4 +1,4 @@
-= Metanorma Docker Container (based on Ubuntu Linux)
+= Metanorma Docker containers
 
 image:https://github.com/metanorma/metanorma-docker/workflows/build-push/badge.svg["Build Status", link="https://github.com/metanorma/metanorma-docker/actions?workflow=build-push"]
 image:https://img.shields.io/github/issues-pr-raw/metanorma/metanorma-docker.svg["Pull Requests", link="https://github.com/metanorma/metanorma-docker/pulls"]
@@ -12,28 +12,35 @@ https://hub.docker.com/r/metanorma/metanorma/tags[Docker Hub: metanorma/metanorm
 
 == Purpose
 
-The Metanorma Docker container provides all dependencies necessary
-for its usage.
+The Metanorma Docker container provides all dependencies necessary for using
+Metanorma.
 
-This is the cross-platform solution for Metanorma
-that across operating systems where supported by Docker
-(including Windows).
+This is the cross-platform solution for Metanorma that works across operating
+systems where supported by Docker (including Windows).
 
-If you want Metanorma to affect your local machine's environment
-as little as possible, using Docker may be the best choice --
-although not without some performance tradeoff.
+If you want Metanorma to affect your local machine's environment as little as
+possible, using Docker may be the best choice -- although not without some
+performance tradeoff.
 
-For those who need better performance, or wish to avoid a Docker
-setup (e.g. administrative rights, memory usage), please refer to
-alternative Metanorma installation methods at
-https://metanorma.com/author/topics/install/.
+For those who need better performance, or wish to avoid a Docker setup (e.g.
+administrative rights, memory usage), please refer to alternative Metanorma
+installation methods at https://metanorma.com/author/topics/install/.
+
+
+== Using Metanorma on GitHub Actions
+
+NOTE: This repository contains source code that is used to build the Metanorma
+Docker images. It is only intended for image development.
+
+Please refer to the https://github.com/metanorma/actions-mn[`metanorma/actions-mn`]
+workflows for using Metanorma in your GitHub Actions workflows.
 
 
 == What's included?
 
-Under the hood, the Metanorma toolchain depends on couple of software/packages.
+Under the hood, the Metanorma toolchain depends on a couple of software/packages.
 
-To ease installation, the Docker image is already fully setup so you don't have
+To ease installation, the Docker image is already fully set up so you don't have
 to worry about anything.
 
 At a high level, the image includes the following:
@@ -81,30 +88,64 @@ and can be pulled with the following command:
 docker pull metanorma/metanorma
 ----
 
-=== Compiling a Metamorma document via docker
+=== Compiling a Metanorma document via Docker
 
 In a directory containing the Metanorma document, run this:
 
-[source,sh]
-----
-docker run -v "$(pwd)":/metanorma/ metanorma/metanorma metanorma compile -t {flavor} -x {extensions} {my-document-file}
-----
-
-Where,
-
-* `{my-document-file}` is the name of the Metanorma document file, such as `iso-12345.adoc`
-* `{flavor}` is the flavor of Metanorma document, such as `iso`
-* `{extensions}` is a list of extensions desired, such as `xml,html,doc`
-
-Example (real-life):
+Syntax:
 
 [source,sh]
 ----
-docker run -v "$(pwd)":/metanorma metanorma/metanorma metanorma -t iso -x xml,html,doc,pdf iso-8601-2-en.adoc
+docker run -v "$PWD":/metanorma/ metanorma/metanorma metanorma compile [compile-options] {my-document-file}
 ----
 
-The above command actually uses a couple assumptions set in the
-built container itself, including:
+Anatomy of syntax:
+
+[source,sh]
+----
+docker run \ <1>
+  -v "$PWD":/metanorma/ \ <2>
+  metanorma/metanorma \ <3>
+  metanorma \ <4>
+  compile \ <5>
+    -t {flavor} \ <6>
+    -x {extensions} \ <7>
+    {my-document-file} <8>
+----
+<1> The `docker run` command to run a container
+<2> The `-v` option "bind mounts" the current working directory (`$PWD`) to `/metanorma/` in the container
+<3> The name of the Metanorma Docker image
+<4> The first argument after the Docker image tag is the command to run inside the container (`metanorma` invokes the Metanorma CLI)
+<5> The `metanorma` CLI accepts the `compile` command with additional arguments
+<6> The `-t` option specifies the Metanorma flavor
++
+[example]
+====
+`iso`, `itu`, etc.
+====
+
+<7> The `-x` option specifies a comma-delimited list of the desired output formats
++
+[example]
+====
+`xml,html,doc` means to generate Presentation XML, HTML, and DOC formats
+====
+
+<8> The name of the Metanorma document file to compile
+
+
+[example]
+====
+[source,sh]
+----
+# Minimal (the `compile` command is assumed)
+docker run -v "$PWD":/metanorma metanorma/metanorma metanorma iso-8601-2-en.adoc
+# Alternatively, if you want to specify the flavor and extensions
+docker run -v "$PWD":/metanorma metanorma/metanorma metanorma compile -t iso -x xml,html,doc,pdf iso-8601-2-en.adoc
+----
+====
+
+The above command uses a couple assumptions set in the built container itself, including:
 
 * the `/metanorma` path is set within the container's `WORKDIR`
 * the `metanorma` command is set in the container's `ENTRYPOINT`
@@ -113,8 +154,9 @@ The full command is actually this:
 
 [source,sh]
 ----
-docker run -v "$(pwd)":/metanorma/ -w /metanorma metanorma/metanorma metanorma compile -t iso -x {extensions} {my-document-file}
+docker run -v "$PWD":/metanorma/ -w /metanorma metanorma/metanorma metanorma compile -t {flavor} -x {extensions} {my-document-file}
 ----
+
 
 === Updating your document to support Docker compilation
 
@@ -147,23 +189,172 @@ The document attribute is to be set in the document header, like this:
 :title-main-en: Representations for information interchange
 :title-part-en: Extensions
 // ...
-:local-cache-only:
+:local-cache-only: <1>
 ----
+<1> This attribute is useful for compiling in Docker with a shared bind mount
+for caching auto-fetched data across Docker runs.
 
 These files can also be checked-in into version control.
 
 
+== Images available
+
+=== Image sets
+
+Metanorma provides two sets of Docker images:
+
+`metanorma/*`:: Official release images using released gems at rigorously tested
+release intervals (via `metanorma-cli` tagged versions)
+
+`mn/*`:: Development release images using released gems at shorter intervals,
+only intended for testing and development purposes
+
+WARNING: The `mn/*` images are **not intended for production use** and may
+contain unstable or untested features.
+
+=== Image types
+
+The Metanorma Docker images are available in three flavors based on different
+base containers (OS containers), each optimized for different use cases.
+
+Each image set produces three image types:
+
+[options="header",cols="1,1,1,1,3"]
+|===
+|Image Type |Base |Tag |Size |Description
+
+|Debian
+|`ruby:3.3.7-slim-bookworm`
+|`metanorma/metanorma:latest`
+|~500MB
+|Default. Based on the official Ruby image on Debian. Developer-friendly and
+extensible.
+
+|Ubuntu
+|`ubuntu:22.04`
+|`metanorma/metanorma:ubuntu-latest`
+|~450MB
+|Developer-friendly and extensible.
+
+|Alpine
+|`ruby:3.3.7-alpine3.21`
+|`metanorma/metanorma:alpine-latest`
+|~400MB
+|Smallest image size. Based on the official Ruby image on Alpine. Extensions may
+be limited due to usage of `musl` libc and limited package availability.
+
+|===
+
+By default, the Debian-based image is tagged as `metanorma/metanorma:latest`.
+
+
+=== Supported Docker architectures
+
+Metanorma Docker images are available for the following Docker architectures:
+
+* `linux/amd64` (x86_64)
+* `linux/arm64` (aarch64)
+
+
+
+== Platform-specific usage notes
+
+=== Windows
+
+When using Docker on Windows, you may encounter path mapping issues:
+
+* Use proper path conversion when mounting volumes:
+
+[source,sh]
+----
+docker run -v "%cd%":/metanorma metanorma/metanorma metanorma compile -t iso document.adoc
+----
+
+* For PowerShell:
+
+[source,sh]
+----
+docker run -v "${PWD}:/metanorma" metanorma/metanorma metanorma compile -t iso document.adoc
+----
+
+* If you encounter permission issues, ensure your Docker Desktop has the necessary permissions to access your files.
+
+=== macOS
+
+* Volume mounting works similarly to Linux:
+
+[source,sh]
+----
+docker run -v "$PWD":/metanorma metanorma/metanorma metanorma compile -t iso document.adoc
+----
+
+* If you experience performance issues with mounted volumes, consider using Docker Desktop's file sharing optimization settings.
+
+=== Linux
+
+* SELinux may prevent proper volume mounting. Use the `:z` option if needed:
+
+[source,sh]
+----
+docker run -v "$PWD":/metanorma:z metanorma/metanorma metanorma compile -t iso document.adoc
+----
+
+* Ensure your user has proper permissions to run Docker commands.
+
+
+
+== Extending images
+
+=== General
+
+Metanorma Docker images are designed to be extensible. You can create your own
+custom images by extending the base Metanorma images to add your own
+dependencies, fonts, or configuration.
+
+=== Basic extensions
+
+Create a `Dockerfile` like this:
+
+[source,dockerfile]
+----
+FROM metanorma/metanorma:latest
+
+# Install additional dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    your-package-name \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add custom fonts
+COPY ./custom-fonts/ /config/fonts/
+
+# Add custom scripts
+COPY ./scripts/ /usr/local/bin/
+RUN chmod +x /usr/local/bin/*.sh
+----
+
+Build your custom image:
+
+[source,sh]
+----
+docker build -t my-organization/metanorma:custom .
+----
+
+Use your custom image the same way as the base image:
+
+[source,sh]
+----
+docker run -v "$PWD":/metanorma my-organization/metanorma:custom metanorma compile -t iso document.adoc
+----
+
+WARNING: If you override the default Metanorma `ENTRYPOINT` or `CMD` in your
+custom image, you will need to adjust the command accordingly.
+
+
 == Development guide
 
-=== Container flavors
-
-There are two supported container flavors:
-
-* `metanorma`: official release of the Metanorma container, using released gems
-* `mn`: experimental release of the Metanorma container, using unreleased (but hopefully functional) gems
-
-
-=== Running the Metamorma container via the Makefile
+=== Running the Metanorma container via the Makefile
 
 The `Makefile` makes developing the container much simpler.
 
@@ -224,11 +415,10 @@ The environment variables are used for:
 `ITEMS`:: a sequential number list for iterating `IMAGE_TYPES`,
 its numbers are indexes to the content in `IMAGE_TYPES`
 
-`IMAGE_TYPES`:: the different containers you support. Remember
-to create a directory for each of these names with a `Dockerfile.in`
-within. See existing examples.
+`IMAGE_TYPES`:: the different containers you support.
 
-`VERSIONS`:: how you want to tag the resulting images, for now we use the same version across all images which defined in `VERSION.mak`
+`VERSIONS`:: how resulting images are tagged. Currently we apply the same
+version across all images, which is defined in `VERSION.mak`
 
 `ROOT_IMAGES`:: the container your new image should be based on
 
@@ -296,29 +486,39 @@ The shortcut targets are:
 `bt-{target}`:: build + tag
 `tp-{target}`:: tag + push
 
-== Push the container by CI
 
-Currently CI do `docker push` only for tags on `master`.
-So to trigger build you need to create tag on `master` and push it, example:
+== Triggering GitHub Actions to build and push
+
+Currently our GitHub Actions workflow performs the `push` step only for tags on `main` branch.
+
+To trigger a build, you need to create a tag on `main` and push it.
+
+[example]
+====
+The following example creates a tag `v1.2.3` and pushes it to the Git repository:
 
 [source,sh]
 ----
 git tag v1.2.3
-git push origin master --tags
+git push origin main --tags
 ----
+====
 
-Important requirement for `tag`: it must correlate with versioning of https://github.com/metanorma/metanorma-cli/releases[metanorma-cli].
+IMPORTANT: The tag version must correlate with the versioning of
+https://github.com/metanorma/metanorma-cli/releases[metanorma-cli].
 
-Tags allow you to fast switch between different versions
-List of tags can be obtained with:
+Git tags allow you to quickly switch between different versions.
+
+You can list available tags with:
 
 [source,sh]
 ----
 git tag --list
 ----
 
+== Copyright and license
 
-== License
-
-The image is available open source under the terms of the
+The Metanorma Docker images are available as open source under the terms of the
 http://opensource.org/licenses/MIT[MIT License].
+
+Copyright 2018-2025 Ribose Inc.
