@@ -15,8 +15,7 @@ concurrency:
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
-  REGISTRY: "docker.io"
-  IMAGE_NAME: "${{ env.REGISTRY }}/metanorma/metanorma-windows"
+  IMAGE_NAME: "docker.io/metanorma/metanorma-windows"
 
 jobs:
   build-windows-images:
