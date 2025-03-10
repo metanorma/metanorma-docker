@@ -13,22 +13,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE_NAME: "docker.io/metanorma/metanorma-windows"
+  IMAGE_NAME: "docker.io/alexsc01/metanorma-windows"
 
 jobs:
-  debug-overrides:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Override IMAGE_NAME if secrets.IMAGE_NAME is set
-        run: |
-          if [[ -n "${{ secrets.IMAGE_NAME }}" ]]; then
-            echo "IMAGE_NAME=${{ secrets.IMAGE_NAME }}" >> $GITHUB_ENV
-          fi
-      - name: Print IMAGE_NAME
-        run: echo "$IMAGE_NAME"
-
   build-windows-images:
-    needs: debug-overrides
     strategy:
       matrix:
         root_image:
