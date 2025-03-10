@@ -37,8 +37,6 @@ jobs:
            # Windows Server 2019 with .NET Framework 4.8 required for Chocolatey
            base_image: "mcr.microsoft.com/dotnet/framework/runtime:4.8"
     runs-on: ${{ matrix.root_image.os }}
-    env:
-      IMAGE_TAG: "${{ env.IMAGE_NAME }}:${{ matrix.root_image.base_id }}"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -56,12 +54,12 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build --pull --no-cache -t ${{ env.IMAGE_TAG }} -f Dockerfile.windows --build-arg BASE_IMAGE=${{ matrix.root_image.base_image }} .
+          docker build --pull --no-cache -t ${{ env.IMAGE_NAME }}:${{ matrix.root_image.base_id }} -f Dockerfile.windows --build-arg BASE_IMAGE=${{ matrix.root_image.base_image }} .
         shell: pwsh
 
       - name: Push Docker Image to Docker Hub
         run: |
-          docker push ${{ env.IMAGE_TAG }}
+          docker push ${{ env.IMAGE_NAME }}:${{ matrix.root_image.base_id }}
         shell: pwsh
 
   create-manifest:
