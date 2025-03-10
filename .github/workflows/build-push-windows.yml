@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE_NAME: "docker.io/alexsc01/metanorma-windows"
+  IMAGE_NAME: "docker.io/metanorma/metanorma-windows"
 
 jobs:
   build-windows-images:
