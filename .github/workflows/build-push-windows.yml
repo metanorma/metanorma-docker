@@ -67,13 +67,5 @@ jobs:
         uses: Noelware/docker-manifest-action@0.4.3
         with:
           inputs: ${{ env.IMAGE_NAME }}:latest
-          images: |
-            ${{ env.IMAGE_NAME }}:ltsc2019
-            ${{ env.IMAGE_NAME }}:ltsc2022
-            ${{ env.IMAGE_NAME }}:ltsc2025
-          #annotations: |
-          #  ${{ env.IMAGE_NAME }}:ltsc2019 os=windows arch=amd64 os.version=10.0.17763.6893
-          #  ${{ env.IMAGE_NAME }}:ltsc2022 os=windows arch=amd64 os.version=10.0.20348.3207
-          #  ${{ env.IMAGE_NAME }}:ltsc2025 os=windows arch=amd64 os.version=10.0.26100.3194
+          images: ${{ env.IMAGE_NAME }}:ltsc2019,${{ env.IMAGE_NAME }}:ltsc2022,${{ env.IMAGE_NAME }}:ltsc2025
           push: true
-
