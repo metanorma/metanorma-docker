@@ -15,8 +15,8 @@ concurrency:
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
-  IMAGE_NAME: "metanorma-windows"
   REGISTRY: "docker.io"
+  IMAGE_NAME: "${{ env.REGISTRY }}/metanorma/metanorma-windows"
 
 jobs:
   build-windows-images:
@@ -38,69 +38,61 @@ jobs:
            # Windows Server 2019 with .NET Framework 4.8 required for Chocolatey
            base_image: "mcr.microsoft.com/dotnet/framework/runtime:4.8"
     runs-on: ${{ matrix.root_image.os }}
+    env:
+      IMAGE_TAG: "${{ env.IMAGE_NAME }}:${{ matrix.root_image.base_id }}"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub (if credentials are provided)
-        if: env.DOCKER_USERNAME != '' && env.DOCKER_PASSWORD != ''
-        run: |
-          echo "${{ env.DOCKER_PASSWORD }}" | docker login ${{ env.REGISTRY }} -u "${{ env.DOCKER_USERNAME }}" --password-stdin
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_LOGIN_USERNAME }}
+          password: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: metanorma-ci
+          password: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
 
       - name: Build Docker Image
         run: |
-          $imageTag = "${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.root_image.base_id }}"
-          docker build --pull --no-cache -t $imageTag -f Dockerfile.windows --build-arg BASE_IMAGE=${{ matrix.root_image.base_image }} .
-
-      - name: Save Docker Image as Artifact (if credentials are not provided)
-        if: env.DOCKER_USERNAME == '' || env.DOCKER_PASSWORD == ''
-        run: |
-          $imageTag = "${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.root_image.os }}-${{ matrix.root_image.base_id }}"
-          $outputFile = "${{ env.IMAGE_NAME }}-${{ matrix.root_image.os }}-${{ matrix.root_image.base_id }}.tar"
-          docker save -o $outputFile $imageTag
+          docker build --pull --no-cache -t ${{ env.IMAGE_TAG }} -f Dockerfile.windows --build-arg BASE_IMAGE=${{ matrix.root_image.base_image }} .
         shell: pwsh
 
-      - name: Upload Docker Image (if credentials are not provided)
-        uses: actions/upload-artifact@v4
-        if: env.DOCKER_USERNAME == '' || env.DOCKER_PASSWORD == ''
-        with:
-          name: ${{ env.IMAGE_NAME }}-${{ matrix.root_image.os }}-${{ matrix.root_image.base_id }}
-          path: ${{ env.IMAGE_NAME }}-${{ matrix.root_image.os }}-${{ matrix.root_image.base_id }}.tar
-
-      - name: Push Docker Image to Docker Hub (if credentials are provided)
-        if: env.DOCKER_USERNAME != '' && env.DOCKER_PASSWORD != ''
+      - name: Push Docker Image to Docker Hub
         run: |
-          $imageTag = "${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.root_image.base_id }}"
-          docker push $imageTag
+          docker push ${{ env.IMAGE_TAG }}
         shell: pwsh
 
   create-manifest:
     needs: build-windows-images
     runs-on: ubuntu-latest
     steps:
-      - name: Log in to Docker Hub
-        run: |
-          echo "${{ env.DOCKER_PASSWORD }}" | docker login ${{ env.REGISTRY }} -u "${{ env.DOCKER_USERNAME }}" --password-stdin
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_LOGIN_USERNAME }}
+          password: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
 
       - name: Create and Push Docker Manifest
         run: |
-          MANIFEST_TAG=${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          MANIFEST_TAG=${{ env.IMAGE_NAME }}:latest
           
           docker manifest create $MANIFEST_TAG \
-            ${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:ltsc2019 \
-            ${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:ltsc2022 \
-            ${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:ltsc2025
+            ${{ env.IMAGE_NAME }}:ltsc2019 \
+            ${{ env.IMAGE_NAME }}:ltsc2022 \
+            ${{ env.IMAGE_NAME }}:ltsc2025
 
           docker manifest annotate $MANIFEST_TAG \
-            ${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:ltsc2019 \
+            ${{ env.IMAGE_NAME }}:ltsc2019 \
             --os windows --arch amd64 --os-version "10.0.17763.6893"
 
           docker manifest annotate $MANIFEST_TAG \
-            ${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:ltsc2022 \
+            ${{ env.IMAGE_NAME }}:ltsc2022 \
             --os windows --arch amd64 --os-version "10.0.20348.3207"
 
           docker manifest annotate $MANIFEST_TAG \
-            ${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:ltsc2025 \
+            ${{ env.IMAGE_NAME }}:ltsc2025 \
             --os windows --arch amd64 --os-version "10.0.26100.3194"
 
           docker manifest push $MANIFEST_TAG
