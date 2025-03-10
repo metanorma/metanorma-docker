@@ -13,12 +13,22 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DOCKER_USERNAME: ${{ secrets.DOCKER_LOGIN_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
   IMAGE_NAME: "docker.io/metanorma/metanorma-windows"
 
 jobs:
+  debug-overrides:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Override IMAGE_NAME if secrets.IMAGE_NAME is set
+        run: |
+          if [[ -n "${{ secrets.IMAGE_NAME }}" ]]; then
+            echo "IMAGE_NAME=${{ secrets.IMAGE_NAME }}" >> $GITHUB_ENV
+          fi
+      - name: Print IMAGE_NAME
+        run: echo "$IMAGE_NAME"
+
   build-windows-images:
+    needs: debug-overrides
     strategy:
       matrix:
         root_image:
@@ -66,24 +76,16 @@ jobs:
           password: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
 
       - name: Create and Push Docker Manifest
-        run: |
-          MANIFEST_TAG=${{ env.IMAGE_NAME }}:latest
-          
-          docker manifest create $MANIFEST_TAG \
-            ${{ env.IMAGE_NAME }}:ltsc2019 \
-            ${{ env.IMAGE_NAME }}:ltsc2022 \
+        uses: Noelware/docker-manifest-action@0.4.3
+        with:
+          inputs: ${{ env.IMAGE_NAME }}:latest
+          images: |
+            ${{ env.IMAGE_NAME }}:ltsc2019
+            ${{ env.IMAGE_NAME }}:ltsc2022
             ${{ env.IMAGE_NAME }}:ltsc2025
+          #annotations: |
+          #  ${{ env.IMAGE_NAME }}:ltsc2019 os=windows arch=amd64 os.version=10.0.17763.6893
+          #  ${{ env.IMAGE_NAME }}:ltsc2022 os=windows arch=amd64 os.version=10.0.20348.3207
+          #  ${{ env.IMAGE_NAME }}:ltsc2025 os=windows arch=amd64 os.version=10.0.26100.3194
+          push: true
 
-          docker manifest annotate $MANIFEST_TAG \
-            ${{ env.IMAGE_NAME }}:ltsc2019 \
-            --os windows --arch amd64 --os-version "10.0.17763.6893"
-
-          docker manifest annotate $MANIFEST_TAG \
-            ${{ env.IMAGE_NAME }}:ltsc2022 \
-            --os windows --arch amd64 --os-version "10.0.20348.3207"
-
-          docker manifest annotate $MANIFEST_TAG \
-            ${{ env.IMAGE_NAME }}:ltsc2025 \
-            --os windows --arch amd64 --os-version "10.0.26100.3194"
-
-          docker manifest push $MANIFEST_TAG
