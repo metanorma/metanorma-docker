@@ -1,6 +1,11 @@
 name: build-push-windows
 
 on:
+  push:
+    branches: [ main ]
+    tags:
+    - '*'
+  pull_request:
   workflow_dispatch:
 
 concurrency:
