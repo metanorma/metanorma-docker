@@ -82,21 +82,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - id: label_prefix
-        env:
-          IS_PRERELEASE: ${{matrix.image_type == 'mn'}}
-          IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'ltsc2022'}}
-        run: |
-          if [ "$IS_MAIN" == "true" ]; then
-            echo "result=" >> $GITHUB_OUTPUT
-          elif [ "$IS_PRERELEASE" == "true" ]; then
-            echo "result=prefix=pre-${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
-          else
-            echo "result=prefix=${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
-          fi
+      # - id: label_prefix
+      #   env:
+      #     IS_PRERELEASE: ${{matrix.image_type == 'mn'}}
+      #     IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'ltsc2022'}}
+      #   run: |
+      #     if [ "$IS_MAIN" == "true" ]; then
+      #       echo "result=" >> $GITHUB_OUTPUT
+      #     elif [ "$IS_PRERELEASE" == "true" ]; then
+      #       echo "result=prefix=pre-${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
+      #     else
+      #       echo "result=prefix=${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
+      #     fi
 
-      - name: Show label prefix calculation
-        run: echo ${{ steps.label_prefix.outputs.result }}
+      # - name: Show label prefix calculation
+      #   run: echo ${{ steps.label_prefix.outputs.result }}
 
       # - id: meta
       #   uses: docker/metadata-action@v5
