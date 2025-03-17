@@ -125,21 +125,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build --pull --no-cache `
-          -t ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }} `
-          -t ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}-${{needs.job_info.outputs.version}} `
-          -t ghcr.io/${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }} `
-          -t ghcr.io/${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}-${{needs.job_info.outputs.version}} `
-          -f Dockerfile.windows `
-          --label org.opencontainers.image.vendor=Ribose Inc. `
-          --label org.opencontainers.image.licenses=BSD-3-Clause `
-          --label org.opencontainers.image.documentation=https://www.metanorma.org `
-          --label org.opencontainers.image.ref.name=metanorma/${{ matrix.image_type }}:${{ matrix.root_image.id }} `
-          --label org.opencontainers.image.base.name=${{ matrix.root_image.base_image }} `
-          --label org.opencontainers.image.title=Metanorma official public image `
-          --label org.opencontainers.image.description=Metanorma official public image on ${{ matrix.root_image.image }} `
-          --label org.opencontainers.image.version=${{needs.job_info.outputs.version}} `
-          --build-arg BASE_IMAGE=${{ matrix.root_image.base_image }} .
+          docker build --pull --no-cache -t ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }} -t ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}-${{needs.job_info.outputs.version}} -t ghcr.io/${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }} -t ghcr.io/${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}-${{needs.job_info.outputs.version}} -f Dockerfile.windows --label org.opencontainers.image.vendor=Ribose Inc. --label org.opencontainers.image.licenses=BSD-3-Clause --label org.opencontainers.image.documentation=https://www.metanorma.org --label org.opencontainers.image.ref.name=metanorma/${{ matrix.image_type }}:${{ matrix.root_image.id }} --label org.opencontainers.image.base.name=${{ matrix.root_image.base_image }} --label org.opencontainers.image.title=Metanorma official public image --label org.opencontainers.image.description=Metanorma official public image on ${{ matrix.root_image.image }} --label org.opencontainers.image.version=${{needs.job_info.outputs.version}} --build-arg BASE_IMAGE=${{ matrix.root_image.base_image }} .
         shell: pwsh
 
       - uses: docker/login-action@v3
