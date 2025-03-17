@@ -12,6 +12,11 @@ concurrency:
   group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  id-token: write
+  packages: read
+
 jobs:
   job_info:
     runs-on: ubuntu-latest
