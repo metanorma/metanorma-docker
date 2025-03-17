@@ -145,12 +145,12 @@ jobs:
 
       - name: Push Docker Image to Docker Hub
         run: |
-          docker image push --all-tags ${{ env.IMAGE_NAME }}:${{ matrix.root_image.id }}
+          docker image push --all-tags ${{ env.IMAGE_NAME }}
         shell: pwsh
 
       - name: Push Docker Image to GitHub Container Registry
         run: |
-          docker image push --all-tags ghcr.io/${{ env.IMAGE_NAME }}:${{ matrix.root_image.id }}
+          docker image push --all-tags ghcr.io/${{ env.IMAGE_NAME }}
         shell: pwsh
 
   create-manifest:
