@@ -61,20 +61,16 @@ jobs:
       fail-fast: false
       matrix:
         root_image:
-         - os: windows-2025
-           # Can be obtained using `docker manifest inspect mcr.microsoft.com/windows/servercore:ltsc2025`
-           os_version: "10.0.26100.3194"
-           id: ltsc2025
-           base_image: "mcr.microsoft.com/windows/servercore:ltsc2025"
+         #- os: windows-2025
+         #  id: ltsc2025
+         #  base_image: "mcr.microsoft.com/windows/servercore:ltsc2025"
          - os: windows-2022
-           os_version: "10.0.20348.3207"
            id: ltsc2022
            base_image: "mcr.microsoft.com/windows/servercore:ltsc2022"
-         - os: windows-2019
-           os_version: "10.0.17763.6893"
-           id: ltsc2019
-           # Windows Server 2019 with .NET Framework 4.8 required for Chocolatey
-           base_image: "mcr.microsoft.com/dotnet/framework/runtime:4.8"
+         #- os: windows-2019
+         #  id: ltsc2019
+         #  # Windows Server 2019 with .NET Framework 4.8 required for Chocolatey
+         #  base_image: "mcr.microsoft.com/dotnet/framework/runtime:4.8"
         experimental: [false]
         image_type: [metanorma]
 
@@ -82,46 +78,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # - id: label_prefix
-      #   env:
-      #     IS_PRERELEASE: ${{matrix.image_type == 'mn'}}
-      #     IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'ltsc2022'}}
-      #   run: |
-      #     if [ "$IS_MAIN" == "true" ]; then
-      #       echo "result=" >> $GITHUB_OUTPUT
-      #     elif [ "$IS_PRERELEASE" == "true" ]; then
-      #       echo "result=prefix=pre-${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
-      #     else
-      #       echo "result=prefix=${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
-      #     fi
+      - id: label_prefix
+        env:
+          IS_PRERELEASE: ${{matrix.image_type == 'mn'}}
+          IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'ltsc2022'}}
+        run: |
+          if [ "$IS_MAIN" == "true" ]; then
+            echo "result=" >> $GITHUB_OUTPUT
+          elif [ "$IS_PRERELEASE" == "true" ]; then
+            echo "result=prefix=pre-${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
+          else
+            echo "result=prefix=${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
 
-      # - name: Show label prefix calculation
-      #   run: echo ${{ steps.label_prefix.outputs.result }}
-
-      # - id: meta
-      #   uses: docker/metadata-action@v5
-      #   with:
-      #     images: |
-      #       metanorma/metanorma
-      #       ghcr.io/metanorma/metanorma
-      #     flavor: |
-      #       ${{ steps.label_prefix.outputs.result }}
-      #     tags: |
-      #       type=edge,branch=main
-      #       type=ref,event=branch
-      #       type=ref,event=pr
-      #       type=semver,pattern={{version}}
-      #       type=semver,pattern={{major}}.{{minor}}
-      #       type=semver,pattern={{major}}
-      #     labels: |
-      #       org.opencontainers.image.vendor=Ribose Inc.
-      #       org.opencontainers.image.licenses=BSD-3-Clause
-      #       org.opencontainers.image.documentation=https://www.metanorma.org
-      #       org.opencontainers.image.ref.name=metanorma/${{ matrix.image_type }}:${{ matrix.root_image.id }}
-      #       org.opencontainers.image.base.name=${{ matrix.root_image.image }}
-      #       org.opencontainers.image.title=Metanorma official public image
-      #       org.opencontainers.image.description=Metanorma official public image on ${{ matrix.root_image.image }}
-      #       org.opencontainers.image.version=${{needs.job_info.outputs.version}}
+      - name: Show label prefix calculation
+        run: echo ${{ steps.label_prefix.outputs.result }}
+        shell: bash
 
       - name: Build Docker Image
         env:
@@ -129,7 +102,35 @@ jobs:
           METANORMA_VERSION: ${{ needs.job_info.outputs.version }}
         run: |
           docker build --pull --no-cache -t ${{ env.METANORMA_IMAGE_NAME }} -t ${{ env.METANORMA_IMAGE_NAME }}-${{ env.METANORMA_VERSION }} -t ghcr.io/${{ env.METANORMA_IMAGE_NAME }} -t ghcr.io/${{ env.METANORMA_IMAGE_NAME }}-${{ env.METANORMA_VERSION }} -f Dockerfile.windows --build-arg BASE_IMAGE=${{ matrix.root_image.base_image }} --label org.opencontainers.image.vendor="Ribose Inc." --label org.opencontainers.image.licenses="BSD-3-Clause" --label org.opencontainers.image.documentation="https://www.metanorma.org" --label org.opencontainers.image.ref.name="metanorma/${{ matrix.image_type }}:${{ matrix.root_image.id }}" --label org.opencontainers.image.base.name="${{ matrix.root_image.base_image }}" --label org.opencontainers.image.title="Metanorma official public image" --label org.opencontainers.image.description="Metanorma official public image on ${{ matrix.root_image.image }}" --label org.opencontainers.image.version="${{needs.job_info.outputs.version}}" .
-        shell: pwsh
+        shell: bash
+
+      - env:
+          METANORMA_IMAGE_NAME: ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}
+        run: |
+          docker save -o docker-image.tar ${{ env.METANORMA_IMAGE_NAME }}
+        shell: bash
+
+      - run: |
+          echo "${{ steps.meta.outputs.tags }}" > docker-tags.txt
+          echo "${{ steps.meta.outputs.labels }}" > docker-labels.txt
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
+          path: docker-image.tar
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tags-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
+          path: docker-tags.txt
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: labels-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
+          path: docker-labels.txt
+          retention-days: 1
 
       - uses: docker/login-action@v3
         if: github.event_name != 'pull_request'
@@ -154,10 +155,85 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           docker image push --all-tags ghcr.io/${{ env.IMAGE_NAME }}
-        shell: pwsh
+        shell: bash
+
+  samples-matrix:
+    name: Samples matrix
+    uses: metanorma/ci/.github/workflows/build-sample-matrix.yml@main
+    with:
+      smoke: false
+      flavors-only: true
+      public-only: true
+
+  test-matrix:
+    name: Test matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+    needs: samples-matrix
+    steps:
+      - name: Build full test matrix
+        id: build
+        run: |
+          echo '{ "root_image": [ { "os": "windows-2022", "id": "ltsc2022", "base_image": "mcr.microsoft.com/windows/servercore:ltsc2022" } ], "experimental": [false], "image_type": ["metanorma"] }' > docker-matrix.json
+          echo '${{ needs.samples-matrix.outputs.samples-matrix }}' > samples-matrix.json
+          echo "matrix=$(jq -s add docker-matrix.json samples-matrix.json | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          echo '${{ needs.samples-matrix.outputs.samples-matrix }}'
+          echo "matrix=$(jq -s add docker-matrix.json samples-matrix.json | tr '\n' ' ')"
+
+  test:
+    name: Test (${{ matrix.image_type }}-${{ matrix.root_image.id }}, ${{ matrix.flavor.id }})
+    runs-on: ${{ matrix.root_image.os }}
+    needs:
+      - build
+      - job_info
+      - test-matrix
+    continue-on-error: ${{ matrix.flavor.experimental || matrix.root_image.id == 'ltsc2022' }}
+    strategy:
+      max-parallel: 5
+      fail-fast: false
+      matrix: ${{ fromJson(needs.test-matrix.outputs.matrix) }}
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: tags-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: labels-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
+
+      - id: loaded_image
+        name: Load image
+        run: |
+          docker load --input docker-image.tar
+          echo "full_name=$(head -n 1 docker-tags.txt)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Fetch samples (${{ matrix.flavor.id }})
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          repository: metanorma/mn-samples-${{ matrix.flavor.id }}
+          token: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
+          path: ${{ github.workspace }}/samples
+          fetch-depth: 1
+
+      - name: Run tests
+        run: |
+          MSYS_NO_PATHCONV=1 docker run --rm \
+            -v "$(pwd -W)/samples:C:/metanorma" \
+            -w C:/metanorma \
+            ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }} \
+            metanorma site generate --strict --agree-to-terms .
+        shell: bash
 
   create-manifest:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     steps:
@@ -175,15 +251,18 @@ jobs:
           password: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
 
       - name: Push Docker Manifest to Docker Hub
-        uses: Noelware/docker-manifest-action@v0.4.3
+        uses: Noelware/docker-manifest-action@0.4.3
         with:
           inputs: ${{ env.IMAGE_NAME }}:windows
-          images: ${{ env.IMAGE_NAME }}:windows-ltsc2019,${{ env.IMAGE_NAME }}:windows-ltsc2022,${{ env.IMAGE_NAME }}:windows-ltsc2025
+          #images: ${{ env.IMAGE_NAME }}:windows-ltsc2019,${{ env.IMAGE_NAME }}:windows-ltsc2022,${{ env.IMAGE_NAME }}:windows-ltsc2025
+          images: ${{ env.IMAGE_NAME }}:windows-ltsc2022
           push: true
 
       - name: Push Docker Manifest to GitHub Container Registry
-        uses: Noelware/docker-manifest-action@v0.4.3
+        uses: Noelware/docker-manifest-action@0.4.3
+        if: github.event_name != 'pull_request'
         with:
           inputs: ghcr.io/${{ env.IMAGE_NAME }}:windows
-          images: ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2019,ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2022,ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2025
+          # images: ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2019,ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2022,ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2025
+          images: ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2019
           push: true
