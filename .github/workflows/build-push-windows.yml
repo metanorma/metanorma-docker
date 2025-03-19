@@ -61,16 +61,16 @@ jobs:
       fail-fast: false
       matrix:
         root_image:
-         #- os: windows-2025
-         #  id: ltsc2025
-         #  base_image: "mcr.microsoft.com/windows/servercore:ltsc2025"
+         - os: windows-2025
+           id: ltsc2025
+           base_image: "mcr.microsoft.com/windows/servercore:ltsc2025"
          - os: windows-2022
            id: ltsc2022
            base_image: "mcr.microsoft.com/windows/servercore:ltsc2022"
-         #- os: windows-2019
-         #  id: ltsc2019
-         #  # Windows Server 2019 with .NET Framework 4.8 required for Chocolatey
-         #  base_image: "mcr.microsoft.com/dotnet/framework/runtime:4.8"
+         - os: windows-2019
+           id: ltsc2019
+           # Windows Server 2019 with .NET Framework 4.8 required for Chocolatey
+           base_image: "mcr.microsoft.com/dotnet/framework/runtime:4.8"
         experimental: [false]
         image_type: [metanorma]
 
@@ -254,8 +254,7 @@ jobs:
         uses: Noelware/docker-manifest-action@0.4.3
         with:
           inputs: ${{ env.IMAGE_NAME }}:windows
-          #images: ${{ env.IMAGE_NAME }}:windows-ltsc2019,${{ env.IMAGE_NAME }}:windows-ltsc2022,${{ env.IMAGE_NAME }}:windows-ltsc2025
-          images: ${{ env.IMAGE_NAME }}:windows-ltsc2022
+          images: ${{ env.IMAGE_NAME }}:windows-ltsc2019,${{ env.IMAGE_NAME }}:windows-ltsc2022,${{ env.IMAGE_NAME }}:windows-ltsc2025
           push: true
 
       - name: Push Docker Manifest to GitHub Container Registry
@@ -263,6 +262,5 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           inputs: ghcr.io/${{ env.IMAGE_NAME }}:windows
-          # images: ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2019,ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2022,ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2025
-          images: ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2019
+          images: ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2019,ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2022,ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2025
           push: true
