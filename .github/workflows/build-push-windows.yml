@@ -54,7 +54,7 @@ jobs:
     name: Build Windows (${{ matrix.root_image.id }})
     runs-on: ${{ matrix.root_image.os }}
     needs: job_info
-    if: "(github.event_name == 'push' && needs.job_info.outputs.head_tag == '') || github.event_name == 'pull_request'"
+    if: "(github.event_name == 'push' && needs.job_info.outputs.head_tag == '') || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'"
     continue-on-error: ${{ matrix.experimental }}
 
     strategy:
