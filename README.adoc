@@ -7,6 +7,7 @@ image:https://img.shields.io/github/commits-since/metanorma/metanorma-docker/lat
 image:https://badgen.net/docker/size/metanorma/metanorma/alpine-latest?icon=docker&label=alpine-latest["metanorma:alpine-latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=alpine"]
 image:https://badgen.net/docker/size/metanorma/metanorma/ubuntu-latest?icon=docker&label=ubuntu-latest["metanorma:ubuntu-latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=ubuntu"]
 image:https://badgen.net/docker/size/metanorma/metanorma/latest?icon=docker&label=latest["metanorma:latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=latest"]
+image:https://badgen.net/docker/size/metanorma/metanorma/windows-latest?icon=docker&label=windows-latest["metanorma:windows-latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=windows"]
 
 https://hub.docker.com/r/metanorma/metanorma/tags[Docker Hub: metanorma/metanorma]
 
@@ -214,10 +215,10 @@ contain unstable or untested features.
 
 === Image types
 
-The Metanorma Docker images are available in three flavors based on different
+The Metanorma Docker images are available in multiple flavors based on different
 base containers (OS containers), each optimized for different use cases.
 
-Each image set produces three image types:
+Each image set produces the following image types:
 
 [options="header",cols="1,1,1,1,3"]
 |===
@@ -243,6 +244,31 @@ extensible.
 |Smallest image size. Based on the official Ruby image on Alpine. Extensions may
 be limited due to usage of `musl` libc and limited package availability.
 
+|Windows
+|`mcr.microsoft.com/windows/servercore:ltsc2019`
+|`metanorma/metanorma:windows-latest`
+|~5GB
+|Native Windows container based on Windows Server Core, using Windows Server
+2019 with .NET Framework 4.8 (required for Chocolatey). Enables native Windows
+workflows in GitHub Actions. Uses Chocolatey for package management. Larger
+image size due to Windows base image.
+
+|Windows
+|`mcr.microsoft.com/windows/servercore:ltsc2022`
+|`metanorma/metanorma:windows-latest`
+|~5GB
+|Native Windows container based on Windows Server Core, using Windows Server
+2022. Enables native Windows workflows in GitHub Actions. Uses Chocolatey for
+package management. Larger image size due to Windows base image.
+
+|Windows
+|`mcr.microsoft.com/windows/servercore:ltsc2025`
+|`metanorma/metanorma:windows-latest`
+|~5GB
+|Native Windows container based on Windows Server Core, using Windows Server
+2025. Enables native Windows workflows in GitHub Actions. Uses Chocolatey for
+package management. Larger image size due to Windows base image.
+
 |===
 
 By default, the Debian-based image is tagged as `metanorma/metanorma:latest`.
@@ -254,6 +280,7 @@ Metanorma Docker images are available for the following Docker architectures:
 
 * `linux/amd64` (x86_64)
 * `linux/arm64` (aarch64)
+* `windows/amd64` (Windows Server 2019/2022/2025)
 
 
 
@@ -261,17 +288,49 @@ Metanorma Docker images are available for the following Docker architectures:
 
 === Windows
 
-When using Docker on Windows, you may encounter path mapping issues:
+==== Native Windows containers
+
+==== Using native Windows containers
+
+Native Windows containers are available with the following tags:
+- `metanorma/metanorma:windows-latest` (Windows Server 2022)
+- `metanorma/metanorma:windows-2019-latest` (Windows Server 2019)
+- `metanorma/metanorma:windows-2025-latest` (Windows Server 2025)
+
+When using native Windows containers, the path format changes:
+
+[source,sh]
+----
+docker run -v "%cd%:c:/metanorma" metanorma/metanorma:windows-latest metanorma compile -t iso document.adoc
+----
+
+For PowerShell:
+
+[source,sh]
+----
+docker run -v "${PWD}:c:/metanorma" metanorma/metanorma:windows-latest metanorma compile -t iso document.adoc
+----
+
+NOTE: For Windows containers, the hostq and container OS versions must match. For example, to use `windows-2022-latest` the host must be running Windows 10/11 with matching kernel version. Alternatively, you can use Hyper-V isolation with the `--isolation=hyperv` flag.
+
+[source,sh]
+----
+docker run --isolation=hyperv -v "%cd%:c:/metanorma" metanorma/metanorma:windows-latest metanorma compile -t iso document.adoc
+----
+
+==== Windows with Linux containers
+
+When using Docker on Windows with Linux containers, you may encounter path mapping issues:
 
 * Use proper path conversion when mounting volumes:
-
++
 [source,sh]
 ----
 docker run -v "%cd%":/metanorma metanorma/metanorma metanorma compile -t iso document.adoc
 ----
 
 * For PowerShell:
-
++
 [source,sh]
 ----
 docker run -v "${PWD}:/metanorma" metanorma/metanorma metanorma compile -t iso document.adoc
