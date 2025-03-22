@@ -3,9 +3,44 @@ ARG BASE_IMAGE=mcr.microsoft.com/windows/servercore:ltsc2022
 # mcr.microsoft.com/windows/servercore:ltsc2022 - Windows Server 2022
 # mcr.microsoft.com/windows/servercore:ltsc2025 - Windows Server 2025
 
-FROM $BASE_IMAGE
+### Build Metanorma dependencies in a separate layer
+FROM $BASE_IMAGE as builder
+
+# Install Chocolatey
+RUN powershell -Command \
+    Set-ExecutionPolicy Bypass -Scope Process -Force; \
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; \
+    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+# Install build and runtime dependencies using Chocolatey
+RUN choco install -y git wget 7zip msys2 make curl \
+    && refreshenv
+
+# Install MinGW and MSYS2 dependencies (mingw-w64-x86_64-libyaml is needed for the psych gem)
+RUN setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin" \
+    && echo "Updating MSYS2..." \
+    && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -Syuu" \
+    && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -S base-devel mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-libyaml"
 
 ARG RUBY_VERSION=3.3.6.2
+
+# Install Ruby using Chocolatey/RubyInstaller
+RUN choco install -y ruby --version=%RUBY_VERSION%
+
+# Install bundler, fontist and metanorma dependencies
+RUN gem install "bundler:~>2.6.5" fontist
+
+# Copy and install metanorma gem
+COPY Gemfile c:/setup/Gemfile
+
+RUN cd c:/setup && bundle install
+
+# Delete gem cache so it doesn't not get copied to the final image
+RUN powershell -Command "Remove-Item -Path 'C:\tools\ruby33\lib\ruby\gems\3.3.0\cache' -Recurse -Force -ErrorAction SilentlyContinue"
+
+
+### Final image
+FROM $BASE_IMAGE as runner
 
 LABEL maintainer="open.source@ribose.com" \
       org.opencontainers.image.authors="open.source@ribose.com" \
@@ -21,42 +56,23 @@ RUN powershell -Command \
     Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
 # Install build and runtime dependencies using Chocolatey
-RUN choco install -y git wget 7zip msys2 make curl inkscape plantuml python3 \
+RUN choco install -y inkscape plantuml python3 git \
+    && choco cache remove \
     && refreshenv
-
-# Install MinGW and MSYS2 dependencies (mingw-w64-x86_64-libyaml is needed for the psych gem)
-RUN setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin" \
-    && echo "Updating MSYS2..." \
-    && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -Syuu" \
-    && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -S base-devel mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-libyaml"
-
-# Install Ruby using Chocolatey/RubyInstaller
-RUN choco install -y ruby --version=%RUBY_VERSION%
-
-# Verify installation
-RUN ruby -v
 
 # Install XML2RFC
 RUN python -m pip install --upgrade pip && \
-    python -m pip install --no-cache-dir wheel idnits xml2rfc --ignore-installed six chardet
+    python -m pip install --no-cache-dir wheel idnits xml2rfc --ignore-installed six chardet && \
+    pip cache purge
 
-# Install bundler, fontist and metanorma dependencies
-RUN gem install "bundler:~>2.6.5" fontist
+# Copy built metanorma from builder
+COPY --from=builder C:/tools/ruby33 C:/tools/ruby33
 
-# Copy and install metanorma gem
-COPY Gemfile c:/setup/Gemfile
-
-RUN cd c:/setup && bundle install
+# Adjust PATH
+RUN setx /M PATH "%PATH%;C:\tools\ruby33\bin"
 
 # Update fontist
 RUN fontist update
-
-# Set environment variables
-ENV BUNDLE_GEMFILE=C:/setup/Gemfile \
-    RELATON_FETCH_PARALLEL=1
-
-# Configure volume for fonts
-VOLUME c:/Users/ContainerAdministrator/.fontist/fonts
 
 # Set working directory
 WORKDIR c:/metanorma
