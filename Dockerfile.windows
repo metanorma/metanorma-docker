@@ -77,6 +77,9 @@ RUN fontist update
 # Set working directory
 WORKDIR c:/metanorma
 
+# Java encoding fix (https://github.com/metanorma/metanorma-docker/issues/202)
+ENV JAVA_TOOL_OPTIONS="-Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8"
+
 # Entrypoint and default command
 ENTRYPOINT ["cmd.exe", "/c"]
 CMD ["metanorma"]
