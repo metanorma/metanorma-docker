@@ -16,11 +16,19 @@ RUN powershell -Command \
 RUN choco install -y git wget 7zip msys2 make curl \
     && refreshenv
 
+# gcc-14 is used as a workaround for https://github.com/metanorma/metanorma-docker/issues/203 and the root cause
+# TODO: remove custom mingw-w64-x86_64-gcc and use `mingw-w64-x86_64-gcc` in the `pacman --noconfirm -S ...` command
+WORKDIR C:/tools
+RUN wget --no-check-certificate https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-14.2.0-3-any.pkg.tar.zst
+RUN wget --no-check-certificate https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-libs-14.2.0-3-any.pkg.tar.zst
+
 # Install MinGW and MSYS2 dependencies (mingw-w64-x86_64-libyaml is needed for the psych gem)
 RUN setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin" \
     && echo "Updating MSYS2..." \
     && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -Syuu" \
-    && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -S base-devel mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-libyaml"
+    && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -U C:/tools/mingw-w64-x86_64-gcc-libs-14.2.0-3-any.pkg.tar.zst" \
+    && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -U C:/tools/mingw-w64-x86_64-gcc-14.2.0-3-any.pkg.tar.zst" \
+    && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -S base-devel mingw-w64-x86_64-make mingw-w64-x86_64-libyaml"
 
 ARG RUBY_VERSION=3.3.6.2
 
@@ -78,7 +86,7 @@ RUN fontist update
 WORKDIR c:/metanorma
 
 # Java encoding fix (https://github.com/metanorma/metanorma-docker/issues/202)
-ENV JAVA_TOOL_OPTIONS="-Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8"
+ENV _JAVA_OPTIONS="-Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8"
 
 # Entrypoint and default command
 ENTRYPOINT ["cmd.exe", "/c"]
