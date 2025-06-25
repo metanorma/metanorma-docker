@@ -38,7 +38,7 @@ RUN apt-get update && \
         python3-wheel \
         python3-setuptools \
         && pip3 install --break-system-packages --no-cache-dir \
-        --upgrade pip wheel idnits xml2rfc \
+        --upgrade pip wheel xml2rfc \
         --ignore-installed six chardet \
         && rm -rf /root/.cache/pip \
         && apt-get purge -y python3-pip python3-setuptools python3-wheel \
