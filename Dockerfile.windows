@@ -70,7 +70,7 @@ RUN choco install -y inkscape plantuml python3 git \
 
 # Install XML2RFC
 RUN python -m pip install --upgrade pip && \
-    python -m pip install --no-cache-dir wheel idnits xml2rfc --ignore-installed six chardet && \
+    python -m pip install --no-cache-dir wheel xml2rfc --ignore-installed six chardet && \
     pip cache purge
 
 # Copy built metanorma from builder
