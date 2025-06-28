@@ -36,7 +36,7 @@ ARG RUBY_VERSION=3.4.4.2
 RUN choco install -y ruby --version=%RUBY_VERSION%
 
 # Install bundler, fontist and metanorma dependencies
-RUN gem install "bundler:~>2.6.5" fontist
+RUN gem install "bundler:~>2.6.5" fontist pkg-config
 
 # Adjust PATH
 RUN setx /M PATH "%PATH%;C:\tools\ruby34\bin"
