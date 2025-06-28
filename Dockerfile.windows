@@ -38,6 +38,12 @@ RUN choco install -y ruby --version=%RUBY_VERSION%
 # Install bundler, fontist and metanorma dependencies
 RUN gem install "bundler:~>2.6.5" fontist
 
+# Adjust PATH
+RUN setx /M PATH "%PATH%;C:\tools\ruby33\bin"
+
+# Update fontist
+RUN fontist update
+
 # Copy and install metanorma gem
 COPY metanorma-windows/Gemfile c:/setup/Gemfile
 
