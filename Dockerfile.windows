@@ -44,24 +44,11 @@ COPY metanorma-windows/Gemfile c:/setup/Gemfile
 RUN cd c:/setup && bundle install
 
 # Delete gem cache so it doesn't not get copied to the final image
-RUN powershell -Command "Remove-Item -Path 'C:\tools\ruby33\lib\ruby\gems\3.3.0\cache' -Recurse -Force -ErrorAction SilentlyContinue"
+#RUN powershell -Command "Remove-Item -Path 'C:\tools\ruby33\lib\ruby\gems\3.3.0\cache' -Recurse -Force -ErrorAction SilentlyContinue"
 
 
 ### Final image
-FROM $BASE_IMAGE as runner
-
-LABEL maintainer="open.source@ribose.com" \
-      org.opencontainers.image.authors="open.source@ribose.com" \
-      org.opencontainers.image.url="https://www.metanorma.org" \
-      org.opencontainers.image.documentation="https://www.metanorma.org" \
-      org.opencontainers.image.title="Metanorma" \
-      org.opencontainers.image.description="Metanorma document processing toolchain (Windows variant)"
-
-# Install Chocolatey
-RUN powershell -Command \
-    Set-ExecutionPolicy Bypass -Scope Process -Force; \
-    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; \
-    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+#FROM $BASE_IMAGE as runner
 
 # Install build and runtime dependencies using Chocolatey
 RUN choco install -y inkscape plantuml python3 git \
@@ -73,8 +60,8 @@ RUN python -m pip install --upgrade pip && \
     python -m pip install --no-cache-dir wheel xml2rfc --ignore-installed six chardet && \
     pip cache purge
 
-# Copy built metanorma from builder
-COPY --from=builder C:/tools/ruby33 C:/tools/ruby33
+# Copy built metanorma from builder#
+#COPY --from=builder C:/tools/ruby33 C:/tools/ruby33
 
 # Adjust PATH
 RUN setx /M PATH "%PATH%;C:\tools\ruby33\bin"
