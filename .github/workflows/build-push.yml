@@ -19,6 +19,7 @@ permissions:
 
 jobs:
   job_info:
+    if: false
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.result }}

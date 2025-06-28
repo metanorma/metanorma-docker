@@ -30,7 +30,7 @@ RUN setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin" \
     && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -U C:/tools/mingw-w64-x86_64-gcc-14.2.0-3-any.pkg.tar.zst" \
     && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -S base-devel mingw-w64-x86_64-make mingw-w64-x86_64-libyaml"
 
-ARG RUBY_VERSION=3.3.6.2
+ARG RUBY_VERSION=3.4.4.2
 
 # Install Ruby using Chocolatey/RubyInstaller
 RUN choco install -y ruby --version=%RUBY_VERSION%
@@ -44,7 +44,7 @@ COPY metanorma-windows/Gemfile c:/setup/Gemfile
 RUN cd c:/setup && bundle install
 
 # Delete gem cache so it doesn't not get copied to the final image
-RUN powershell -Command "Remove-Item -Path 'C:\tools\ruby33\lib\ruby\gems\3.3.0\cache' -Recurse -Force -ErrorAction SilentlyContinue"
+RUN powershell -Command "Remove-Item -Path 'C:\tools\ruby34\lib\ruby\gems\3.4.0\cache' -Recurse -Force -ErrorAction SilentlyContinue"
 
 
 ### Final image
@@ -74,10 +74,10 @@ RUN python -m pip install --upgrade pip && \
     pip cache purge
 
 # Copy built metanorma from builder
-COPY --from=builder C:/tools/ruby33 C:/tools/ruby33
+COPY --from=builder C:/tools/ruby34 C:/tools/ruby34
 
 # Adjust PATH
-RUN setx /M PATH "%PATH%;C:\tools\ruby33\bin"
+RUN setx /M PATH "%PATH%;C:\tools\ruby34\bin"
 
 # Update fontist
 RUN fontist update

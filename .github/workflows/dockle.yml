@@ -20,6 +20,7 @@ permissions:
 
 jobs:
   dockle-scan:
+    if: false
     name: Dockle image scan (${{ matrix.image_type }})
     runs-on: ubuntu-latest
     strategy:

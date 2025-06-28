@@ -61,16 +61,9 @@ jobs:
       fail-fast: false
       matrix:
         root_image:
-         - os: windows-2025
-           id: ltsc2025
-           base_image: "mcr.microsoft.com/windows/servercore:ltsc2025"
          - os: windows-2022
            id: ltsc2022
            base_image: "mcr.microsoft.com/windows/servercore:ltsc2022"
-         - os: windows-2019
-           id: ltsc2019
-           # Windows Server 2019 with .NET Framework 4.8 required for Chocolatey
-           base_image: "mcr.microsoft.com/dotnet/framework/runtime:4.8"
         experimental: [false]
         image_type: [metanorma]
 

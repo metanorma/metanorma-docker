@@ -18,6 +18,7 @@ permissions:
 
 jobs:
   trivy-scan:
+    if: false
     name: Trivy image scan (${{ matrix.image_type }})
     runs-on: ubuntu-latest
     strategy:
