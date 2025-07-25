@@ -293,9 +293,10 @@ Metanorma Docker images are available for the following Docker architectures:
 ==== Using native Windows containers
 
 Native Windows containers are available with the following tags:
-- `metanorma/metanorma:windows-latest` (Windows Server 2022)
-- `metanorma/metanorma:windows-2019-latest` (Windows Server 2019)
-- `metanorma/metanorma:windows-2025-latest` (Windows Server 2025)
+
+* `metanorma/metanorma:windows-latest` (Windows Server 2022)
+// * `metanorma/metanorma:windows-2019-latest` (Windows Server 2019)
+* `metanorma/metanorma:windows-2025-latest` (Windows Server 2025)
 
 When using native Windows containers, the path format changes:
 
