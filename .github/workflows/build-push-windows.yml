@@ -5,7 +5,21 @@ on:
     branches: [ main ]
     tags:
     - '*'
+    paths:
+      - 'Dockerfile.windows'
+      - 'VERSION.mak'
+      - 'Gemfile'
+      - 'metanorma-windows/**'
+      - '.dockerignore'
+      - '.github/workflows/build-push-windows.yml'
   pull_request:
+    paths:
+      - 'Dockerfile.windows'
+      - 'VERSION.mak'
+      - 'Gemfile'
+      - 'metanorma-windows/**'
+      - '.dockerignore'
+      - '.github/workflows/build-push-windows.yml'
   workflow_dispatch:
 
 concurrency:
