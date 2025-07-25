@@ -5,7 +5,23 @@ on:
     branches: [ main ]
     tags:
     - '*'
+    paths:
+      - 'Dockerfile.*'
+      - 'VERSION.mak'
+      - 'Gemfile'
+      - 'metanorma-*/**'
+      - 'mn-*/**'
+      - '.dockerignore'
+      - '.github/workflows/build-push.yml'
   pull_request:
+    paths:
+      - 'Dockerfile.*'
+      - 'VERSION.mak'
+      - 'Gemfile'
+      - 'metanorma-*/**'
+      - 'mn-*/**'
+      - '.dockerignore'
+      - '.github/workflows/build-push.yml'
   workflow_dispatch:
 
 concurrency:
