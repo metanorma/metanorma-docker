@@ -68,7 +68,7 @@ jobs:
     name: Build Windows (${{ matrix.root_image.id }})
     runs-on: ${{ matrix.root_image.os }}
     needs: job_info
-    if: "(github.event_name == 'push' && needs.job_info.outputs.head_tag == '') || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'"
+    if: (github.event_name == 'push' && needs.job_info.outputs.head_tag == '') || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     continue-on-error: ${{ matrix.experimental }}
 
     strategy:
@@ -114,13 +114,11 @@ jobs:
           docker build --pull --no-cache -t ${{ env.METANORMA_IMAGE_NAME }} -t ${{ env.METANORMA_IMAGE_NAME }}-${{ env.METANORMA_VERSION }} -t ghcr.io/${{ env.METANORMA_IMAGE_NAME }} -t ghcr.io/${{ env.METANORMA_IMAGE_NAME }}-${{ env.METANORMA_VERSION }} -f Dockerfile.windows --build-arg BASE_IMAGE=${{ matrix.root_image.base_image }} --label org.opencontainers.image.vendor="Ribose Inc." --label org.opencontainers.image.licenses="BSD-3-Clause" --label org.opencontainers.image.documentation="https://www.metanorma.org" --label org.opencontainers.image.ref.name="metanorma/${{ matrix.image_type }}:${{ matrix.root_image.id }}" --label org.opencontainers.image.base.name="${{ matrix.root_image.base_image }}" --label org.opencontainers.image.title="Metanorma official public image" --label org.opencontainers.image.description="Metanorma official public image on ${{ matrix.root_image.image }}" --label org.opencontainers.image.version="${{needs.job_info.outputs.version}}" .
         shell: bash
 
-      - env:
+      - name: Compress image and export metadata to artifacts
+        env:
           METANORMA_IMAGE_NAME: ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}
         run: |
-          docker save -o docker-image.tar ${{ env.METANORMA_IMAGE_NAME }}
-        shell: bash
-
-      - run: |
+          docker image save ${{ env.METANORMA_IMAGE_NAME }} | gzip > docker-image.tar.gz
           echo "${{ steps.meta.outputs.tags }}" > docker-tags.txt
           echo "${{ steps.meta.outputs.labels }}" > docker-labels.txt
         shell: bash
@@ -129,7 +127,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
-          path: docker-image.tar
+          path: docker-image.tar.gz
           retention-days: 1
       - uses: actions/upload-artifact@v4
         with:
@@ -213,15 +211,12 @@ jobs:
         with:
           name: tags-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: labels-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
-
       - id: loaded_image
         name: Load image
         run: |
-          docker load --input docker-image.tar
-          echo "full_name=$(head -n 1 docker-tags.txt)" >> $GITHUB_OUTPUT
+          IMAGE_TAG=$(head -n 1 docker-tags.txt)
+          docker image import docker-image.tar.gz $IMAGE_TAG
+          echo "full_name=$IMAGE_TAG" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Fetch samples (${{ matrix.flavor.id }})
@@ -234,11 +229,13 @@ jobs:
           fetch-depth: 1
 
       - name: Run tests
+        env:
+          IMAGE_NAME: ${{ steps.loaded_image.outputs.full_name }}
         run: |
           MSYS_NO_PATHCONV=1 docker run --rm \
             -v "$(pwd -W)/samples:C:/metanorma" \
             -w C:/metanorma \
-            ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }} \
+            ${{ env.IMAGE_NAME }} \
             metanorma site generate --strict --agree-to-terms .
         shell: bash
 

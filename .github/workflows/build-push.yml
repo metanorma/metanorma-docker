@@ -67,7 +67,7 @@ jobs:
     name: Build (${{ matrix.image_type }}-${{ matrix.root_image.id }})
     runs-on: ubuntu-latest
     needs: job_info
-    if: "(github.event_name == 'push' && needs.job_info.outputs.head_tag == '') || github.event_name == 'pull_request'"
+    if: (github.event_name == 'push' && needs.job_info.outputs.head_tag == '') || github.event_name == 'pull_request'
     continue-on-error: ${{ matrix.experimental }}
 
     strategy:
