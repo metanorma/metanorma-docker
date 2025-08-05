@@ -10,7 +10,6 @@ on:
       - 'VERSION.mak'
       - 'Gemfile'
       - 'metanorma-windows/**'
-      - '.dockerignore'
       - '.github/workflows/build-push-windows.yml'
   pull_request:
     paths:
@@ -18,7 +17,6 @@ on:
       - 'VERSION.mak'
       - 'Gemfile'
       - 'metanorma-windows/**'
-      - '.dockerignore'
       - '.github/workflows/build-push-windows.yml'
   workflow_dispatch:
 
