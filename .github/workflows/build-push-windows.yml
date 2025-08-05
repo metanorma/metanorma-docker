@@ -213,9 +213,8 @@ jobs:
         name: Load image
         run: |
           ls -al
-          IMAGE_TAG=$(head -n 1 docker-tags.txt)
-          docker image import docker-image.tar.gz $IMAGE_TAG
-          echo "full_name=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          docker load --input docker-image.tar.gz
+          echo "full_name=$(head -n 1 /tmp/docker-tags.txt)" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Fetch samples (${{ matrix.flavor.id }})
