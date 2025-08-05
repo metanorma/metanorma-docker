@@ -165,12 +165,13 @@ jobs:
     - run: |
         echo "${{ steps.meta.outputs.tags }}" > /tmp/docker-tags.txt
         echo "${{ steps.meta.outputs.labels }}" > /tmp/docker-labels.txt
+        gzip /tmp/docker-image.tar
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
-        path: /tmp/docker-image.tar
+        path: /tmp/docker-image.tar.gz
         retention-days: 1
 
     - uses: actions/upload-artifact@v4
@@ -222,7 +223,7 @@ jobs:
     - id: loaded_image
       name: Load image
       run: |
-        docker load --input /tmp/docker-image.tar
+        docker load --input /tmp/docker-image.tar.gz
         echo "full_name<<EOF" >> $GITHUB_OUTPUT
         echo "$(head -n 1 /tmp/docker-tags.txt)" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
@@ -293,7 +294,7 @@ jobs:
     - id: loaded_image
       name: Load image
       run: |
-        docker load --input /tmp/docker-image.tar
+        docker load --input /tmp/docker-image.tar.gz
         echo "full_name=$(head -n 1 /tmp/docker-tags.txt)" >> $GITHUB_OUTPUT
 
     - name: Fetch samples (${{ matrix.flavor.id }})
@@ -358,7 +359,7 @@ jobs:
     - id: loaded_image
       name: Load image
       run: |
-        docker load --input /tmp/docker-image.tar
+        docker load --input /tmp/docker-image.tar.gz
         docker image ls -a
         docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma
         result=$(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma | head -1 | tr -d '\n')
