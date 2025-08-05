@@ -212,6 +212,7 @@ jobs:
       - id: loaded_image
         name: Load image
         run: |
+          ls -al
           IMAGE_TAG=$(head -n 1 docker-tags.txt)
           docker image import docker-image.tar.gz $IMAGE_TAG
           echo "full_name=$IMAGE_TAG" >> $GITHUB_OUTPUT
