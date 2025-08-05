@@ -214,7 +214,7 @@ jobs:
         run: |
           ls -al
           docker load --input docker-image.tar.gz
-          echo "full_name=$(head -n 1 /tmp/docker-tags.txt)" >> $GITHUB_OUTPUT
+          echo "full_name=$(head -n 1 docker-tags.txt)" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Fetch samples (${{ matrix.flavor.id }})
@@ -228,12 +228,13 @@ jobs:
 
       - name: Run tests
         env:
+          METANORMA_IMAGE_NAME: ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}
           IMAGE_NAME: ${{ steps.loaded_image.outputs.full_name }}
         run: |
           MSYS_NO_PATHCONV=1 docker run --rm \
             -v "$(pwd -W)/samples:C:/metanorma" \
             -w C:/metanorma \
-            ${{ env.IMAGE_NAME }} \
+            ${{ env.METANORMA_IMAGE_NAME }} \
             metanorma site generate --strict --agree-to-terms .
         shell: bash
 
