@@ -306,15 +306,25 @@ jobs:
         path: ${{ github.workspace }}/samples
         fetch-depth: 1
 
+    - name: Set config file
+      id: config
+      run: |
+        if [ -f "${{ github.workspace }}/samples/metanorma.test.yml" ]; then
+          echo "file=metanorma.test.yml" >> $GITHUB_OUTPUT
+        else
+          echo "file=metanorma.yml" >> $GITHUB_OUTPUT
+        fi
+
     - name: Run tests
       env:
         IMAGE_NAME: ${{ steps.loaded_image.outputs.full_name }}
+        CONFIG_FILE: ${{ steps.config.outputs.file }}
       run: |
         docker run --rm \
           -v ${{ github.workspace }}/samples:/metanorma \
           -w /metanorma \
           ${IMAGE_NAME} \
-          metanorma site generate --strict --agree-to-terms .
+          metanorma site generate --strict --agree-to-terms -c ${CONFIG_FILE} .
 
   publish:
     name: Build+publish (${{ matrix.image_type }}-${{ matrix.root_image.id }}
