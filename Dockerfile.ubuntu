@@ -70,8 +70,6 @@ RUN apt-get update && \
         gpg-agent \
         python3 \
         python3-lxml && \
-    # Install PlantUML
-    curl -L "https://raw.githubusercontent.com/metanorma/plantuml-install/main/ubuntu.sh" | bash && \
     # Update Inkscape repository and install
     add-apt-repository -y ppa:inkscape.dev/stable && \
     apt-get --no-install-recommends install -y inkscape && \

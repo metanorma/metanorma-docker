@@ -50,7 +50,6 @@ At a high level, the image includes the following:
 * `mn2pdf` on the Java subsystem
 * Other tools
 ** https://inkscape.org[Inkscape]
-** https://plantuml.com[PlantUML]
 
 To see the full list of packages/software included, check out the Dockerfiles.
 
