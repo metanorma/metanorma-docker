@@ -29,9 +29,6 @@ RUN apk add --no-cache \
     unzip \
     && rm -rf /usr/share/inkscape/tutorials
 
-# Install plantuml
-RUN curl -L "https://raw.githubusercontent.com/metanorma/plantuml-install/main/alpine.sh" | sh
-
 # Install xml2rfc with optimized layer
 ENV PYTHONUNBUFFERED=1
 RUN apk add --no-cache python3 py3-pip && \

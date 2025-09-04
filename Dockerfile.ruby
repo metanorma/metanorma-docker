@@ -27,7 +27,6 @@ RUN apt-get update && \
         python3 \
         python3-lxml \
         && rm -rf /usr/share/inkscape/tutorials \
-        && curl -L "https://raw.githubusercontent.com/metanorma/plantuml-install/main/ubuntu.sh" | bash \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/*
 
