@@ -22,7 +22,7 @@ RUN setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin" \
     && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -Syuu" \
     && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-libyaml"
 
-ARG RUBY_VERSION=3.4.4.2
+ARG RUBY_VERSION=3.4.5.1
 
 # Install Ruby using Chocolatey/RubyInstaller
 RUN choco install -y ruby --version=%RUBY_VERSION%
