@@ -56,7 +56,7 @@ RUN powershell -Command \
     Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
 # Install build and runtime dependencies using Chocolatey
-RUN choco install -y inkscape python3 git \
+RUN choco install -y inkscape openjdk17 python3 git \
     && choco cache remove \
     && refreshenv
 
