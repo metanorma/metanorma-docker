@@ -26,7 +26,7 @@ RUN apt-get update && \
         software-properties-common \
         python3 \
         python3-lxml \
-        openjdk-17-jre-headless \
+        openjdk-17-jdk \
         && rm -rf /usr/share/inkscape/tutorials \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/*
