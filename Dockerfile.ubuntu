@@ -74,7 +74,7 @@ RUN apt-get update && \
     add-apt-repository -y ppa:inkscape.dev/stable && \
     apt-get --no-install-recommends install -y inkscape && \
     rm -rf /usr/share/inkscape/tutorials && \
-    apt-get --no-install-recommends install -y openjdk-11-jre && \
+    apt-get --no-install-recommends install -y openjdk-11-jre graphviz && \
     # Clean up
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*

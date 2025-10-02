@@ -27,6 +27,7 @@ RUN apt-get update && \
         python3 \
         python3-lxml \
         openjdk-17-jdk \
+        graphviz \
         && rm -rf /usr/share/inkscape/tutorials \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/*

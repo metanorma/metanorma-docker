@@ -24,6 +24,7 @@ RUN apk add --no-cache \
     make \
     nss \
     openjdk11-jre \
+    graphviz \
     ttf-dejavu \
     tzdata \
     unzip \
