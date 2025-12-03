@@ -24,6 +24,7 @@ RUN apk add --no-cache \
     make \
     nss \
     openjdk11-jre \
+    openssl \
     ttf-dejavu \
     tzdata \
     unzip \
@@ -62,6 +63,7 @@ RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
         g++ \
         musl-dev \
         cmake \
+        openssl-dev \
         libxml2-dev \
         libxslt-dev \
         yaml-dev \

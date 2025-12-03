@@ -141,7 +141,7 @@ docker run \ <1>
 # Minimal (the `compile` command is assumed)
 docker run -v "$PWD":/metanorma metanorma/metanorma metanorma iso-8601-2-en.adoc
 # Alternatively, if you want to specify the flavor and extensions
-docker run -v "$PWD":/metanorma metanorma/metanorma metanorma compile -t iso -x xml,html,doc,pdf iso-8601-2-en.adoc
+docker run -v "$PWD":/metanorma metanorma/metanorma metanorma compile iso -x xml,html,doc,pdf iso-8601-2-en.adoc
 ----
 ====
 
@@ -154,7 +154,7 @@ The full command is actually this:
 
 [source,sh]
 ----
-docker run -v "$PWD":/metanorma/ -w /metanorma metanorma/metanorma metanorma compile -t {flavor} -x {extensions} {my-document-file}
+docker run -v "$PWD":/metanorma/ -w /metanorma metanorma/metanorma metanorma compile {flavor} -x {extensions} {my-document-file}
 ----
 
 
@@ -301,21 +301,21 @@ When using native Windows containers, the path format changes:
 
 [source,sh]
 ----
-docker run -v "%cd%:c:/metanorma" metanorma/metanorma:windows-latest metanorma compile -t iso document.adoc
+docker run -v "%cd%:c:/metanorma" metanorma/metanorma:windows-latest metanorma compile iso document.adoc
 ----
 
 For PowerShell:
 
 [source,sh]
 ----
-docker run -v "${PWD}:c:/metanorma" metanorma/metanorma:windows-latest metanorma compile -t iso document.adoc
+docker run -v "${PWD}:c:/metanorma" metanorma/metanorma:windows-latest metanorma compile iso document.adoc
 ----
 
 NOTE: For Windows containers, the hostq and container OS versions must match. For example, to use `windows-2022-latest` the host must be running Windows 10/11 with matching kernel version. Alternatively, you can use Hyper-V isolation with the `--isolation=hyperv` flag.
 
 [source,sh]
 ----
-docker run --isolation=hyperv -v "%cd%:c:/metanorma" metanorma/metanorma:windows-latest metanorma compile -t iso document.adoc
+docker run --isolation=hyperv -v "%cd%:c:/metanorma" metanorma/metanorma:windows-latest metanorma compile iso document.adoc
 ----
 
 ==== Windows with Linux containers
@@ -326,14 +326,14 @@ When using Docker on Windows with Linux containers, you may encounter path mappi
 +
 [source,sh]
 ----
-docker run -v "%cd%":/metanorma metanorma/metanorma metanorma compile -t iso document.adoc
+docker run -v "%cd%":/metanorma metanorma/metanorma metanorma compile iso document.adoc
 ----
 
 * For PowerShell:
 +
 [source,sh]
 ----
-docker run -v "${PWD}:/metanorma" metanorma/metanorma metanorma compile -t iso document.adoc
+docker run -v "${PWD}:/metanorma" metanorma/metanorma metanorma compile iso document.adoc
 ----
 
 * If you encounter permission issues, ensure your Docker Desktop has the necessary permissions to access your files.
@@ -344,7 +344,7 @@ docker run -v "${PWD}:/metanorma" metanorma/metanorma metanorma compile -t iso d
 
 [source,sh]
 ----
-docker run -v "$PWD":/metanorma metanorma/metanorma metanorma compile -t iso document.adoc
+docker run -v "$PWD":/metanorma metanorma/metanorma metanorma compile iso document.adoc
 ----
 
 * If you experience performance issues with mounted volumes, consider using Docker Desktop's file sharing optimization settings.
@@ -355,7 +355,7 @@ docker run -v "$PWD":/metanorma metanorma/metanorma metanorma compile -t iso doc
 
 [source,sh]
 ----
-docker run -v "$PWD":/metanorma:z metanorma/metanorma metanorma compile -t iso document.adoc
+docker run -v "$PWD":/metanorma:z metanorma/metanorma metanorma compile iso document.adoc
 ----
 
 * Ensure your user has proper permissions to run Docker commands.
@@ -404,7 +404,7 @@ Use your custom image the same way as the base image:
 
 [source,sh]
 ----
-docker run -v "$PWD":/metanorma my-organization/metanorma:custom metanorma compile -t iso document.adoc
+docker run -v "$PWD":/metanorma my-organization/metanorma:custom metanorma compile iso document.adoc
 ----
 
 WARNING: If you override the default Metanorma `ENTRYPOINT` or `CMD` in your
@@ -421,21 +421,21 @@ To start the `metanorma` container and enter it with `bash`, all you need is:
 
 [source,sh]
 ----
-make run-metanorma
+make run-metanorma-ruby
 ----
 
 To kill the container:
 
 [source,sh]
 ----
-make kill-metanorma
+make kill-metanorma-ruby
 ----
 
 The `Makefile` supports the following commands related to running:
 
 [source,sh]
 ----
-make {run,kill,rm,rmf}-metanorma
+make {run,kill,rm,rmf}-metanorma-ruby
 ----
 
 
@@ -496,7 +496,7 @@ make {build,push,tag,clean-remote,clean-local}-{container-flavor}
 All files relating to building a certain container flavor is located in the
 `{container-flavor}` directory.
 
-For the `metanorma` and `mn` flavors, we update using this procedure:
+For the `metanorma` flavors, we update using this procedure:
 
 [source,sh]
 ----
@@ -510,14 +510,14 @@ Then, we build and push the container:
 
 [source,sh]
 ----
-make btp-metanorma
+make btp-metanorma-ruby
 ----
 
 Lastly, we tag and push the built container as latest.
 
 [source,sh]
 ----
-make latest-tp-metanorma
+make latest-tp-metanorma-ruby
 ----
 
 
@@ -527,7 +527,7 @@ If you feel tired typing out this:
 
 [source,sh]
 ----
-make build-metanorma tag-metanorma push-metanorma
+make build-metanorma-ruby tag-metanorma-ruby push-metanorma-ruby
 ----
 
 We have a list of shortcut targets to save you from repeating fingers.
@@ -536,7 +536,7 @@ For example:
 [source,sh]
 ----
 # equivalent to make {build,push}-{container-flavor} latest-{tag,push}-{container-flavor}
-make btp-metanorma latest-tp-metanorma
+make btp-metanorma-ruby latest-tp-metanorma-ruby
 ----
 
 The shortcut targets are:
