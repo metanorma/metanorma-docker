@@ -18,33 +18,33 @@ RUN mkdir -p /usr/share/man/man1
 # Install runtime dependencies
 RUN apt-get update && \
     apt-get --no-install-recommends install -y \
-        curl \
-        git \
-        make \
-        gnupg2 \
-        inkscape \
-        software-properties-common \
-        python3 \
-        python3-lxml \
-        openjdk-17-jdk \
-        && rm -rf /usr/share/inkscape/tutorials \
-        && apt-get clean \
-        && rm -rf /var/lib/apt/lists/*
+      curl \
+      git \
+      make \
+      gnupg2 \
+      inkscape \
+      software-properties-common \
+      python3 \
+      python3-lxml \
+      openjdk-17-jdk \
+    && rm -rf /usr/share/inkscape/tutorials \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install XML2RFC using a separate layer to minimize image size
 RUN apt-get update && \
     apt-get --no-install-recommends install -y \
-        python3-pip \
-        python3-wheel \
-        python3-setuptools \
-        && pip3 install --break-system-packages --no-cache-dir \
-        --upgrade pip wheel xml2rfc \
-        --ignore-installed six chardet \
-        && rm -rf /root/.cache/pip \
-        && apt-get purge -y python3-pip python3-setuptools python3-wheel \
-        && apt-get autoremove -y \
-        && apt-get clean \
-        && rm -rf /var/lib/apt/lists/*
+      python3-pip \
+      python3-wheel \
+      python3-setuptools \
+    && pip3 install --break-system-packages --no-cache-dir \
+      --upgrade pip wheel xml2rfc \
+      --ignore-installed six chardet \
+    && rm -rf /root/.cache/pip \
+    && apt-get purge -y python3-pip python3-setuptools python3-wheel \
+    && apt-get autoremove -y \
+    && apt-get clean \
+      && rm -rf /var/lib/apt/lists/*
 
 # Set up directories
 RUN mkdir -p /setup
@@ -61,13 +61,14 @@ RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
     gem install bundler -v "~> 2.6.5" && \
     apt-get update && \
     apt-get --no-install-recommends install -y \
-        gcc \
-        g++ \
-        cmake \
-        libxml2-dev \
-        libxslt-dev \
-        libyaml-dev \
-        zlib1g-dev && \
+      gcc \
+      g++ \
+      cmake \
+      libssl-dev \
+      libxml2-dev \
+      libxslt-dev \
+      libyaml-dev \
+      zlib1g-dev && \
     cd /setup && \
     bundle install --no-cache --redownload && \
     rm -rf /usr/local/bundle/cache && \

@@ -113,13 +113,14 @@ RUN --mount=type=secret,id=bundle_config,dst=$GEM_HOME/config \
     gem install bundler -v "~> 2.6.5" && \
     apt-get update && \
     apt-get --no-install-recommends install -y \
-        gcc \
-        g++ \
-        cmake \
-        libxml2-dev \
-        libxslt-dev \
-        zlib1g-dev \
-        libyaml-dev && \
+      gcc \
+      g++ \
+      cmake \
+      libssl-dev \
+      libxml2-dev \
+      libxslt-dev \
+      zlib1g-dev \
+      libyaml-dev && \
     cd /setup && \
     bundle install --no-cache --redownload && \
     # Clean up bundle cache and test files
