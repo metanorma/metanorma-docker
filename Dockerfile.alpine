@@ -28,6 +28,7 @@ RUN apk add --no-cache \
     ttf-dejavu \
     tzdata \
     unzip \
+    graphviz \
     && rm -rf /usr/share/inkscape/tutorials
 
 # Install xml2rfc with optimized layer
