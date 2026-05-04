@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install Ruby build dependencies
 RUN apt-get update
 
-RUN apt-get install --fix-broken
+RUN apt-get install --fix-broken -y
 
 RUN apt-get install -y --no-install-recommends \
       git \
