@@ -113,8 +113,9 @@ COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
 # Install bundler and metanorma dependencies
 RUN --mount=type=secret,id=bundle_config,dst=$GEM_HOME/config \
     --mount=type=secret,id=gemrc_config,dst=$GEM_HOME/.gemrc \
-    gem install bundler -v "~> 2.6.5" && \
-    apt-get update && \
+    gem install bundler -v "~> 2.6.5"
+
+RUN apt-get update && \
     apt-get --no-install-recommends install -y \
       gcc \
       g++ \
