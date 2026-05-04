@@ -9,8 +9,11 @@ ARG RUBY_VERSION
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Ruby build dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apt-get update
+
+RUN apt install --fix-broken
+
+RUN apt-get install -y --no-install-recommends \
       git \
       curl \
       autoconf \
