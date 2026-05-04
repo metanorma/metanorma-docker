@@ -68,6 +68,7 @@ RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
       libssl-dev \
       libxml2-dev \
       libxslt-dev \
+      libffi-dev \
       libyaml-dev \
       zlib1g-dev && \
     cd /setup && \
