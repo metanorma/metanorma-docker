@@ -124,6 +124,7 @@ RUN apt-get update && \
       libxml2-dev \
       libxslt-dev \
       zlib1g-dev \
+      libffi-dev \
       graphviz \
       libyaml-dev && \
     cd /setup && \
