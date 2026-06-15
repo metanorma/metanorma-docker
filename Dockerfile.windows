@@ -71,15 +71,6 @@ COPY --from=builder C:/tools/ruby34 C:/tools/ruby34
 # Adjust PATH
 RUN setx /M PATH "%PATH%;C:\tools\ruby34\bin"
 
-# Disable Ruby 3.4 Happy Eyeballs v2 (HEv2).
-# Ruby >= 3.4 enables HEv2 for Socket.tcp (the Net::HTTP path) by default. Inside
-# Windows containers it races/closes parallel sockets, leaving OpenSSL to call
-# SSL_connect on a torn-down fd -> Errno::ENOTSOCK ("An operation was attempted on
-# something that is not a socket"). This breaks every Net::HTTP-based client at
-# runtime (fontist font downloads, relaton bib lookups, etc.).
-# See: https://bugs.ruby-lang.org/issues/21104
-ENV RUBY_TCP_NO_FAST_FALLBACK="1"
-
 # Update fontist
 RUN fontist update
 

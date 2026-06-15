@@ -242,7 +242,13 @@ jobs:
           IMAGE_NAME: ${{ steps.loaded_image.outputs.full_name }}
           CONFIG_FILE: ${{ steps.config.outputs.file }}
         run: |
+          # Hyper-V isolation is required on Windows Server 2025: ltsc2025
+          # containers under the default *process* isolation have broken outbound
+          # TCP (ping works, SSL_connect fails with Errno::ENOTSOCK), which makes
+          # runtime font/relaton downloads fail. Hyper-V isolation restores TCP.
+          # See https://github.com/microsoft/Windows-Containers/issues/620
           MSYS_NO_PATHCONV=1 docker run --rm \
+            --isolation=hyperv \
             -v "$(pwd -W)/samples:C:/metanorma" \
             -w C:/metanorma \
             ${{ env.METANORMA_IMAGE_NAME }} \
