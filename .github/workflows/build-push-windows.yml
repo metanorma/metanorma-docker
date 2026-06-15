@@ -236,19 +236,61 @@ jobs:
           fi
         shell: bash
 
+      # DIAGNOSTIC (temporary): pin the exact failure boundary in-container.
+      # Runtime font/relaton downloads fail with Errno::ENOTSOCK at SSL_connect,
+      # but ONLY via Ruby Net::HTTP; git.exe works. This probe localizes it:
+      #  - tcp_connect           : does a plain TCP socket connect at all?
+      #  - nethttp_default       : baseline (non-blocking connect path) -> expect FAIL
+      #  - nethttp_open_timeout0 : blocking s.connect path (open_timeout=nil) -> KEY
+      #  - openssl_blocking      : raw blocking OpenSSL connect
+      #  - curl.exe              : native process control -> expect OK
+      # Interpreting: open_timeout=nil OK => clean in-Ruby fix (non-blocking path);
+      # all-Ruby FAIL but curl OK => environmental (Winsock), fontist must not change.
+      - name: Probe socket connectivity (diagnostic)
+        continue-on-error: true
+        env:
+          METANORMA_IMAGE_NAME: ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}
+        run: |
+          cat > probe.rb <<'RUBY'
+          require "net/http"; require "uri"; require "socket"; require "openssl"
+          host = "github.com"; port = 443
+          path = "/latofonts/lato-source/archive/refs/tags/v1.0.0.zip"
+          t = lambda do |label, &blk|
+            print "#{label}: "
+            begin
+              puts blk.call
+            rescue => e
+              puts "FAIL #{e.class}: #{e.message}"
+            end
+          end
+          puts "ruby #{RUBY_VERSION} #{RUBY_PLATFORM}"
+          t.call("tcp_connect")          { s = TCPSocket.new(host, port); s.close; "OK" }
+          t.call("nethttp_default")      { Net::HTTP.start(host, port, use_ssl: true) { |h| h.head(path).code } }
+          t.call("nethttp_open_timeout0") do
+            h = Net::HTTP.new(host, port); h.use_ssl = true; h.open_timeout = nil
+            h.start { h.head(path).code }
+          end
+          t.call("openssl_blocking") do
+            tcp = TCPSocket.new(host, port)
+            ssl = OpenSSL::SSL::SSLSocket.new(tcp); ssl.connect; ssl.close; "OK"
+          end
+          RUBY
+          echo "----- ruby probe -----"
+          MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd -W)/probe.rb:C:/probe.rb" \
+            ${{ env.METANORMA_IMAGE_NAME }} ruby C:/probe.rb || true
+          echo "----- curl probe (native process control) -----"
+          MSYS_NO_PATHCONV=1 docker run --rm ${{ env.METANORMA_IMAGE_NAME }} \
+            curl.exe -fsS -o NUL -w "curl: %{http_code}\n" \
+            https://github.com/latofonts/lato-source/archive/refs/tags/v1.0.0.zip || true
+        shell: bash
+
       - name: Run tests
         env:
           METANORMA_IMAGE_NAME: ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}
           IMAGE_NAME: ${{ steps.loaded_image.outputs.full_name }}
           CONFIG_FILE: ${{ steps.config.outputs.file }}
         run: |
-          # Hyper-V isolation is required on Windows Server 2025: ltsc2025
-          # containers under the default *process* isolation have broken outbound
-          # TCP (ping works, SSL_connect fails with Errno::ENOTSOCK), which makes
-          # runtime font/relaton downloads fail. Hyper-V isolation restores TCP.
-          # See https://github.com/microsoft/Windows-Containers/issues/620
           MSYS_NO_PATHCONV=1 docker run --rm \
-            --isolation=hyperv \
             -v "$(pwd -W)/samples:C:/metanorma" \
             -w C:/metanorma \
             ${{ env.METANORMA_IMAGE_NAME }} \
