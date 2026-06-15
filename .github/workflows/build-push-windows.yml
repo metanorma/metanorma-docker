@@ -251,7 +251,10 @@ jobs:
         env:
           METANORMA_IMAGE_NAME: ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}
         run: |
-          cat > probe.rb <<'RUBY'
+          # Windows containers only support DIRECTORY bind mounts, not single
+          # files, so put probe.rb in a dir and mount the dir.
+          mkdir -p probe_dir
+          cat > probe_dir/probe.rb <<'RUBY'
           require "net/http"; require "uri"; require "socket"; require "openssl"
           host = "github.com"; port = 443
           path = "/latofonts/lato-source/archive/refs/tags/v1.0.0.zip"
@@ -276,8 +279,8 @@ jobs:
           end
           RUBY
           echo "----- ruby probe -----"
-          MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd -W)/probe.rb:C:/probe.rb" \
-            ${{ env.METANORMA_IMAGE_NAME }} ruby C:/probe.rb || true
+          MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd -W)/probe_dir:C:/probe" \
+            ${{ env.METANORMA_IMAGE_NAME }} ruby C:/probe/probe.rb || true
           echo "----- curl probe (native process control) -----"
           MSYS_NO_PATHCONV=1 docker run --rm ${{ env.METANORMA_IMAGE_NAME }} \
             curl.exe -fsS -o NUL -w "curl: %{http_code}\n" \
