@@ -71,6 +71,17 @@ COPY --from=builder C:/tools/ruby34 C:/tools/ruby34
 # Adjust PATH
 RUN setx /M PATH "%PATH%;C:\tools\ruby34\bin"
 
+# TEST (metanorma-docker#236): override fontist with the Windows curl-fallback
+# fix. The runtime runs `metanorma` outside bundler, so a Gemfile pin would be
+# shadowed by the released gem — build + force-install the patched gem as the
+# system fontist instead. Pinned to an immutable commit for reproducibility.
+# Remove once the fix ships in a fontist release.
+RUN git clone https://github.com/fontist/fontist.git c:\fontist-src \
+    && cd /d c:\fontist-src \
+    && git checkout 1f71ffd056b456437f9f347e403a995fbd9dcd36 \
+    && gem build fontist.gemspec \
+    && gem install --local --force fontist-3.0.8.gem
+
 # Update fontist
 RUN fontist update
 
