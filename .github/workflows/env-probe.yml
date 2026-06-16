@@ -5,8 +5,12 @@ name: env-probe-enotsock
 # Net::HTTP HTTPS request and prints `RESULT: <code>` or `RESULT: FAIL <Errno>`.
 # Exp1 isolates the CONTAINER VERSION (ltsc2022 vs ltsc2025, same Ruby).
 # Exp2 isolates the RUBY BUILD (mswin vs ucrt vs mingw, same ltsc2025).
-# Dispatch manually from the Actions tab. Delete once the fix is chosen.
+# Auto-runs on push of THIS file (workflow_dispatch only works once a workflow is
+# on the default branch). Delete once the fix is chosen.
 on:
+  push:
+    paths:
+      - '.github/workflows/env-probe.yml'
   workflow_dispatch:
 
 jobs:
