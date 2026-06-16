@@ -1,12 +1,12 @@
 name: env-probe-enotsock
 
 # Cheap proof experiments for the ltsc2025 Ruby ENOTSOCK environment fix.
-# No ~2h image build — each job is a single `docker run` (~5-10 min): it does ONE
-# Net::HTTP HTTPS request and prints `RESULT: <code>` or `RESULT: FAIL <Errno>`.
+# No ~2h image build — each job is a single `docker run` (~5-10 min): it runs ONE
+# Net::HTTP HTTPS request (from a MOUNTED test.rb file to avoid command-line quote
+# mangling) and prints `RESULT: <code>` or `RESULT: FAIL <Errno>`.
 # Exp1 isolates the CONTAINER VERSION (ltsc2022 vs ltsc2025, same Ruby).
 # Exp2 isolates the RUBY BUILD (mswin vs ucrt vs mingw, same ltsc2025).
-# Auto-runs on push of THIS file (workflow_dispatch only works once a workflow is
-# on the default branch). Delete once the fix is chosen.
+# Auto-runs on push of THIS file. Delete once the fix is chosen.
 on:
   push:
     paths:
@@ -29,6 +29,16 @@ jobs:
         shell: bash
         run: |
           mkdir -p probe_dir
+          cat > probe_dir/test.rb <<'RUBY'
+          require "net/http"
+          require "uri"
+          begin
+            print "RESULT: "
+            puts Net::HTTP.get_response(URI("https://github.com")).code
+          rescue => e
+            puts "FAIL #{e.class} - #{e.message}"
+          end
+          RUBY
           cat > probe_dir/probe.ps1 <<'PS1'
           $ErrorActionPreference = 'Stop'
           [Net.ServicePointManager]::SecurityProtocol = 3072
@@ -36,7 +46,7 @@ jobs:
           Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
           choco install -y ruby --version=3.4.9.1 | Out-Null
           $env:Path = 'C:\tools\ruby34\bin;' + $env:Path
-          ruby -ropen-uri -e 'begin; print "RESULT: "; puts URI.open("https://rubygems.org/").status.inspect; rescue => e; puts "FAIL " + e.class.to_s + " - " + e.message; end'
+          ruby C:/probe/test.rb
           PS1
           MSYS_NO_PATHCONV=1 docker run --rm --isolation=process \
             -v "$(pwd -W)/probe_dir:C:/probe" \
@@ -56,6 +66,16 @@ jobs:
         shell: bash
         run: |
           mkdir -p probe_dir
+          cat > probe_dir/test.rb <<'RUBY'
+          require "net/http"
+          require "uri"
+          begin
+            print "RESULT: "
+            puts Net::HTTP.get_response(URI("https://github.com")).code
+          rescue => e
+            puts "FAIL #{e.class} - #{e.message}"
+          end
+          RUBY
           cat > probe_dir/probe.ps1 <<'PS1'
           $ErrorActionPreference = 'Stop'
           [Net.ServicePointManager]::SecurityProtocol = 3072
@@ -64,7 +84,7 @@ jobs:
           & C:\7zr.exe x C:\r.7z -oC:\rb | Out-Null
           $e = (Get-ChildItem -Recurse C:\rb -Filter ruby.exe | Select-Object -First 1).FullName
           Write-Host ("ruby.exe: " + $e)
-          & $e -e 'begin; require "net/http"; require "uri"; print "RESULT: "; puts Net::HTTP.get_response(URI("https://github.com")).code; rescue => x; puts "FAIL " + x.class.to_s; end'
+          & $e C:/probe/test.rb
           PS1
           MSYS_NO_PATHCONV=1 docker run --rm \
             -v "$(pwd -W)/probe_dir:C:/probe" \
