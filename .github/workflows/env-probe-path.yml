@@ -1,16 +1,17 @@
 name: env-probe-path
 
-# CONFIRMED root cause: Ruby is x64-mingw-ucrt (UCRT ABI), compiled against
-# OpenSSL 3.6.3, but the build leaves a msvcrt OpenSSL 3.5.1 in Ruby's ext dir
-# (ruby34\lib\ruby\3.4.0\x64-mingw-ucrt\) because the Dockerfile installs the
-# mingw-w64-x86_64-* (MINGW64/msvcrt) toolchain for a UCRT Ruby. A msvcrt libssl
-# handing sockets to a UCRT Ruby => Errno::ENOTSOCK on every HTTPS connect.
-# This probe runs ON the published image (no 2h build):
-#  - pin-ucrt-openssl-3.6.3 : install the PINNED matching UCRT OpenSSL 3.6.3-1
-#    (mingw-w64-ucrt-x86_64-openssl, frozen URL on repo.msys2.org) over Ruby's
-#    wrong 3.5.1, then run Net::HTTP. RESULT: 200 => the Dockerfile fix is to pin
-#    this exact UCRT OpenSSL into Ruby (won't regress on rebuild).
-# Delete once the fix is confirmed.
+# RULED OUT (proven on the published image): OpenSSL version AND ABI. Installing
+# the exact matching UCRT OpenSSL 3.6.3 (LOADED_NOW confirmed) STILL fails with
+# Errno::ENOTSOCK. Also ruled out: PATH ordering, the OS (bare ltsc2025 + fresh
+# Ruby works). Plain TCP works; only OpenSSL's own Winsock calls hit ENOTSOCK.
+# So the image breaks the socket-fd -> SOCKET-handle handoff for TLS. Two classes
+# remain: (a) the copied/built Ruby is corrupted, or (b) the image environment.
+# This probe runs ON the published image (no 2h build) to discriminate:
+#  - pristine-ruby-in-image : install a fresh RubyInstaller (own complete DLL set)
+#    into the image, run Net::HTTP. 200 => copied/built Ruby is broken (fix build);
+#    FAIL => the environment is broken (bisect installed components).
+#  - image-ruby-baseline    : the image's own Ruby, expect FAIL (same-run control).
+# Delete once the culprit is found.
 on:
   push:
     paths:
@@ -25,8 +26,10 @@ jobs:
       fail-fast: false
       matrix:
         candidate:
-          - name: pin-ucrt-openssl-3.6.3
-            ps: "$pkg='mingw-w64-ucrt-x86_64-openssl-3.6.3-1-any.pkg.tar.zst'; iwr ('https://repo.msys2.org/mingw/ucrt64/'+$pkg) -OutFile ('C:\\'+$pkg) -UseBasicParsing; New-Item -ItemType Directory -Force C:\\ossl | Out-Null; tar -xf ('C:\\'+$pkg) -C C:\\ossl; $ssl=(Get-ChildItem -Recurse C:\\ossl -Filter libssl-3-x64.dll | Select-Object -First 1).FullName; $cry=(Get-ChildItem -Recurse C:\\ossl -Filter libcrypto-3-x64.dll | Select-Object -First 1).FullName; Write-Host ('installing ssl=' + $ssl); Copy-Item $ssl,$cry 'C:\\tools\\ruby34\\lib\\ruby\\3.4.0\\x64-mingw-ucrt\\' -Force; ruby -ropenssl -e 'STDOUT.puts %q{LOADED_NOW: } + OpenSSL::OPENSSL_LIBRARY_VERSION'; ruby C:/probe/test.rb"
+          - name: pristine-ruby-in-image
+            ps: "$u='https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-3.4.9-1/rubyinstaller-3.4.9-1-x64.exe'; iwr $u -OutFile C:\\ri.exe -UseBasicParsing; Start-Process C:\\ri.exe -ArgumentList '/verysilent','/norestart','/suppressmsgboxes','/dir=C:\\fresh-ruby','/mergetasks=!ridkinstall' -Wait; if (Test-Path C:\\fresh-ruby\\bin\\ruby.exe) { Write-Host ('fresh ruby: ' + (& C:\\fresh-ruby\\bin\\ruby.exe -v)); & C:\\fresh-ruby\\bin\\ruby.exe C:/probe/test.rb } else { Write-Host 'FRESH RUBY INSTALL FAILED' }"
+          - name: image-ruby-baseline
+            ps: "ruby C:/probe/test.rb"
     steps:
       - name: Probe PATH/DLL hypothesis on the published image
         continue-on-error: true
