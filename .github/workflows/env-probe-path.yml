@@ -26,7 +26,7 @@ jobs:
           - name: minimal-path
             ps: "$env:Path = 'C:\\tools\\ruby34\\bin;C:\\Windows\\System32;C:\\Windows'; ruby C:/probe/test.rb"
           - name: diag
-            ps: "Write-Host ('PATH=' + $env:Path); ruby -ropenssl -e 'STDOUT.puts %q{OPENSSL_LIB: } + OpenSSL::OPENSSL_LIBRARY_VERSION'; ruby C:/probe/test.rb"
+            ps: "Write-Host ('PATH=' + $env:Path); ruby -ropenssl -e 'STDOUT.puts %q{COMPILED: } + OpenSSL::OPENSSL_VERSION; STDOUT.puts %q{LOADED: } + OpenSSL::OPENSSL_LIBRARY_VERSION'; ruby C:/probe/test.rb"
     steps:
       - name: Probe PATH/DLL hypothesis on the published image
         continue-on-error: true
