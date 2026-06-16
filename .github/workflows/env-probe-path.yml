@@ -1,0 +1,54 @@
+name: env-probe-path
+
+# The image's ENVIRONMENT (not the Ruby install) breaks sockets: a fresh Ruby
+# fails in the metanorma image but works on bare ltsc2025. Prime suspect: a DLL
+# conflict on PATH (wrong libssl/libcrypto). Runs ON the published image (no build):
+#  - control      : full PATH        -> expect RESULT: FAIL
+#  - minimal-path : ruby bin+System32 -> if RESULT: 200, it's a PATH/DLL conflict
+#  - diag         : print PATH + the OpenSSL lib Ruby actually loaded
+# Delete once the culprit is found.
+on:
+  push:
+    paths:
+      - '.github/workflows/env-probe-path.yml'
+  workflow_dispatch:
+
+jobs:
+  path-probe:
+    name: "Path ${{ matrix.candidate.name }}"
+    runs-on: windows-2025
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate:
+          - name: control
+            ps: "ruby C:/probe/test.rb"
+          - name: minimal-path
+            ps: "$env:Path = 'C:\\tools\\ruby34\\bin;C:\\Windows\\System32;C:\\Windows'; ruby C:/probe/test.rb"
+          - name: diag
+            ps: "Write-Host ('PATH=' + $env:Path); ruby -ropenssl -e 'STDOUT.puts %q{OPENSSL_LIB: } + OpenSSL::OPENSSL_LIBRARY_VERSION'; ruby C:/probe/test.rb"
+    steps:
+      - name: Probe PATH/DLL hypothesis on the published image
+        continue-on-error: true
+        shell: bash
+        run: |
+          mkdir -p probe_dir
+          cat > probe_dir/test.rb <<'RUBY'
+          require "net/http"
+          require "uri"
+          begin
+            print "RESULT: "
+            puts Net::HTTP.get_response(URI("https://github.com")).code
+          rescue => e
+            puts "FAIL #{e.class} - #{e.message}"
+          end
+          RUBY
+          cat > probe_dir/fix.ps1 <<'PS1'
+          $ErrorActionPreference = 'Continue'
+          [Net.ServicePointManager]::SecurityProtocol = 3072
+          ${{ matrix.candidate.ps }}
+          PS1
+          MSYS_NO_PATHCONV=1 docker run --rm \
+            -v "$(pwd -W)/probe_dir:C:/probe" \
+            metanorma/metanorma:windows-ltsc2025 \
+            powershell -ExecutionPolicy Bypass -File C:/probe/fix.ps1
