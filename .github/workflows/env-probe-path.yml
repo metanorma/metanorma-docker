@@ -1,12 +1,16 @@
 name: env-probe-path
 
-# The image's ENVIRONMENT (not the Ruby install) breaks sockets: a fresh Ruby
-# fails in the metanorma image but works on bare ltsc2025. Prime suspect: a DLL
-# conflict on PATH (wrong libssl/libcrypto). Runs ON the published image (no build):
-#  - control      : full PATH        -> expect RESULT: FAIL
-#  - minimal-path : ruby bin+System32 -> if RESULT: 200, it's a PATH/DLL conflict
-#  - diag         : print PATH + the OpenSSL lib Ruby actually loaded
-# Delete once the culprit is found.
+# CONFIRMED root cause: Ruby is x64-mingw-ucrt (UCRT ABI), compiled against
+# OpenSSL 3.6.3, but the build leaves a msvcrt OpenSSL 3.5.1 in Ruby's ext dir
+# (ruby34\lib\ruby\3.4.0\x64-mingw-ucrt\) because the Dockerfile installs the
+# mingw-w64-x86_64-* (MINGW64/msvcrt) toolchain for a UCRT Ruby. A msvcrt libssl
+# handing sockets to a UCRT Ruby => Errno::ENOTSOCK on every HTTPS connect.
+# This probe runs ON the published image (no 2h build):
+#  - pin-ucrt-openssl-3.6.3 : install the PINNED matching UCRT OpenSSL 3.6.3-1
+#    (mingw-w64-ucrt-x86_64-openssl, frozen URL on repo.msys2.org) over Ruby's
+#    wrong 3.5.1, then run Net::HTTP. RESULT: 200 => the Dockerfile fix is to pin
+#    this exact UCRT OpenSSL into Ruby (won't regress on rebuild).
+# Delete once the fix is confirmed.
 on:
   push:
     paths:
@@ -21,10 +25,8 @@ jobs:
       fail-fast: false
       matrix:
         candidate:
-          - name: diag
-            ps: "ruby -ropenssl -e 'STDOUT.puts %q{COMPILED: } + OpenSSL::OPENSSL_VERSION; STDOUT.puts %q{LOADED: } + OpenSSL::OPENSSL_LIBRARY_VERSION'"
-          - name: locate-ssl-dlls
-            ps: "Get-ChildItem -Path C:\\tools,C:\\Windows\\System32,'C:\\Program Files' -Recurse -Include libssl*.dll,libcrypto*.dll -ErrorAction SilentlyContinue | ForEach-Object { Write-Host ('DLL ' + $_.VersionInfo.ProductVersion + '  ' + $_.FullName) }"
+          - name: pin-ucrt-openssl-3.6.3
+            ps: "$pkg='mingw-w64-ucrt-x86_64-openssl-3.6.3-1-any.pkg.tar.zst'; iwr ('https://repo.msys2.org/mingw/ucrt64/'+$pkg) -OutFile ('C:\\'+$pkg) -UseBasicParsing; New-Item -ItemType Directory -Force C:\\ossl | Out-Null; tar -xf ('C:\\'+$pkg) -C C:\\ossl; $ssl=(Get-ChildItem -Recurse C:\\ossl -Filter libssl-3-x64.dll | Select-Object -First 1).FullName; $cry=(Get-ChildItem -Recurse C:\\ossl -Filter libcrypto-3-x64.dll | Select-Object -First 1).FullName; Write-Host ('installing ssl=' + $ssl); Copy-Item $ssl,$cry 'C:\\tools\\ruby34\\lib\\ruby\\3.4.0\\x64-mingw-ucrt\\' -Force; ruby -ropenssl -e 'STDOUT.puts %q{LOADED_NOW: } + OpenSSL::OPENSSL_LIBRARY_VERSION'; ruby C:/probe/test.rb"
     steps:
       - name: Probe PATH/DLL hypothesis on the published image
         continue-on-error: true
