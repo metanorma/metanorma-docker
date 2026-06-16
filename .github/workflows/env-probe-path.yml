@@ -21,12 +21,10 @@ jobs:
       fail-fast: false
       matrix:
         candidate:
-          - name: control
-            ps: "ruby C:/probe/test.rb"
-          - name: minimal-path
-            ps: "$env:Path = 'C:\\tools\\ruby34\\bin;C:\\Windows\\System32;C:\\Windows'; ruby C:/probe/test.rb"
           - name: diag
-            ps: "Write-Host ('PATH=' + $env:Path); ruby -ropenssl -e 'STDOUT.puts %q{COMPILED: } + OpenSSL::OPENSSL_VERSION; STDOUT.puts %q{LOADED: } + OpenSSL::OPENSSL_LIBRARY_VERSION'; ruby C:/probe/test.rb"
+            ps: "ruby -ropenssl -e 'STDOUT.puts %q{COMPILED: } + OpenSSL::OPENSSL_VERSION; STDOUT.puts %q{LOADED: } + OpenSSL::OPENSSL_LIBRARY_VERSION'"
+          - name: locate-ssl-dlls
+            ps: "Get-ChildItem -Path C:\\tools,C:\\Windows\\System32,'C:\\Program Files' -Recurse -Include libssl*.dll,libcrypto*.dll -ErrorAction SilentlyContinue | ForEach-Object { Write-Host ('DLL ' + $_.VersionInfo.ProductVersion + '  ' + $_.FullName) }"
     steps:
       - name: Probe PATH/DLL hypothesis on the published image
         continue-on-error: true
