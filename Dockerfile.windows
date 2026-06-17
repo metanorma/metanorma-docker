@@ -68,6 +68,13 @@ RUN python -m pip install --upgrade pip && \
 # Copy built metanorma from builder
 COPY --from=builder C:/tools/ruby34 C:/tools/ruby34
 
+# Copy the Gemfile + lockfile so the toolchain runs inside bundler at runtime.
+# Some transitive relaton gems are pulled from git branches (to drop an unnecessary
+# `openssl` gem pin); git-sourced gems live under ruby34/.../bundler/gems and are
+# only visible through bundler, not plain RubyGems. Running via `bundle exec`
+# (see ENTRYPOINT) puts them on the load path.
+COPY --from=builder c:/setup c:/setup
+
 # Adjust PATH
 RUN setx /M PATH "%PATH%;C:\tools\ruby34\bin"
 
@@ -80,6 +87,12 @@ WORKDIR c:/metanorma
 # Java encoding fix (https://github.com/metanorma/metanorma-docker/issues/202)
 ENV _JAVA_OPTIONS="-Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8"
 
-# Entrypoint and default command
-ENTRYPOINT ["cmd.exe", "/c"]
+# Run the toolchain inside bundler so git-sourced gems resolve (see COPY c:/setup
+# above). WORKDIR is the mounted document dir, so point bundler at the Gemfile.
+ENV BUNDLE_GEMFILE="c:/setup/Gemfile"
+
+# Entrypoint and default command. `bundle exec` lives in the ENTRYPOINT (not CMD)
+# so it wraps user-supplied commands too: `docker run <img> metanorma site generate`
+# replaces CMD but keeps the ENTRYPOINT, becoming `bundle exec metanorma site ...`.
+ENTRYPOINT ["cmd.exe", "/c", "bundle", "exec"]
 CMD ["metanorma"]
