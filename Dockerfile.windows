@@ -16,11 +16,17 @@ RUN powershell -Command \
 RUN choco install -y git wget 7zip msys2 make curl \
     && refreshenv
 
-# Install MinGW and MSYS2 dependencies (mingw-w64-x86_64-libyaml is needed for the psych gem)
-RUN setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin" \
+# Install MinGW and MSYS2 dependencies. RubyInstaller Ruby is x64-mingw-UCRT, so the
+# toolchain MUST be the UCRT environment (mingw-w64-ucrt-x86_64-*), not msvcrt
+# (mingw-w64-x86_64-*). Native gem extensions compiled in the msvcrt env (notably the
+# transitive openssl gem) link the wrong C runtime for a UCRT Ruby, which breaks the
+# socket fd<->SOCKET handoff inside OpenSSL -> Errno::ENOTSOCK on every HTTPS request.
+# Building with the matching UCRT toolchain produces a working openssl.so, so the gem
+# stays installed (satisfies relaton's `openssl ~> 3.3.2`) and HTTPS works.
+RUN setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\ucrt64\bin" \
     && echo "Updating MSYS2..." \
     && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -Syuu" \
-    && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-libyaml"
+    && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -S base-devel mingw-w64-ucrt-x86_64-toolchain mingw-w64-ucrt-x86_64-libyaml"
 
 ARG RUBY_VERSION=3.4.9.1
 
@@ -34,17 +40,6 @@ RUN gem install "bundler:~>2.6.5" fontist pkg-config
 COPY metanorma-windows/Gemfile c:/setup/Gemfile
 
 RUN cd c:/setup && bundle install
-
-# Remove the transitive `openssl` gem. bundle install compiles its native
-# extension here; on a UCRT Ruby that msvcrt-built openssl.so shadows Ruby's
-# working built-in openssl and breaks every HTTPS request with Errno::ENOTSOCK
-# (a CRT fd<->socket-handle mismatch; plain TCP is unaffected). metanorma runs
-# outside bundler, so Ruby falls back to its working built-in openssl (3.5.1).
-# Verified on the published image via the repro-down workflow: removing the gem
-# turns fontist's Down download from ENOTSOCK -> OK.
-# `; exit 0`: the built-in openssl is a default gem that cannot be uninstalled,
-# so the command prints a harmless message and returns non-zero even on success.
-RUN powershell -Command "gem uninstall openssl -aIx --force; exit 0"
 
 # Delete gem cache so it doesn't not get copied to the final image
 RUN powershell -Command "Remove-Item -Path 'C:\tools\ruby34\lib\ruby\gems\3.4.0\cache' -Recurse -Force -ErrorAction SilentlyContinue"
