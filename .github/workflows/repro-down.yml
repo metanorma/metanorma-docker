@@ -1,0 +1,55 @@
+name: repro-down
+
+# Fast (~10 min) reproduction of the fontist Windows ENOTSOCK using the SAME `Down`
+# gem fontist uses, on the published image — no 2h build. It downloads the exact
+# font archive that fails the `iso` flavor, twice:
+#   BEFORE: with the transitive openssl gem present  -> expect FAIL (ENOTSOCK)
+#   AFTER:  after `gem uninstall openssl`             -> expect RESULT: OK
+# This proves the fix on fontist's real download path before touching the Dockerfile.
+on:
+  push:
+    paths:
+      - '.github/workflows/repro-down.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: repro-down-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repro:
+    name: "Down ENOTSOCK repro"
+    runs-on: windows-2025
+    steps:
+      - name: Repro fontist Down download + verify the openssl-gem fix
+        continue-on-error: true
+        shell: bash
+        run: |
+          mkdir -p probe_dir
+          cat > probe_dir/down_test.rb <<'RUBY'
+          require "down"
+          url = ARGV[0] || "https://gitlab.com/fontmirror/archive/-/raw/master/EUupdate.EXE"
+          begin
+            print "RESULT: "
+            file = Down.download(url)
+            puts "OK #{File.size(file.path)} bytes <- #{url}"
+            file.close
+          rescue Exception => e
+            puts "FAIL #{e.class} - #{e.message}"
+          end
+          RUBY
+          cat > probe_dir/run.ps1 <<'PS1'
+          $ErrorActionPreference = 'Continue'
+          [Net.ServicePointManager]::SecurityProtocol = 3072
+          Write-Host '--- down + openssl gems in image ---'; gem list down openssl
+          Write-Host '=== BEFORE (openssl gem present): fontist Down path ==='
+          ruby C:/probe/down_test.rb
+          Write-Host 'Applying the proposed fix: gem uninstall openssl -aIx --force'
+          gem uninstall openssl -aIx --force
+          Write-Host '=== AFTER (built-in openssl): fontist Down path ==='
+          ruby C:/probe/down_test.rb
+          PS1
+          MSYS_NO_PATHCONV=1 docker run --rm \
+            -v "$(pwd -W)/probe_dir:C:/probe" \
+            metanorma/metanorma:windows-ltsc2025 \
+            powershell -ExecutionPolicy Bypass -File C:/probe/run.ps1
