@@ -35,17 +35,6 @@ COPY metanorma-windows/Gemfile c:/setup/Gemfile
 
 RUN cd c:/setup && bundle install
 
-# Remove the transitive `openssl` gem. bundle install compiles its native
-# extension here; on Windows that openssl.so is built against the wrong C runtime
-# (msvcrt) for a UCRT Ruby and shadows Ruby's working built-in openssl, so every
-# HTTPS request fails with Errno::ENOTSOCK (a CRT fd<->socket-handle mismatch;
-# plain TCP is unaffected). metanorma runs outside bundler, so Ruby falls back to
-# its working built-in openssl (3.5.1). Verified on the published image:
-# removing the gem turns HTTPS FAIL into 200.
-# `; exit 0`: the built-in openssl is a default gem that cannot be uninstalled, so
-# the command prints a harmless message and returns non-zero even on success.
-RUN powershell -Command "gem uninstall openssl -aIx --force; exit 0"
-
 # Delete gem cache so it doesn't not get copied to the final image
 RUN powershell -Command "Remove-Item -Path 'C:\tools\ruby34\lib\ruby\gems\3.4.0\cache' -Recurse -Force -ErrorAction SilentlyContinue"
 
