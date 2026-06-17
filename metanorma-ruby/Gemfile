@@ -1,20 +1,3 @@
 source "https://rubygems.org"
 
 gem "metanorma-cli", "= 1.16.4"
-
-# This Gemfile is shared by all images (the per-image Gemfiles are symlinks to it).
-#
-# Two transitive relaton gems pin the `openssl` gem
-# (`add_dependency "openssl", "~> 3.3.2"`). `openssl` is a default gem that ships
-# with Ruby, so this pin is unnecessary: it forces bundler to install the openssl
-# gem and compile its native extension instead of using Ruby's working built-in.
-# On Windows Ruby 3.4 that compiled openssl.so is built against msvcrt, shadows the
-# UCRT built-in, and breaks every HTTPS request with Errno::ENOTSOCK. Dropping the
-# pin lets every platform use its built-in openssl (the relaton branches below
-# remove it unconditionally, matching the intended upstream fix).
-#
-# TEMPORARY: remove this block once relaton-iso / relaton-index ship openssl-free releases.
-#   https://github.com/relaton/relaton-iso/tree/fix/drop-openssl-dep
-#   https://github.com/relaton/relaton-index/tree/fix/drop-openssl-dep
-gem "relaton-iso",   git: "https://github.com/relaton/relaton-iso.git",   branch: "fix/drop-openssl-dep"
-gem "relaton-index", git: "https://github.com/relaton/relaton-index.git", branch: "fix/drop-openssl-dep"
