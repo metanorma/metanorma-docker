@@ -1,11 +1,12 @@
 name: repro-down
 
-# Fast (~10 min) reproduction of the fontist Windows ENOTSOCK using the SAME `Down`
-# gem fontist uses, on the published image — no 2h build. It downloads the exact
-# font archive that fails the `iso` flavor, twice:
-#   BEFORE: with the transitive openssl gem present  -> expect FAIL (ENOTSOCK)
-#   AFTER:  after `gem uninstall openssl`             -> expect RESULT: OK
-# This proves the fix on fontist's real download path before touching the Dockerfile.
+# Verifies the UCRT-toolchain fix on the PUBLISHED image (~20 min, no 2h build):
+# recompiles the transitive openssl gem with the correct UCRT toolchain (matching
+# RubyInstaller's x64-mingw-ucrt Ruby) and confirms fontist's `Down` HTTPS download
+# works — WITHOUT removing the gem, so `openssl ~> 3.3.2` stays satisfied (no
+# Gem::MissingSpecError). Mirrors what the Dockerfile builder now does.
+#   BEFORE: openssl gem as shipped (msvcrt)   -> expect RESULT: FAIL (ENOTSOCK)
+#   AFTER:  openssl gem recompiled with UCRT  -> expect RESULT: OK  + `metanorma --version` works
 on:
   push:
     paths:
@@ -18,10 +19,10 @@ concurrency:
 
 jobs:
   repro:
-    name: "Down ENOTSOCK repro"
+    name: "UCRT openssl rebuild repro"
     runs-on: windows-2025
     steps:
-      - name: Repro fontist Down download + verify the openssl-gem fix
+      - name: Recompile openssl with the UCRT toolchain and verify fontist Down
         continue-on-error: true
         shell: bash
         run: |
@@ -41,12 +42,20 @@ jobs:
           cat > probe_dir/run.ps1 <<'PS1'
           $ErrorActionPreference = 'Continue'
           [Net.ServicePointManager]::SecurityProtocol = 3072
-          Write-Host '--- down + openssl gems in image ---'; gem list down openssl
-          Write-Host '=== BEFORE (openssl gem present): fontist Down path ==='
+          Write-Host '--- openssl gem (as shipped) ---'; gem list openssl
+          Write-Host '=== BEFORE (msvcrt openssl gem): fontist Down path ==='
           ruby C:/probe/down_test.rb
-          Write-Host 'Applying the proposed fix: gem uninstall openssl -aIx --force'
-          gem uninstall openssl -aIx --force
-          Write-Host '=== AFTER (built-in openssl): fontist Down path ==='
+          Write-Host '=== install msys2 + UCRT toolchain (mirrors the Dockerfile builder fix) ==='
+          choco install -y msys2 | Out-Null
+          $env:Path = 'C:\tools\msys64\usr\bin;C:\tools\msys64\ucrt64\bin;' + $env:Path
+          C:\tools\msys64\usr\bin\bash.exe -lc "pacman --noconfirm -Syuu"
+          C:\tools\msys64\usr\bin\bash.exe -lc "pacman --noconfirm -S base-devel mingw-w64-ucrt-x86_64-toolchain mingw-w64-ucrt-x86_64-libyaml"
+          Write-Host '=== recompile openssl 3.3.3 with the UCRT toolchain ==='
+          gem install openssl -v 3.3.3 --force
+          Write-Host '--- openssl gem (after recompile) ---'; gem list openssl
+          Write-Host '=== activation check: metanorma loads the openssl ~> 3.3.2 tree (was MissingSpecError) ==='
+          metanorma --version
+          Write-Host '=== AFTER (UCRT-recompiled openssl gem): fontist Down path ==='
           ruby C:/probe/down_test.rb
           PS1
           MSYS_NO_PATHCONV=1 docker run --rm \
