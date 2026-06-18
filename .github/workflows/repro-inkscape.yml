@@ -1,13 +1,12 @@
 name: repro-inkscape
 
-# Fast (~10 min) diagnosis of the iho/ogc SVG->EMF failure on the PUBLISHED Windows
-# image -- no 2h build. First probe proved it is NOT a GUI-vs-console issue: BOTH
-# inkscape.exe AND inkscape.com exit with -1073741515 (0xC0000135 STATUS_DLL_NOT_FOUND)
-# -- Inkscape can't even start, a runtime DLL is missing (the choco shim returns 0,
-# masking it). This probe pinpoints/fixes the missing dependency:
-#   - run from inkscape\bin (DLL-search-path check)
-#   - check + install the VC++ redistributable, then retest
-# Expect one of these to flip emf=True -> that's the Dockerfile fix.
+# Verify the Inkscape fix on the PUBLISHED Windows image (~10 min, no 2h build).
+# Root cause (proven): Inkscape 1.4.4 imports OPENGL32.dll at load time, but Windows
+# Server Core ships NO OpenGL -> inkscape can't start (exit -1073741515 STATUS_DLL_NOT_FOUND)
+# -> SVG->EMF fails -> iho/ogc fail. The ext-ms-win-* "NOT_FOUND" are apiset false positives.
+# Fix candidate: drop Mesa3D's software opengl32.dll into Inkscape\bin. This probe proves it:
+#   BEFORE -> exit -1073741515, emf=False
+#   AFTER (opengl32.dll present) -> exit 0, emf=True
 on:
   push:
     paths:
@@ -20,10 +19,10 @@ concurrency:
 
 jobs:
   repro:
-    name: "Inkscape SVG->EMF repro"
+    name: "Inkscape OpenGL fix verify"
     runs-on: windows-2025
     steps:
-      - name: Identify Inkscape's missing DLL via dependency walker
+      - name: Verify Mesa software OpenGL fixes inkscape SVG->EMF
         continue-on-error: true
         shell: bash
         run: |
@@ -31,20 +30,31 @@ jobs:
           cat > probe_dir/run.ps1 <<'PS1'
           $ErrorActionPreference = 'Continue'
           [Net.ServicePointManager]::SecurityProtocol = 3072
-          $ink = 'C:\Program Files\Inkscape\bin\inkscape.exe'
-          Write-Host ('=== inkscape version: ' + (Get-Item $ink).VersionInfo.ProductVersion + ' ===')
-          Write-Host '=== fetch lucasg Dependencies (latest x64) ==='
-          $rel = (Invoke-WebRequest 'https://api.github.com/repos/lucasg/Dependencies/releases/latest' -UseBasicParsing -Headers @{'User-Agent'='ci'}).Content | ConvertFrom-Json
-          $url = ($rel.assets | Where-Object { $_.name -match 'x64_Release\.zip$' } | Select-Object -First 1).browser_download_url
-          Write-Host "url: $url"
-          Invoke-WebRequest $url -OutFile C:\probe\dep.zip -UseBasicParsing
-          Expand-Archive C:\probe\dep.zip -DestinationPath C:\probe\dep -Force
-          $dep = (Get-ChildItem -Recurse C:\probe\dep -Filter Dependencies.exe | Select-Object -First 1).FullName
-          Write-Host "tool: $dep"
-          Write-Host '=== NOT_FOUND modules in inkscape.exe dependency chain ==='
-          & $dep -depth 3 -chain $ink 2>&1 | Select-String -Pattern "NOT_FOUND" | Select-Object -First 40 | Out-Host
-          Write-Host '=== (fallback) direct imports listing ==='
-          & $dep -modules $ink 2>&1 | Select-String -Pattern "NOT_FOUND|NotFound|Missing" | Select-Object -First 20 | Out-Host
+          $bin = 'C:\Program Files\Inkscape\bin'
+          '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="red"/></svg>' | Set-Content C:\probe\t.svg
+          function Conv($label, $out) {
+            Remove-Item $out -ErrorAction SilentlyContinue
+            $p = Start-Process -FilePath "$bin\inkscape.com" -ArgumentList '--export-type=emf', "--export-filename=$out", 'C:\probe\t.svg' -Wait -NoNewWindow -PassThru
+            Write-Host ("  [$label] exit=$($p.ExitCode)  emf=" + (Test-Path $out))
+          }
+          Write-Host '=== BEFORE (no OpenGL) -> expect exit=-1073741515 emf=False ==='
+          Conv 'before' 'C:\probe\before.emf'
+          Write-Host '=== install 7zip + fetch Mesa3D software OpenGL ==='
+          choco install -y 7zip 2>&1 | Select-String -Pattern "install|already" | Out-Host
+          $rel = (Invoke-WebRequest 'https://api.github.com/repos/pal1000/mesa-dist-win/releases/latest' -UseBasicParsing -Headers @{'User-Agent'='ci'}).Content | ConvertFrom-Json
+          $url = ($rel.assets | Where-Object { $_.name -match 'release-msvc\.7z$' } | Select-Object -First 1).browser_download_url
+          Write-Host "mesa: $url"
+          Invoke-WebRequest $url -OutFile C:\probe\mesa.7z -UseBasicParsing
+          & 'C:\Program Files\7-Zip\7z.exe' x C:\probe\mesa.7z -oC:\probe\mesa -y | Out-Null
+          $ogl = Get-ChildItem -Recurse C:\probe\mesa -Filter opengl32.dll -EA SilentlyContinue | Where-Object { $_.FullName -match '\\x64\\' } | Select-Object -First 1
+          Write-Host ("opengl32.dll: " + $ogl.FullName)
+          $md = $ogl.Directory.FullName
+          Write-Host '=== AFTER opengl32.dll only -> expect exit=0 emf=True ==='
+          Copy-Item "$md\opengl32.dll" "$bin\opengl32.dll" -Force
+          Conv 'after-opengl32-only' 'C:\probe\after1.emf'
+          Write-Host '=== AFTER all mesa x64 dlls (in case companions are needed) ==='
+          Copy-Item "$md\*.dll" "$bin\" -Force
+          Conv 'after-all-mesa' 'C:\probe\after2.emf'
           PS1
           MSYS_NO_PATHCONV=1 docker run --rm \
             -v "$(pwd -W)/probe_dir:C:/probe" \
