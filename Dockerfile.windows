@@ -60,9 +60,17 @@ RUN powershell -Command \
     Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
 # Install build and runtime dependencies using Chocolatey
-RUN choco install -y inkscape openjdk17 python3 git graphviz \
+RUN choco install -y inkscape openjdk17 python3 git graphviz 7zip \
     && choco cache remove \
     && refreshenv
+
+# Windows Server Core ships no OpenGL, but Inkscape imports opengl32.dll at load
+# time, so it can't start (STATUS_DLL_NOT_FOUND) and SVG->EMF image conversion
+# (vectory/isodoc) fails for flavors like iho/ogc. Install Mesa3D's software OpenGL
+# (opengl32.dll + its companion DLLs) into Inkscape's bin. Verified on the published
+# image: the full Mesa x64 DLL set makes inkscape SVG->EMF succeed (opengl32.dll
+# alone is not enough -- it has its own dependencies).
+RUN powershell -Command "[Net.ServicePointManager]::SecurityProtocol = 3072; Invoke-WebRequest 'https://github.com/pal1000/mesa-dist-win/releases/download/26.1.2/mesa3d-26.1.2-release-msvc.7z' -OutFile C:\mesa.7z -UseBasicParsing; & 'C:\Program Files\7-Zip\7z.exe' x C:\mesa.7z -oC:\mesa -y; Copy-Item C:\mesa\x64\*.dll 'C:\Program Files\Inkscape\bin\' -Force; Remove-Item C:\mesa.7z, C:\mesa -Recurse -Force"
 
 # Install XML2RFC
 RUN python -m pip install --upgrade pip && \
