@@ -1,14 +1,13 @@
 name: repro-inkscape
 
-# Fast (~10 min) reproduction of the iho/ogc image-conversion failure on the
-# PUBLISHED Windows image -- no 2h build. metanorma (vectory -> Ukiryu) shells out
-# to inkscape.EXE for SVG->EMF, but on Windows inkscape.exe is the GUI launcher,
-# which returns exit 0 WITHOUT producing the .emf (the CI signature). The console
-# inkscape.com does the CLI work. Ukiryu's locator forces ".exe" on Windows
-# (executable_locator.rb: "prioritizes .exe over .com"), so it picks the GUI one.
-# This probe proves it on real Windows:
-#   inkscape.exe / choco shim -> emf_created = False   (the bug)
-#   inkscape.com              -> emf_created = True    (the fix direction)
+# Fast (~10 min) diagnosis of the iho/ogc SVG->EMF failure on the PUBLISHED Windows
+# image -- no 2h build. First probe proved it is NOT a GUI-vs-console issue: BOTH
+# inkscape.exe AND inkscape.com exit with -1073741515 (0xC0000135 STATUS_DLL_NOT_FOUND)
+# -- Inkscape can't even start, a runtime DLL is missing (the choco shim returns 0,
+# masking it). This probe pinpoints/fixes the missing dependency:
+#   - run from inkscape\bin (DLL-search-path check)
+#   - check + install the VC++ redistributable, then retest
+# Expect one of these to flip emf=True -> that's the Dockerfile fix.
 on:
   push:
     paths:
@@ -24,31 +23,33 @@ jobs:
     name: "Inkscape SVG->EMF repro"
     runs-on: windows-2025
     steps:
-      - name: inkscape.exe vs inkscape.com on the published image
+      - name: Inkscape STATUS_DLL_NOT_FOUND - find the missing runtime dependency
         continue-on-error: true
         shell: bash
         run: |
           mkdir -p probe_dir
           cat > probe_dir/run.ps1 <<'PS1'
           $ErrorActionPreference = 'Continue'
-          function Try-Convert($exe, $out) {
-            if (-not (Test-Path $exe)) { Write-Host "  MISSING: $exe"; return }
-            Remove-Item $out -ErrorAction SilentlyContinue
-            $p = Start-Process -FilePath $exe -ArgumentList '--export-type=emf', "--export-filename=$out", 'C:\probe\t.svg' -Wait -NoNewWindow -PassThru
-            Write-Host ("  $exe   exit=$($p.ExitCode)  emf_created=" + (Test-Path $out))
-          }
-          Write-Host '=== where inkscape resolves (Ukiryu uses: where inkscape.exe) ==='
-          where.exe inkscape 2>&1 | Out-Host
-          where.exe inkscape.exe 2>&1 | Out-Host
-          where.exe inkscape.com 2>&1 | Out-Host
-          Write-Host '=== Inkscape install bin ==='
-          Get-ChildItem 'C:\Program Files\Inkscape\bin\inkscape.*' -EA SilentlyContinue | Select-Object -ExpandProperty Name | Out-Host
+          $bin = 'C:\Program Files\Inkscape\bin'
           '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="red"/></svg>' | Set-Content C:\probe\t.svg
-          Write-Host '=== GUI inkscape.exe + choco shim (what Ukiryu picks) -> expect emf_created=False ==='
-          Try-Convert 'C:\Program Files\Inkscape\bin\inkscape.exe' 'C:\probe\t_exe.emf'
-          Try-Convert 'C:\ProgramData\chocolatey\bin\inkscape.exe' 'C:\probe\t_shim.emf'
-          Write-Host '=== console inkscape.com -> expect emf_created=True ==='
-          Try-Convert 'C:\Program Files\Inkscape\bin\inkscape.com' 'C:\probe\t_com.emf'
+          function Conv($label, $exe, $out, $cwd) {
+            Remove-Item $out -ErrorAction SilentlyContinue
+            if ($cwd) { Push-Location $cwd }
+            $p = Start-Process -FilePath $exe -ArgumentList '--export-type=emf', "--export-filename=$out", 'C:\probe\t.svg' -Wait -NoNewWindow -PassThru
+            if ($cwd) { Pop-Location }
+            Write-Host ("  [$label] exit=$($p.ExitCode)  emf=" + (Test-Path $out))
+          }
+          Write-Host '=== baseline (expect exit -1073741515 = STATUS_DLL_NOT_FOUND) ==='
+          Conv 'com-direct' "$bin\inkscape.com" 'C:\probe\b1.emf' $null
+          Write-Host '=== run from inkscape bin dir (CWD=bin) -> tests DLL search path ==='
+          Conv 'com-from-bin' "$bin\inkscape.com" 'C:\probe\b2.emf' $bin
+          Write-Host '=== VC++ runtime present in System32? ==='
+          Get-ChildItem C:\Windows\System32\vcruntime140*.dll,C:\Windows\System32\msvcp140*.dll,C:\Windows\System32\vcomp140.dll -EA SilentlyContinue | Select-Object -ExpandProperty Name | Out-Host
+          Write-Host '=== install VC++ redistributable, then retest ==='
+          choco install -y vcredist140 2>&1 | Select-String -Pattern "install|already|exit code" | Out-Host
+          Conv 'com-after-vcredist' "$bin\inkscape.com" 'C:\probe\b3.emf' $null
+          Write-Host '=== inkscape bin DLL inventory (first 40) ==='
+          (Get-ChildItem "$bin\*.dll" | Measure-Object).Count.ToString() + ' dlls in bin' | Out-Host
           PS1
           MSYS_NO_PATHCONV=1 docker run --rm \
             -v "$(pwd -W)/probe_dir:C:/probe" \
