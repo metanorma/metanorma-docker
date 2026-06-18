@@ -23,33 +23,28 @@ jobs:
     name: "Inkscape SVG->EMF repro"
     runs-on: windows-2025
     steps:
-      - name: Inkscape STATUS_DLL_NOT_FOUND - find the missing runtime dependency
+      - name: Identify Inkscape's missing DLL via dependency walker
         continue-on-error: true
         shell: bash
         run: |
           mkdir -p probe_dir
           cat > probe_dir/run.ps1 <<'PS1'
           $ErrorActionPreference = 'Continue'
-          $bin = 'C:\Program Files\Inkscape\bin'
-          '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="red"/></svg>' | Set-Content C:\probe\t.svg
-          function Conv($label, $exe, $out, $cwd) {
-            Remove-Item $out -ErrorAction SilentlyContinue
-            if ($cwd) { Push-Location $cwd }
-            $p = Start-Process -FilePath $exe -ArgumentList '--export-type=emf', "--export-filename=$out", 'C:\probe\t.svg' -Wait -NoNewWindow -PassThru
-            if ($cwd) { Pop-Location }
-            Write-Host ("  [$label] exit=$($p.ExitCode)  emf=" + (Test-Path $out))
-          }
-          Write-Host '=== baseline (expect exit -1073741515 = STATUS_DLL_NOT_FOUND) ==='
-          Conv 'com-direct' "$bin\inkscape.com" 'C:\probe\b1.emf' $null
-          Write-Host '=== run from inkscape bin dir (CWD=bin) -> tests DLL search path ==='
-          Conv 'com-from-bin' "$bin\inkscape.com" 'C:\probe\b2.emf' $bin
-          Write-Host '=== VC++ runtime present in System32? ==='
-          Get-ChildItem C:\Windows\System32\vcruntime140*.dll,C:\Windows\System32\msvcp140*.dll,C:\Windows\System32\vcomp140.dll -EA SilentlyContinue | Select-Object -ExpandProperty Name | Out-Host
-          Write-Host '=== install VC++ redistributable, then retest ==='
-          choco install -y vcredist140 2>&1 | Select-String -Pattern "install|already|exit code" | Out-Host
-          Conv 'com-after-vcredist' "$bin\inkscape.com" 'C:\probe\b3.emf' $null
-          Write-Host '=== inkscape bin DLL inventory (first 40) ==='
-          (Get-ChildItem "$bin\*.dll" | Measure-Object).Count.ToString() + ' dlls in bin' | Out-Host
+          [Net.ServicePointManager]::SecurityProtocol = 3072
+          $ink = 'C:\Program Files\Inkscape\bin\inkscape.exe'
+          Write-Host ('=== inkscape version: ' + (Get-Item $ink).VersionInfo.ProductVersion + ' ===')
+          Write-Host '=== fetch lucasg Dependencies (latest x64) ==='
+          $rel = (Invoke-WebRequest 'https://api.github.com/repos/lucasg/Dependencies/releases/latest' -UseBasicParsing -Headers @{'User-Agent'='ci'}).Content | ConvertFrom-Json
+          $url = ($rel.assets | Where-Object { $_.name -match 'x64_Release\.zip$' } | Select-Object -First 1).browser_download_url
+          Write-Host "url: $url"
+          Invoke-WebRequest $url -OutFile C:\probe\dep.zip -UseBasicParsing
+          Expand-Archive C:\probe\dep.zip -DestinationPath C:\probe\dep -Force
+          $dep = (Get-ChildItem -Recurse C:\probe\dep -Filter Dependencies.exe | Select-Object -First 1).FullName
+          Write-Host "tool: $dep"
+          Write-Host '=== NOT_FOUND modules in inkscape.exe dependency chain ==='
+          & $dep -depth 3 -chain $ink 2>&1 | Select-String -Pattern "NOT_FOUND" | Select-Object -First 40 | Out-Host
+          Write-Host '=== (fallback) direct imports listing ==='
+          & $dep -modules $ink 2>&1 | Select-String -Pattern "NOT_FOUND|NotFound|Missing" | Select-Object -First 20 | Out-Host
           PS1
           MSYS_NO_PATHCONV=1 docker run --rm \
             -v "$(pwd -W)/probe_dir:C:/probe" \
