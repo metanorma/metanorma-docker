@@ -16,17 +16,11 @@ RUN powershell -Command \
 RUN choco install -y git wget 7zip msys2 make curl \
     && refreshenv
 
-# Install MinGW and MSYS2 dependencies. RubyInstaller Ruby is x64-mingw-UCRT, so the
-# toolchain MUST be the UCRT environment (mingw-w64-ucrt-x86_64-*), not msvcrt
-# (mingw-w64-x86_64-*). Native gem extensions compiled in the msvcrt env (notably the
-# transitive openssl gem) link the wrong C runtime for a UCRT Ruby, which breaks the
-# socket fd<->SOCKET handoff inside OpenSSL -> Errno::ENOTSOCK on every HTTPS request.
-# Building with the matching UCRT toolchain produces a working openssl.so, so the gem
-# stays installed (satisfies relaton's `openssl ~> 3.3.2`) and HTTPS works.
-RUN setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\ucrt64\bin" \
+# Install MinGW and MSYS2 dependencies (mingw-w64-x86_64-libyaml is needed for the psych gem)
+RUN setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin" \
     && echo "Updating MSYS2..." \
     && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -Syuu" \
-    && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -S base-devel mingw-w64-ucrt-x86_64-toolchain mingw-w64-ucrt-x86_64-libyaml"
+    && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-libyaml"
 
 ARG RUBY_VERSION=3.4.9.1
 
@@ -38,8 +32,12 @@ RUN gem install "bundler:~>2.6.5" fontist pkg-config
 
 # Copy and install metanorma gem
 COPY metanorma-windows/Gemfile c:/setup/Gemfile
+COPY metanorma-windows/check-no-openssl.rb c:/setup/check-no-openssl.rb
 
-RUN cd c:/setup && bundle install
+# Install gems, then guard against regressions: fail the build (naming the culprit
+# gem) if anything pulls in the `openssl` gem, whose native ext breaks Windows HTTPS
+# with Errno::ENOTSOCK. Ruby's built-in openssl is used instead.
+RUN cd c:/setup && bundle install && ruby check-no-openssl.rb
 
 # Delete gem cache so it doesn't not get copied to the final image
 RUN powershell -Command "Remove-Item -Path 'C:\tools\ruby34\lib\ruby\gems\3.4.0\cache' -Recurse -Force -ErrorAction SilentlyContinue"
