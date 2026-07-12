@@ -112,6 +112,20 @@ jobs:
           docker build --pull --no-cache -t ${{ env.METANORMA_IMAGE_NAME }} -t ${{ env.METANORMA_IMAGE_NAME }}-${{ env.METANORMA_VERSION }} -t ghcr.io/${{ env.METANORMA_IMAGE_NAME }} -t ghcr.io/${{ env.METANORMA_IMAGE_NAME }}-${{ env.METANORMA_VERSION }} -f Dockerfile.windows --build-arg BASE_IMAGE=${{ matrix.root_image.base_image }} --label org.opencontainers.image.vendor="Ribose Inc." --label org.opencontainers.image.licenses="BSD-3-Clause" --label org.opencontainers.image.documentation="https://www.metanorma.org" --label org.opencontainers.image.ref.name="metanorma/${{ matrix.image_type }}:${{ matrix.root_image.id }}" --label org.opencontainers.image.base.name="${{ matrix.root_image.base_image }}" --label org.opencontainers.image.title="Metanorma official public image" --label org.opencontainers.image.description="Metanorma official public image on ${{ matrix.root_image.image }}" --label org.opencontainers.image.version="${{needs.job_info.outputs.version}}" .
         shell: bash
 
+      # ============ Smoke test ============
+      # Confirm the image can actually run `metanorma` before publishing.
+      # Windows push happens inside this build job (below), so the smoke
+      # gate lives here rather than in a separate job. See build-push.yml
+      # (Linux) for the same gate in the `lint` job. Parallel to the
+      # smoke-test framework Ronald built on metanorma/suma-docker
+      # (contract at suma-docker:tests/smoke.contract).
+      - name: Smoke test — image runs metanorma
+        env:
+          METANORMA_IMAGE_NAME: ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}
+        run: |
+          docker run --rm ${{ env.METANORMA_IMAGE_NAME }} metanorma version
+        shell: bash
+
       - name: Compress image and export metadata to artifacts
         env:
           METANORMA_IMAGE_NAME: ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}
