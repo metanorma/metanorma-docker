@@ -228,6 +228,19 @@ jobs:
         echo "$(head -n 1 /tmp/docker-tags.txt)" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
 
+    # ============ Smoke test ============
+    # Confirm the image can actually run `metanorma` before publishing.
+    # The `test` job downstream runs `metanorma site generate` per flavor
+    # (real integration coverage), but if `mn-samples-*` fetch fails for
+    # any reason the test job errors out without ever exercising the
+    # image itself. This one-line check catches "image builds green but
+    # metanorma is broken" — the class of miss that motivated the
+    # smoke-test framework Ronald built on `metanorma/suma-docker`
+    # (contract at suma-docker:tests/smoke.contract).
+    - name: Smoke test — image runs metanorma
+      run: |
+        docker run --rm ${{ steps.loaded_image.outputs.full_name }} metanorma version
+
     - run: docker history --no-trunc ${{ steps.loaded_image.outputs.full_name }}
 
     - run: docker inspect -f "{{ .Size }}" ${{ steps.loaded_image.outputs.full_name }}
