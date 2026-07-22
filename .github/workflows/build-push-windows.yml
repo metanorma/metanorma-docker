@@ -104,6 +104,19 @@ jobs:
         run: echo ${{ steps.label_prefix.outputs.result }}
         shell: bash
 
+      # windows-2022 runners sometimes boot without the Docker daemon ready
+      # (see metanorma/metanorma-docker#239). Poll until it responds before
+      # handing off to `docker build`.
+      - name: Wait for Docker daemon
+        run: |
+          for i in $(seq 1 30); do
+            docker info >/dev/null 2>&1 && { echo "Docker ready after $i tries"; exit 0; }
+            sleep 2
+          done
+          echo "Docker daemon did not start within 60s" >&2
+          exit 1
+        shell: bash
+
       - name: Build Docker Image
         env:
           METANORMA_IMAGE_NAME: ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}
@@ -222,6 +235,17 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: tags-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
+
+      # Same daemon-readiness guard as the build job — see metanorma/metanorma-docker#239.
+      - name: Wait for Docker daemon
+        run: |
+          for i in $(seq 1 30); do
+            docker info >/dev/null 2>&1 && { echo "Docker ready after $i tries"; exit 0; }
+            sleep 2
+          done
+          echo "Docker daemon did not start within 60s" >&2
+          exit 1
+        shell: bash
 
       - id: loaded_image
         name: Load image
