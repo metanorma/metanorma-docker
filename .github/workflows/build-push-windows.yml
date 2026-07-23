@@ -105,15 +105,18 @@ jobs:
         shell: bash
 
       # windows-2022 runners sometimes boot without the Docker daemon ready
-      # (see metanorma/metanorma-docker#239). Poll until it responds before
-      # handing off to `docker build`.
+      # (see metanorma/metanorma-docker#239). Kick the service and poll until
+      # it responds before handing off to `docker build`. 60s was not always
+      # enough on the ltsc2022 leg; bumping to 180s + an explicit Start-Service
+      # call recovers runs that previously needed manual re-dispatch.
       - name: Wait for Docker daemon
         run: |
-          for i in $(seq 1 30); do
+          powershell -Command "Start-Service docker" 2>/dev/null || true
+          for i in $(seq 1 90); do
             docker info >/dev/null 2>&1 && { echo "Docker ready after $i tries"; exit 0; }
             sleep 2
           done
-          echo "Docker daemon did not start within 60s" >&2
+          echo "Docker daemon did not start within 180s" >&2
           exit 1
         shell: bash
 
@@ -239,11 +242,12 @@ jobs:
       # Same daemon-readiness guard as the build job — see metanorma/metanorma-docker#239.
       - name: Wait for Docker daemon
         run: |
-          for i in $(seq 1 30); do
+          powershell -Command "Start-Service docker" 2>/dev/null || true
+          for i in $(seq 1 90); do
             docker info >/dev/null 2>&1 && { echo "Docker ready after $i tries"; exit 0; }
             sleep 2
           done
-          echo "Docker daemon did not start within 60s" >&2
+          echo "Docker daemon did not start within 180s" >&2
           exit 1
         shell: bash
 
