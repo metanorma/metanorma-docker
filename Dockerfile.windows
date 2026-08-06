@@ -22,7 +22,7 @@ RUN setx PATH "%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin" \
     && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -Syuu" \
     && C:\tools\msys64\usr\bin\bash -lc "pacman --noconfirm -S base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-libyaml"
 
-ARG RUBY_VERSION=3.4.5.1
+ARG RUBY_VERSION=3.4.9.1
 
 # Install Ruby using Chocolatey/RubyInstaller
 RUN choco install -y ruby --version=%RUBY_VERSION%
@@ -32,8 +32,12 @@ RUN gem install "bundler:~>2.6.5" fontist pkg-config
 
 # Copy and install metanorma gem
 COPY metanorma-windows/Gemfile c:/setup/Gemfile
+COPY metanorma-windows/check-no-openssl.rb c:/setup/check-no-openssl.rb
 
-RUN cd c:/setup && bundle install
+# Install gems, then guard against regressions: fail the build (naming the culprit
+# gem) if anything pulls in the `openssl` gem, whose native ext breaks Windows HTTPS
+# with Errno::ENOTSOCK. Ruby's built-in openssl is used instead.
+RUN cd c:/setup && bundle install && ruby check-no-openssl.rb
 
 # Delete gem cache so it doesn't not get copied to the final image
 RUN powershell -Command "Remove-Item -Path 'C:\tools\ruby34\lib\ruby\gems\3.4.0\cache' -Recurse -Force -ErrorAction SilentlyContinue"
@@ -56,9 +60,17 @@ RUN powershell -Command \
     Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
 # Install build and runtime dependencies using Chocolatey
-RUN choco install -y inkscape openjdk17 python3 git graphviz \
+RUN choco install -y inkscape openjdk17 python3 git graphviz 7zip \
     && choco cache remove \
     && refreshenv
+
+# Windows Server Core ships no OpenGL, but Inkscape imports opengl32.dll at load
+# time, so it can't start (STATUS_DLL_NOT_FOUND) and SVG->EMF image conversion
+# (vectory/isodoc) fails for flavors like iho/ogc. Install Mesa3D's software OpenGL
+# (opengl32.dll + its companion DLLs) into Inkscape's bin. Verified on the published
+# image: the full Mesa x64 DLL set makes inkscape SVG->EMF succeed (opengl32.dll
+# alone is not enough -- it has its own dependencies).
+RUN powershell -Command "[Net.ServicePointManager]::SecurityProtocol = 3072; Invoke-WebRequest 'https://github.com/pal1000/mesa-dist-win/releases/download/26.1.2/mesa3d-26.1.2-release-msvc.7z' -OutFile C:\mesa.7z -UseBasicParsing; & 'C:\Program Files\7-Zip\7z.exe' x C:\mesa.7z -oC:\mesa -y; Copy-Item C:\mesa\x64\*.dll 'C:\Program Files\Inkscape\bin\' -Force; Remove-Item C:\mesa.7z, C:\mesa -Recurse -Force"
 
 # Install XML2RFC
 RUN python -m pip install --upgrade pip && \
