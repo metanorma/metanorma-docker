@@ -8,14 +8,12 @@ on:
     paths:
       - 'Dockerfile.windows'
       - 'VERSION.mak'
-      - 'Gemfile'
       - 'metanorma-windows/**'
       - '.github/workflows/build-push-windows.yml'
   pull_request:
     paths:
       - 'Dockerfile.windows'
       - 'VERSION.mak'
-      - 'Gemfile'
       - 'metanorma-windows/**'
       - '.github/workflows/build-push-windows.yml'
   workflow_dispatch:
@@ -43,7 +41,7 @@ jobs:
     - uses: actions/checkout@v4
     - id: version
       run: |
-        export CLI_VERSION=$(cat VERSION.mak | cut -d ' ' -f 3)
+        export CLI_VERSION=$(grep '^IMAGE_VERSION :=' VERSION.mak | cut -d ' ' -f 3)
         echo "result=${CLI_VERSION}" >> $GITHUB_OUTPUT
     - name: Show version number
       run: echo ${{ steps.version.outputs.result }}
