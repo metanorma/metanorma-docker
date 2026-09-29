@@ -267,7 +267,10 @@ jobs:
       - build
       - job_info
       - test-matrix
-    continue-on-error: ${{ matrix.flavor.experimental || matrix.root_image == 'alpine' }}
+    # ubuntu + ietf is gated on the packaged toolchain's xml2rfc spawn
+    # edge failing upstream (tamatebako/tebako#691) — remove once the
+    # upstream fix lands and the payload is rebuilt.
+    continue-on-error: ${{ matrix.flavor.experimental || matrix.root_image == 'alpine' || (matrix.root_image == 'ubuntu' && matrix.flavor.id == 'ietf') }}
     strategy:
       max-parallel: 5
       fail-fast: false
