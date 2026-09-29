@@ -1,14 +1,12 @@
-.PHONY: login pull %-chain
+.PHONY: login build test tp clean latest-tp
 
 SHELL := /bin/bash
 
 NS_LOCAL := ribose-local
 NS_REMOTE ?= metanorma
 
+# Versions and digests: VERSION.mak is the single source of truth.
 include ./VERSION.mak
-
-DOCKER_RUN := docker run
-DOCKER_EXEC := docker exec
 
 # On Jenkins we won't be on any branch, use the CONTAINER_BRANCH environment
 # variable to set it
@@ -19,152 +17,98 @@ endif
 CONTAINER_COMMIT ?= $(shell git rev-parse --short HEAD)
 REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
-ITEMS       ?= 1 2 3 4 5 6
-IMAGE_TYPES ?= metanorma-ruby metanorma-ubuntu metanorma-alpine mn-ruby mn-ubuntu mn-alpine
-VERSIONS    ?= $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION) $(IMAGE_VERSION)
-ROOT_PLATFORMS ?= ruby ubuntu alpine ruby ubuntu alpine
+# Image variants:
+#  metanorma-ubuntu — tebako-packaged (pre-built payloads, no compiler in
+#    the image); the main variant (unprefixed tags on Docker Hub/GHCR).
+#  metanorma-alpine — legacy gem build (ruby:3.3.7-alpine base); stays on
+#    this path until the inkscape payload ships linux-musl legs.
+IMAGE_TYPES ?= metanorma-ubuntu metanorma-alpine
 
-# Getters
-GET_IMAGE_TYPE = $(word $1,$(IMAGE_TYPES))
-GET_VERSION = $(word $1,$(VERSIONS))
-GET_ROOT_PLATFORM = $(word $1,$(ROOT_PLATFORMS))
+GET_PLATFORM = $(patsubst metanorma-%,%,$(1))
 
 DOCKER_LOGIN_USERNAME ?=
 DOCKER_LOGIN_PASSWORD ?=
 DOCKER_LOGIN_CMD ?= "echo \"$(DOCKER_LOGIN_PASSWORD)\" | docker login docker.io --username=$(DOCKER_LOGIN_USERNAME) --password-stdin"
 
-TEST_FLAVOR ?= iso
-
 login:
 	eval $(DOCKER_LOGIN_CMD)
 
-define PULL_TASKS
-pull-build-$(1):	login
-	docker pull $(3); \
-	docker pull $(NS_REMOTE)/$(1):$(2);
-endef
+define IMAGE_TASKS
 
-$(foreach i,$(ITEMS),$(eval $(call PULL_TASKS,$(call GET_IMAGE_TYPE,$i),$(call GET_VERSION,$i),$(call GET_ROOT_PLATFORM,$i))))
+.PHONY: build-$(1) test-$(1) run-$(1) kill-$(1) rm-$(1) rmf-$(1) tag-$(1) push-$(1) tp-$(1) btp-$(1) bt-$(1) \
+	clean-local-$(1) clean-remote-$(1) latest-tag-$(1) latest-push-$(1) latest-tp-$(1)
 
-## Basic Containers
-define ROOT_PLATFORM_TASKS
+$(eval CONTAINER_LOCAL_NAME := $(NS_LOCAL)/$(1):latest)
+$(eval CONTAINER_REMOTE_NAME := $(NS_REMOTE)/$(1):$(IMAGE_VERSION))
+$(eval CONTAINER_LATEST_NAME := $(NS_REMOTE)/$(1):latest)
 
-# All */Dockerfiles are intermediate files, removed after using
-# Comment this out when debugging
-.INTERMEDIATE: $(3)/Gemfile $(3)/Dockerfile
-
-.PHONY: build-$(3) clean-local-$(3) kill-$(3) rm-$(3) \
-	rmf-$(3) tag-$(3) push-$(3) \
-	tp-$(3) btp-$(3) bt-$(3) \
-	clean-remote-$(3) run-$(3) \
-	latest-tag-$(3) latest-push-$(3) latest-tp-$(3)
-
-$(eval CONTAINER_LOCAL_NAME := $(NS_LOCAL)/$(3):latest)
-$(eval CONTAINER_REMOTE_NAME := $(NS_REMOTE)/$(3):$(1))
-$(eval CONTAINER_LATEST_NAME := $(NS_REMOTE)/$(3):latest)
-
-# Only the first line is eval'ed by bash
-
-clean-$(3):
-	rm -f $(3)/Gemfile $(3)/Dockerfile
-
-$(3)/Gemfile: Gemfile
-	cp $$< $$@
-
-$(3)/Gemfile.lock: $(3)/Gemfile
-	pushd $(3); \
-	bundle; \
-	popd
-
-build-$(3): $(3)/Gemfile
-	docker build --squash --rm \
+build-$(1):
+	docker build --rm \
 		-t $(CONTAINER_LOCAL_NAME) \
-		-f Dockerfile.$(2) \
+		-f Dockerfile.$(call GET_PLATFORM,$(1)) \
 		--platform linux/amd64 \
-		--label metanorma-container-root=$(2) \
-		--label metanorma-container-source=$(REPO_GIT_NAME)/$(3) \
+		--label metanorma-container-root=$(call GET_PLATFORM,$(1)) \
+		--label metanorma-container-source=$(REPO_GIT_NAME)/$(1) \
 		--label metanorma-container=$(CONTAINER_LOCAL_NAME) \
 		--label metanorma-container-remote=$(CONTAINER_REMOTE_NAME) \
-		--label metanorma-container-version=$(1) \
+		--label metanorma-container-version=$(IMAGE_VERSION) \
 		--label metanorma-container-commit=$(CONTAINER_COMMIT) \
 		--label metanorma-container-commit-branch=$(CONTAINER_BRANCH) \
-		--build-arg METANORMA_IMAGE_NAME=$(3) \
-		--secret id=bundle_rubygems__pkg__github__com,src=${HOME}/.bundle/config \
-		.;\
+		.
 
-	$$(MAKE) clean-$(3)
+# Smoke gate: `metanorma version` + a real document compile (xml, html,
+# pdf — the PDF leg exercises the spawned Java subsystem).
+test-$(1):
+	tests/smoke/run-smoke.sh $(CONTAINER_LOCAL_NAME)
 
-clean-local-$(3):
-	docker rmi -f $(CONTAINER_LOCAL_NAME)
+run-$(1):
+	docker run -it --name=test-$(1) --entrypoint="" $(CONTAINER_LOCAL_NAME) /bin/bash
 
-clean-remote-$(3):
-	docker rmi -f $(CONTAINER_REMOTE_NAME)
+kill-$(1):
+	docker kill test-$(1)
 
-run-$(3):
-	$(DOCKER_RUN) -it --name=test-$(3) --entrypoint="" $(CONTAINER_REMOTE_NAME) /bin/bash; \
+rm-$(1):
+	docker rm test-$(1)
 
-test-$(3):
-	$(DOCKER_RUN) $(CONTAINER_LOCAL_NAME) metanorma help; \
-	TEST_FLAVORS="iso cc iec ogc un iho ieee-private ieee jcgm"; \
-	parallel --gnu --halt 0 -j+0 --joblog parallel.log --eta make test-flavor-$(3) TEST_FLAVOR={} "&>" test_{}.log ::: $$$${TEST_FLAVORS} || \
-	(parallel --gnu -j+0 --joblog parallel.log --resume-failed 'echo ---- {} ----; cat test_{}.log; echo ---- --- ----' ::: $$$${TEST_FLAVORS} && exit 1)
+rmf-$(1):
+	docker rm -f test-$(1)
 
-test-flavor-$(3):
-	[[ -d mn-samples-$(TEST_FLAVOR) ]] || git clone --recurse-submodules https://${GITHUB_CREDENTIALS}@github.com/metanorma/mn-samples-${TEST_FLAVOR}; \
-	CONFIG_FILE="metanorma.yml"; \
-	if [ -f "mn-samples-$(TEST_FLAVOR)/metanorma.test.yml" ]; then \
-		CONFIG_FILE="metanorma.test.yml"; \
-	fi; \
-	$(DOCKER_RUN) -v $(shell pwd)/mn-samples-$(TEST_FLAVOR):/metanorma/ $(CONTAINER_LOCAL_NAME) metanorma site generate --agree-to-terms -c $$CONFIG_FILE .
-
-kill-$(3):
-	docker kill test-$(3)
-
-rm-$(3):
-	docker rm test-$(3)
-
-rmf-$(3):
-	docker rm -f test-$(3)
-
-tag-$(3):
+tag-$(1):
 	CONTAINER_ID=`docker images -q $(CONTAINER_LOCAL_NAME)`; \
 	if [ "$$$${CONTAINER_ID}" == "" ]; then \
-		echo "Container non-existant, check 'docker images'."; \
+		echo "Container non-existent, check 'docker images'."; \
 		exit 1; \
 	fi; \
-	docker tag $$$${CONTAINER_ID} $(CONTAINER_REMOTE_NAME) \
-		&& $(MAKE) clean-local-$(3)
+	docker tag $$$${CONTAINER_ID} $(CONTAINER_REMOTE_NAME)
 
-push-$(3):	login
+push-$(1): login
 	docker push $(CONTAINER_REMOTE_NAME)
 
-tp-$(3):
-	$(MAKE) tag-$(3) push-$(3)
+tp-$(1): tag-$(1) push-$(1)
 
-btp-$(3):
-	$(MAKE) build-$(3) tp-$(3)
+btp-$(1): build-$(1) tp-$(1)
 
-bt-$(3):
-	$(MAKE) build-$(3) tag-$(3)
+bt-$(1): build-$(1) tag-$(1)
 
-latest-tag-$(3):
+clean-local-$(1):
+	docker rmi -f $(CONTAINER_LOCAL_NAME)
+
+clean-remote-$(1):
+	docker rmi -f $(CONTAINER_REMOTE_NAME)
+
+latest-tag-$(1):
 	docker tag $(CONTAINER_REMOTE_NAME) $(CONTAINER_LATEST_NAME)
 
-latest-push-$(3):	login
+latest-push-$(1): login
 	docker push $(CONTAINER_LATEST_NAME)
 
-latest-tp-$(3):
-	$(MAKE) latest-tag-$(3) latest-push-$(3)
-
-print-local-name-$(3):
-	@echo $(CONTAINER_LOCAL_NAME)
+latest-tp-$(1): latest-tag-$(1) latest-push-$(1)
 
 endef
 
-$(foreach i,$(ITEMS),$(eval $(call ROOT_PLATFORM_TASKS,$(call GET_VERSION,$i),$(call GET_ROOT_PLATFORM,$i),$(call GET_IMAGE_TYPE,$i),$(CONTAINER_TYPE))))
+$(foreach t,$(IMAGE_TYPES),$(eval $(call IMAGE_TASKS,$(t))))
 
-build: $(addprefix build-, $(notdir $(IMAGE_TYPES)))
-test: $(addprefix test-, $(notdir $(IMAGE_TYPES))) $(addprefix test-flavor-, $(notdir $(IMAGE_TYPES)))
-tp: $(addprefix tp-, $(notdir $(IMAGE_TYPES)))
-clean: $(addprefix clean-, $(notdir $(IMAGE_TYPES)))
-latest-tp: $(addprefix latest-tp-, $(notdir $(IMAGE_TYPES)))
+build: $(addprefix build-, $(IMAGE_TYPES))
+test: $(addprefix test-, $(IMAGE_TYPES))
+tp: $(addprefix tp-, $(IMAGE_TYPES))
+latest-tp: $(addprefix latest-tp-, $(IMAGE_TYPES))

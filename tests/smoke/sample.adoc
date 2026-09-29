@@ -1,0 +1,22 @@
+= Smoke test document
+:doctype: international-standard
+:docstage: 60
+:docnumber: 1
+:copyright-year: 2026
+:language: en
+:mn-document-class: iso
+
+== Scope
+
+This document exists to prove that a built container image compiles a real
+Metanorma document end to end: XML (the Metanorma semantic core), HTML
+(the presentation chain) and PDF (the spawned Java subsystem via mn2pdf),
+with an SVG figure crossing the graphics chain.
+
+[[fig-figure]]
+.Smoke figure
+image::figure.svg[]
+
+== Normative references
+
+* [[[iso8601,ISO 8601-1:2019]]]

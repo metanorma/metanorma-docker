@@ -1,3 +1,12 @@
+# Alpine variant — legacy build path.
+#
+# The Ubuntu variant is packaged with tebako (pre-built, sha256-verified
+# payloads; see Dockerfile.ubuntu). This Alpine variant still compiles the
+# toolchain from gems because the inkscape payload Metanorma depends on is
+# not yet published for linux-musl or aarch64-linux, so `tebako install
+# metanorma` cannot complete on musl hosts. Once tebako-packages/inkscape
+# publishes musl legs (both architectures), this variant moves to the
+# tebako model and the gem-build stages below are retired.
 FROM ruby:3.3.7-alpine3.21
 USER root
 
