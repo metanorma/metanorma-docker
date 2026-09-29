@@ -17,7 +17,7 @@ LABEL maintainer="open.source@ribose.com" \
       org.opencontainers.image.title="Metanorma" \
       org.opencontainers.image.description="Metanorma document processing toolchain (Alpine variant)"
 
-ARG METANORMA_IMAGE_NAME=metanorma
+ARG METANORMA_IMAGE_NAME=metanorma-alpine
 
 # Install runtime dependencies
 RUN apk add --no-cache \
