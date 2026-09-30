@@ -39,19 +39,22 @@ workflows for using Metanorma in your GitHub Actions workflows.
 
 == What's included?
 
-Under the hood, the Metanorma toolchain depends on a couple of software/packages.
-
-To ease installation, the Docker image is already fully set up so you don't have
-to worry about anything.
+The Ubuntu image is packaged with https://github.com/tamatebako/tebako[tebako]:
+instead of compiling Ruby and gems inside the image, it carries pre-built,
+checksum-verified Metanorma payload images plus the language runtimes they
+need, all resolved from published releases. There is no compiler and no gem
+installation in the image build.
 
 At a high level, the image includes the following:
 
 * Metanorma and Metanorma CLI on https://ruby-lang.org[Ruby]
-* `mn2pdf` on the Java subsystem
-* Other tools
-** https://inkscape.org[Inkscape]
+* `mn2pdf` on the bundled Java runtime
+* https://inkscape.org[Inkscape] and `xml2rfc` as packaged companion tools
+* Other supporting tools (`git`, `graphviz`)
 
-To see the full list of packages/software included, check out the Dockerfiles.
+The exact versions and checksums of every packaged component are pinned in
+`VERSION.mak`. Release images are signed (keyless, via Sigstore cosign) and
+carry SBOM and provenance attestations — see <<Verifying release images>>.
 
 
 == Usage
@@ -217,31 +220,25 @@ contain unstable or untested features.
 The Metanorma Docker images are available in multiple flavors based on different
 base containers (OS containers), each optimized for different use cases.
 
-Each image set produces the following image types:
-
 [options="header",cols="1,1,1,1,3"]
 |===
 |Image Type |Base |Tag |Size |Description
 
-|Debian
-|`ruby:3.3.7-slim-bookworm`
-|`metanorma/metanorma:latest`
-|~500MB
-|Default. Based on the official Ruby image on Debian. Developer-friendly and
-extensible.
-
 |Ubuntu
-|`ubuntu:22.04`
-|`metanorma/metanorma:ubuntu-latest`
-|~450MB
-|Developer-friendly and extensible.
+|`ubuntu:24.04`
+|`metanorma/metanorma:latest`
+|~1.5GB
+|Default. Packaged with tebako from pre-built, checksum-verified payloads —
+no compilation inside the image. Developer-friendly and extensible.
 
 |Alpine
 |`ruby:3.3.7-alpine3.21`
 |`metanorma/metanorma:alpine-latest`
-|~400MB
-|Smallest image size. Based on the official Ruby image on Alpine. Extensions may
-be limited due to usage of `musl` libc and limited package availability.
+|~1GB
+|Smallest footprint. This variant still builds the toolchain from gems (the
+packaged Inkscape component is not yet published for the musl C library, so
+the tebako packaging path is not available there yet). Extensions may be
+limited due to usage of `musl` libc and limited package availability.
 
 |Windows
 |`mcr.microsoft.com/windows/servercore:ltsc2019`
@@ -270,16 +267,44 @@ package management. Larger image size due to Windows base image.
 
 |===
 
-By default, the Debian-based image is tagged as `metanorma/metanorma:latest`.
+By default, the Ubuntu-based image is tagged as `metanorma/metanorma:latest`.
+
+NOTE: The previous Debian (`ruby:slim-bookworm`) variant is retired; its role
+as the default image is taken over by the tebako-packaged Ubuntu variant.
 
 
 === Supported Docker architectures
 
 Metanorma Docker images are available for the following Docker architectures:
 
-* `linux/amd64` (x86_64)
-* `linux/arm64` (aarch64)
-* `windows/amd64` (Windows Server 2019/2022/2025)
+* Ubuntu (default): `linux/amd64`
+  (`linux/arm64` follows once the packaged Inkscape component is published
+  for `aarch64-linux`)
+* Alpine: `linux/amd64`, `linux/arm64`
+* Windows: `windows/amd64` (Windows Server 2019/2022/2025)
+
+
+=== Verifying release images
+
+Release images (version tags) are published to both Docker Hub and GHCR with:
+
+* keyless https://docs.sigstore.dev/[Sigstore] signatures (cosign) on the image
+  digest
+* an SBOM (SPDX JSON, generated with Syft) attached as a cosign attestation
+* BuildKit provenance and SBOM attestations embedded in the image manifest
+
+To verify a release image:
+
+[source,sh]
+----
+cosign verify metanorma/metanorma@<digest> \
+  --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp=https://github.com/metanorma/metanorma-docker/
+
+cosign verify-attestation --type spdxjson metanorma/metanorma@<digest> \
+  --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp=https://github.com/metanorma/metanorma-docker/
+----
 
 
 
@@ -421,21 +446,21 @@ To start the `metanorma` container and enter it with `bash`, all you need is:
 
 [source,sh]
 ----
-make run-metanorma-ruby
+make run-metanorma-ubuntu
 ----
 
 To kill the container:
 
 [source,sh]
 ----
-make kill-metanorma-ruby
+make kill-metanorma-ubuntu
 ----
 
 The `Makefile` supports the following commands related to running:
 
 [source,sh]
 ----
-make {run,kill,rm,rmf}-metanorma-ruby
+make {run,kill,rm,rmf}-metanorma-ubuntu
 ----
 
 
@@ -454,14 +479,11 @@ export DOCKER_LOGIN_CMD='aws ecr get-login --no-include-email \
   --region=${region} --registry-ids=${ecr-registry-id}'
 ----
 
-If you want to build other containers you can add these:
+If you want to build only a subset of the variants:
 
 [source,sh]
 ----
-export ITEMS="1 2"
-export IMAGE_TYPES="metanorma metanorma-ubuntu-21.10"
-export VERSIONS="1.0 1.0"
-export ROOT_IMAGES="ubuntu:20.04 ubuntu:21.10"
+export IMAGE_TYPES="metanorma-ubuntu"
 ----
 
 The environment variables are used for:
@@ -471,15 +493,10 @@ The environment variables are used for:
 
 `DOCKER_LOGIN_CMD`:: how you authenticate against your repository
 
-`ITEMS`:: a sequential number list for iterating `IMAGE_TYPES`,
-its numbers are indexes to the content in `IMAGE_TYPES`
-
-`IMAGE_TYPES`:: the different containers you support.
-
-`VERSIONS`:: how resulting images are tagged. Currently we apply the same
-version across all images, which is defined in `VERSION.mak`
-
-`ROOT_IMAGES`:: the container your new image should be based on
+`IMAGE_TYPES`:: the image variants to operate on
+(`metanorma-ubuntu`, `metanorma-alpine`). Versions are not set here —
+`VERSION.mak` is the single source of truth for the image version and every
+packaged component's version and checksum.
 
 
 === Makefile build targets
@@ -488,36 +505,32 @@ The `Makefile` supports the following commands for building:
 
 [source,sh]
 ----
-make {build,push,tag,clean-remote,clean-local}-{container-flavor}
+make {build,test,push,tag,clean-remote,clean-local}-{container-flavor}
 ----
+
+`test-{container-flavor}` runs the smoke gate (`tests/smoke/run-smoke.sh`):
+`metanorma version` plus a real document compile to XML, HTML and PDF.
 
 === Updating container flavors
 
-All files relating to building a certain container flavor is located in the
-`{container-flavor}` directory.
-
-For the `metanorma` flavors, we update using this procedure:
-
-[source,sh]
-----
-pushd metanorma
-bundle update
-popd
-# Gemfile.lock is updated
-----
+The tebako-packaged Ubuntu variant consumes published components; updating it
+means editing pins in `VERSION.mak` (component versions and checksums) and
+rebuilding — there is no `bundle update` step. The legacy Alpine variant pins
+`metanorma-cli` in `metanorma-alpine/Gemfile`. The `release-tag` workflow
+updates both for a new `metanorma-cli` release.
 
 Then, we build and push the container:
 
 [source,sh]
 ----
-make btp-metanorma-ruby
+make btp-metanorma-ubuntu
 ----
 
 Lastly, we tag and push the built container as latest.
 
 [source,sh]
 ----
-make latest-tp-metanorma-ruby
+make latest-tp-metanorma-ubuntu
 ----
 
 
@@ -527,7 +540,7 @@ If you feel tired typing out this:
 
 [source,sh]
 ----
-make build-metanorma-ruby tag-metanorma-ruby push-metanorma-ruby
+make build-metanorma-ubuntu tag-metanorma-ubuntu push-metanorma-ubuntu
 ----
 
 We have a list of shortcut targets to save you from repeating fingers.
@@ -536,7 +549,7 @@ For example:
 [source,sh]
 ----
 # equivalent to make {build,push}-{container-flavor} latest-{tag,push}-{container-flavor}
-make btp-metanorma-ruby latest-tp-metanorma-ruby
+make btp-metanorma-ubuntu latest-tp-metanorma-ubuntu
 ----
 
 The shortcut targets are:

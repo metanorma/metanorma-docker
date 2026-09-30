@@ -8,6 +8,9 @@ on:
       next_version:
         description: |
           Next version. Should correspond to the released metanorma-cli gem
+          AND the published tebako payload (tebako-packages/metanorma) of
+          the same version — the tag build fails closed if the payload is
+          not published yet.
         required: true
 
 jobs:
@@ -48,17 +51,40 @@ jobs:
       with:
         version: ${{ env.DOCKER_TAG }}
 
-    - name: Update version
+    - name: Update versions and payload digests (VERSION.mak is the SSOT)
+      env:
+        REGISTRY_URL: https://raw.githubusercontent.com/tebako-packages/metanorma/main/tpkg-registry.yaml
       run: |
-        echo "IMAGE_VERSION := ${METANORMA_CLI_VERSION}" > VERSION.mak
-        pushd metanorma-ruby
-        bundle remove metanorma-cli
-        bundle add metanorma-cli -v ${METANORMA_CLI_VERSION}
-        popd
+        ruby -ryaml -ropen-uri -e '
+          version = ENV.fetch("METANORMA_CLI_VERSION")
+          registry = YAML.safe_load(URI.open(ENV.fetch("REGISTRY_URL")).read)
+          metanorma = registry["payloads"].find { |p| p["name"] == "metanorma" }
+          entry = metanorma["versions"].find { |v| v["version"] == version }
+          unless entry
+            available = metanorma["versions"].map { |v| v["version"] }.join(", ")
+            abort "payload metanorma@#{version} is not published in #{ENV["REGISTRY_URL"]} " \
+                  "(available: #{available}) — publish the tebako payload release first"
+          end
+          digests = entry["platforms"]
+          lines = File.read("VERSION.mak")
+          lines.gsub!(/^IMAGE_VERSION := .*$/, "IMAGE_VERSION := #{version}")
+          lines.gsub!(/^METANORMA_VERSION := .*$/, "METANORMA_VERSION := #{version}")
+          {
+            "GNU_X86_64" => "x86_64-linux-gnu", "GNU_ARM64" => "aarch64-linux-gnu",
+            "MUSL_X86_64" => "x86_64-linux-musl", "MUSL_ARM64" => "aarch64-linux-musl"
+          }.each do |suffix, triplet|
+            sha = digests.fetch(triplet) { abort "registry entry has no #{triplet} digest" }["sha256"]
+            lines.gsub!(/^METANORMA_SHA256_#{suffix} := .*$/, "METANORMA_SHA256_#{suffix} := #{sha}")
+          end
+          File.write("VERSION.mak", lines)
+        '
+        # Legacy alpine variant: keep its gem pin in lockstep.
+        sed -i.bak "s/gem \"metanorma-cli\", \"= .*\"/gem \"metanorma-cli\", \"= ${METANORMA_CLI_VERSION}\"/" metanorma-alpine/Gemfile
+        rm -f metanorma-alpine/Gemfile.bak
 
     - name: Push commit and tag
       run: |
-        git add VERSION.mak metanorma-ruby/Gemfile
+        git add VERSION.mak metanorma-alpine/Gemfile
         git commit -m "Bump version to ${DOCKER_TAG}"
         git tag v${DOCKER_TAG}
         git push origin HEAD:${GITHUB_REF} --tags

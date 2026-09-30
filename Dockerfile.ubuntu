@@ -1,167 +1,134 @@
-ARG RUBY_PATH=/usr/local/
-ARG RUBY_VERSION=3.3.7
+# syntax=docker/dockerfile:1
+# Metanorma on tebako: the image carries no compiler and no Ruby
+# installation. A builder stage downloads the pinned, sha256-verified
+# tebako CLI from the tamatebako/tebako GitHub release and installs the
+# published Metanorma payload (tebako-packages/metanorma, LimniFS image,
+# sha256-verified against the payload registry) plus its dependency
+# payloads (inkscape, xml2rfc) into a content-addressed store at
+# /tebako. The runtime pairs (Ruby, OpenJDK, Python) are fetched and
+# verified the same way when `metanorma version` warms the store.
+# The final stage copies the store and the dispatcher; shims under
+# /tebako/shims dispatch every Metanorma command.
+#
+# All versions and digests come from VERSION.mak (build context) — the
+# single source of truth shared with the Makefile and CI.
 
-# Stage 1: Build Ruby
-FROM ubuntu:22.04 AS rubybuild
-ARG RUBY_PATH
-ARG RUBY_VERSION
+ARG UBUNTU_VERSION=24.04
 
+# ---------------------------------------------------------------------------
+# Builder: install the tebako tool set and assemble the payload store.
+# ---------------------------------------------------------------------------
+FROM ubuntu:${UBUNTU_VERSION} AS store
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ARG TARGETARCH
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Ruby build dependencies
-RUN apt-get update
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl ca-certificates git && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get install --fix-broken -y
+COPY VERSION.mak /build/VERSION.mak
+WORKDIR /build
 
-RUN apt-get install -y --no-install-recommends \
-      git \
-      curl \
-      autoconf \
-      bison \
-      build-essential \
-      libssl-dev \
-      libyaml-dev \
-      libreadline-dev \
-      zlib1g-dev \
-      libncurses5-dev \
-      libffi-dev \
-      ca-certificates \
-      snapd \
-      libgdbm6 \
-      libgdbm-dev && \
-    git clone https://github.com/rbenv/ruby-build.git $RUBY_PATH/plugins/ruby-build && \
-    $RUBY_PATH/plugins/ruby-build/install.sh && \
-    ruby-build $RUBY_VERSION $RUBY_PATH && \
-    rm -rf ~/.rbenv/cache && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Download the tebako CLI + dispatcher for the build architecture and
+# verify them twice: against the release SHA256SUMS and against the
+# digests pinned in VERSION.mak.
+RUN set -eu; \
+    v() { grep "^$1 :=" VERSION.mak | cut -d' ' -f3; }; \
+    TEBAKO_VERSION=$(v TEBAKO_VERSION); \
+    case "$TARGETARCH" in \
+      amd64) triple=linux-gnu-x86_64; cli_sha=$(v TEBAKO_CLI_SHA256_GNU_X86_64); shim_sha=$(v TEBAKO_SHIM_SHA256_GNU_X86_64) ;; \
+      arm64) triple=linux-gnu-arm64;  cli_sha=$(v TEBAKO_CLI_SHA256_GNU_ARM64);  shim_sha=$(v TEBAKO_SHIM_SHA256_GNU_ARM64) ;; \
+      *) echo "unsupported TARGETARCH: $TARGETARCH" >&2; exit 1 ;; \
+    esac; \
+    base="https://github.com/tamatebako/tebako/releases/download/v${TEBAKO_VERSION}"; \
+    curl -fsSLO "${base}/SHA256SUMS"; \
+    for bin in tebako tebako-shim; do \
+      asset="${bin}-${TEBAKO_VERSION}-${triple}"; \
+      curl -fsSLO "${base}/${asset}"; \
+      grep " ${asset}\$" SHA256SUMS | sha256sum -c -; \
+    done; \
+    echo "${cli_sha}  tebako-${TEBAKO_VERSION}-${triple}" | sha256sum -c -; \
+    echo "${shim_sha}  tebako-shim-${TEBAKO_VERSION}-${triple}" | sha256sum -c -; \
+    install -m 0755 "tebako-${TEBAKO_VERSION}-${triple}" /usr/local/bin/tebako; \
+    install -m 0755 "tebako-shim-${TEBAKO_VERSION}-${triple}" /usr/local/bin/tebako-shim
 
-# Stage 2: Final image
-FROM ubuntu:22.04
-USER root
+# Install the pinned payloads and warm the runtime fetch. Shims are
+# absolute symlinks to /usr/local/bin/tebako-shim, which the final stage
+# carries at the same path.
+ENV TEBAKO_HOME=/tebako
+RUN set -eu; \
+    v() { grep "^$1 :=" VERSION.mak | cut -d' ' -f3; }; \
+    METANORMA_VERSION=$(v METANORMA_VERSION); \
+    INKSCAPE_VERSION=$(v INKSCAPE_VERSION); \
+    XML2RFC_VERSION=$(v XML2RFC_VERSION); \
+    tebako setup; \
+    tebako add-registry tfs:github:tebako-packages/metanorma; \
+    tebako install "metanorma/inkscape@${INKSCAPE_VERSION}"; \
+    tebako install "metanorma/xml2rfc@${XML2RFC_VERSION}"; \
+    tebako install "metanorma/metanorma@${METANORMA_VERSION}"; \
+    tebako shim use metanorma "${METANORMA_VERSION}"; \
+    tebako shim use xml2rfc "${XML2RFC_VERSION}"; \
+    tebako shim use inkscape "${INKSCAPE_VERSION}"
+
+# Assert the cached payload bytes match the digest pinned in VERSION.mak
+# (the install already verified them against the payload registry).
+RUN set -eu; \
+    v() { grep "^$1 :=" VERSION.mak | cut -d' ' -f3; }; \
+    METANORMA_VERSION=$(v METANORMA_VERSION); \
+    case "$TARGETARCH" in \
+      amd64) want=$(v METANORMA_SHA256_GNU_X86_64) ;; \
+      arm64) want=$(v METANORMA_SHA256_GNU_ARM64) ;; \
+    esac; \
+    got=$(cut -d' ' -f1 "/tebako/payloads/metanorma/${METANORMA_VERSION}.tfs.sha256"); \
+    [ "$got" = "$want" ] || { echo "metanorma payload digest mismatch: $got != $want" >&2; exit 1; }
+
+# Warm the store: resolve and fetch the runtime pairs (Ruby, OpenJDK,
+# Python) and the fontist formula index so first runs start fast.
+ENV PATH=/tebako/shims:$PATH
+RUN metanorma version && FONTIST_PATH=/config fontist update && rm -rf /tebako/tmp
+
+# ---------------------------------------------------------------------------
+# Final image: the store, the dispatcher, and host tools the document
+# toolchain shells out to (git for fontist formula repos, graphviz for
+# PlantUML/dot diagrams). No compiler, no Ruby, no gem installs.
+# ---------------------------------------------------------------------------
+FROM ubuntu:${UBUNTU_VERSION}
 
 LABEL maintainer="open.source@ribose.com" \
       org.opencontainers.image.authors="open.source@ribose.com" \
       org.opencontainers.image.url="https://www.metanorma.org" \
       org.opencontainers.image.documentation="https://www.metanorma.org" \
       org.opencontainers.image.title="Metanorma" \
-      org.opencontainers.image.description="Metanorma document processing toolchain (Ubuntu variant)"
+      org.opencontainers.image.description="Metanorma document processing toolchain (Ubuntu variant, tebako-packaged)"
 
-ARG RUBY_PATH
-ARG METANORMA_IMAGE_NAME=metanorma
+ENV DEBIAN_FRONTEND=noninteractive \
+    CONTAINER_TIMEZONE=Etc/UTC \
+    LANG=C.UTF-8
 
-# Copy Ruby from build stage
-ENV PATH $RUBY_PATH/bin:$PATH
-COPY --from=rubybuild $RUBY_PATH $RUBY_PATH
-
-# Set environment variables
-ENV DEBIAN_FRONTEND=noninteractive
-ENV CONTAINER_TIMEZONE=Etc/UTC
-
-# Configure timezone
-RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && \
-    echo $CONTAINER_TIMEZONE > /etc/timezone
-
-# Install runtime dependencies
 RUN apt-get update && \
-    apt-get --no-install-recommends install -y \
-        curl \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        fontconfig \
         git \
-        make \
-        software-properties-common \
-        gnupg \
-        gpg-agent \
-        python3 \
-        python3-lxml && \
-    # Update Inkscape repository and install
-    add-apt-repository -y ppa:inkscape.dev/stable && \
-    apt-get --no-install-recommends install -y inkscape && \
-    rm -rf /usr/share/inkscape/tutorials && \
-    apt-get --no-install-recommends install -y openjdk-11-jre && \
-    # Clean up
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+        graphviz \
+        tzdata && \
+    ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && \
+    echo $CONTAINER_TIMEZONE > /etc/timezone && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install XML2RFC in a separate layer
-RUN apt-get update && \
-    apt-get --no-install-recommends install -y \
-        python3-pip \
-        python3-setuptools \
-        python3-wheel && \
-    pip3 install --no-cache-dir \
-      --upgrade pip wheel xml2rfc \
-      --ignore-installed six chardet && \
-    rm -rf /root/.cache/pip && \
-    apt-get purge -y python3-pip python3-setuptools python3-wheel && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+COPY --from=store /usr/local/bin/tebako /usr/local/bin/tebako
+COPY --from=store /usr/local/bin/tebako-shim /usr/local/bin/tebako-shim
+COPY --from=store /tebako /tebako
+COPY --from=store /config /config
 
-# Configure Ruby gems environment
-ENV GEM_HOME=/usr/local/bundle
-ENV BUNDLE_SILENCE_ROOT_WARNING=1 \
-    BUNDLE_APP_CONFIG="$GEM_HOME" \
-    BUNDLE_WITHOUT="development:test"
-ENV PATH $GEM_HOME/bin:$PATH
-
-# Set up directories with proper permissions
-RUN mkdir -p "$GEM_HOME" && chmod 777 "$GEM_HOME" && mkdir -p /setup
-
-# Copy Gemfile and install metanorma toolchain
-COPY $METANORMA_IMAGE_NAME/Gemfile /setup/Gemfile
-
-# Install bundler and metanorma dependencies
-RUN --mount=type=secret,id=bundle_config,dst=$GEM_HOME/config \
-    --mount=type=secret,id=gemrc_config,dst=$GEM_HOME/.gemrc \
-    gem install bundler -v "~> 2.6.5"
-
-RUN apt-get update && \
-    apt-get --no-install-recommends install -y \
-      gcc \
-      g++ \
-      cmake \
-      libssl-dev \
-      libxml2-dev \
-      libxslt-dev \
-      zlib1g-dev \
-      libffi-dev \
-      graphviz \
-      libyaml-dev && \
-    cd /setup && \
-    bundle install --no-cache --redownload && \
-    # Clean up bundle cache and test files
-    rm -rf /usr/local/bundle/cache && \
-    find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
-    find /usr/local/bundle/gems -type d -name 'test' -prune -exec rm -r "{}" \; && \
-    # Remove build dependencies
-    apt-get purge -y \
-        gcc \
-        g++ \
-        cmake \
-        libxml2-dev \
-        libxslt-dev \
-        zlib1g-dev \
-        libyaml-dev && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Update fontist
-RUN fontist update
-
-# Set environment variables
-ENV JAVA_HOME=/usr/lib/jvm/default-java \
-    PATH=$PATH:/usr/lib/jvm/default-java/bin \
-    RUBYOPT=-rbundler/setup \
-    BUNDLE_GEMFILE=/setup/Gemfile \
+ENV TEBAKO_HOME=/tebako \
+    PATH=/tebako/shims:$PATH \
     RELATON_FETCH_PARALLEL=1 \
-    FONTIST_PATH="/config"
+    FONTIST_PATH=/config
 
-# Configure volume for fonts
-VOLUME /config/fonts
-
-# Set working directory
 WORKDIR /metanorma
 
-# Default command
 CMD ["metanorma"]
