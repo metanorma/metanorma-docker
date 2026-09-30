@@ -57,9 +57,16 @@ RUN set -eu; \
 
 # Install the pinned payloads and warm the runtime fetch. Shims are
 # absolute symlinks to /usr/local/bin/tebako-shim, which the final stage
-# carries at the same path.
+# carries at the same path. The optional BuildKit secret
+# `tebako_github_token` authenticates the registry's GitHub contents-API
+# reads (TEBAKO_GITHUB_TOKEN), keeping CI off the anonymous rate limit;
+# local builds without the secret fall back to anonymous fetch.
 ENV TEBAKO_HOME=/tebako
-RUN set -eu; \
+RUN --mount=type=secret,id=tebako_github_token \
+    set -eu; \
+    if [ -s /run/secrets/tebako_github_token ]; then \
+      export TEBAKO_GITHUB_TOKEN="$(cat /run/secrets/tebako_github_token)"; \
+    fi; \
     v() { grep "^$1 :=" VERSION.mak | cut -d' ' -f3; }; \
     METANORMA_VERSION=$(v METANORMA_VERSION); \
     INKSCAPE_VERSION=$(v INKSCAPE_VERSION); \

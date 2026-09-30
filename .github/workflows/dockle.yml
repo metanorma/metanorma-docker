@@ -43,6 +43,8 @@ jobs:
           push: false
           build-args: |
             METANORMA_IMAGE_NAME=metanorma-${{ matrix.image_type }}
+          secrets: |
+            tebako_github_token=${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Dockle
         uses: erzz/dockle-action@v1
