@@ -51,3 +51,13 @@ tmp
 
 # Environment variables
 .env*
+
+# Local working-tree junk (never part of any build context)
+.cache
+.local
+.ash_history
+.bash_history
+.irb_history
+*.bak
+Makefile.orig
+rice-en.cd.adoc

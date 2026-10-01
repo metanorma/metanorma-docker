@@ -40,6 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.result }}
+      ruby_version: ${{ steps.ruby_version.outputs.result }}
       head_tag: ${{ steps.check.outputs.head_tag }}
       foreign_pr: ${{ steps.check.outputs.foreign_pr }}
     steps:
@@ -48,6 +49,9 @@ jobs:
       run: |
         export CLI_VERSION=$(grep '^IMAGE_VERSION :=' VERSION.mak | cut -d ' ' -f 3)
         echo "result=${CLI_VERSION}" >> $GITHUB_OUTPUT
+    - id: ruby_version
+      run: |
+        echo "result=$(grep '^RUBY_VERSION :=' VERSION.mak | cut -d ' ' -f 3)" >> $GITHUB_OUTPUT
     - name: Show version number
       run: echo ${{ steps.version.outputs.result }}
     - name: Retrieve tags
@@ -79,6 +83,8 @@ jobs:
         # debian: the default image — Docker-native gem build on a stock
         # Ruby base (Dockerfile.debian). Multi-arch via buildx; ruby and
         # bundle stay on PATH so user Gemfile overrides keep working.
+        # `image` is descriptive (labels only): the actual FROM is pinned
+        # by RUBY_VERSION in VERSION.mak, passed as a build-arg.
         - id: debian
           image: ruby:4.0.7-slim
         # alpine: same gem-based build path, smallest footprint.
@@ -144,9 +150,11 @@ jobs:
         file: Dockerfile.${{ matrix.root_image.id }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+          RUBY_VERSION=${{ needs.job_info.outputs.ruby_version }}
         outputs: type=docker,dest=/tmp/docker-image.tar
-        # cache-from: type=gha
-        # cache-to: type=gha,mode=min
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     - run: |
         echo "${{ steps.meta.outputs.tags }}" > /tmp/docker-tags.txt
@@ -415,10 +423,14 @@ jobs:
         file: Dockerfile.${{ matrix.root_image.id }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+          RUBY_VERSION=${{ needs.job_info.outputs.ruby_version }}
         # BuildKit attestations: SLSA provenance + Syft SBOM ride the
         # manifest of every published image.
         provenance: mode=max
         sbom: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     # Release supply chain (tag builds only): keyless cosign signatures on
     # both registries' digests, plus an explicit Syft SPDX SBOM attached

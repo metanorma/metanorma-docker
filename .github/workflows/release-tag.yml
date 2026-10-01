@@ -57,9 +57,25 @@ jobs:
           rm -f ${variant}/Gemfile.bak
         done
 
+    # Image builds install with BUNDLE_DEPLOYMENT, so the committed
+    # lockfiles must track the Gemfile bump. Re-lock inside the same base
+    # images the builds use, so bundler matches (and only the bumped gem's
+    # subtree re-resolves).
+    - name: Re-lock variant dependency trees
+      run: |
+        ruby_version=$(grep '^RUBY_VERSION :=' VERSION.mak | cut -d ' ' -f 3)
+        for variant in metanorma-debian metanorma-alpine; do
+          case ${variant} in
+            metanorma-debian) image="ruby:${ruby_version}-slim" ;;
+            metanorma-alpine) image="ruby:3.3.7-alpine3.21" ;;
+          esac
+          docker run --rm -v "$GITHUB_WORKSPACE/${variant}":/lock -w /lock "${image}" \
+            sh -c 'bundle lock --update metanorma-cli'
+        done
+
     - name: Push commit and tag
       run: |
-        git add VERSION.mak metanorma-debian/Gemfile metanorma-alpine/Gemfile
+        git add VERSION.mak metanorma-debian metanorma-alpine
         git commit -m "Bump version to ${DOCKER_TAG}"
         git tag v${DOCKER_TAG}
         git push origin HEAD:${GITHUB_REF} --tags
