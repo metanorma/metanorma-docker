@@ -59,12 +59,12 @@ RUN gem install bundler -v "~> 2.6.5"
 
 # Install metanorma toolchain with optimized layers
 COPY $METANORMA_IMAGE_NAME/Gemfile $METANORMA_IMAGE_NAME/Gemfile.lock /setup/
+WORKDIR /setup
 ENV BUNDLE_WITHOUT="development:test"
 
 # Use build dependencies in a single layer to reduce image size
 RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
     --mount=type=cache,target=/usr/local/bundle/cache \
-    cd /setup && \
     apk add --no-cache --virtual .build-deps \
         gcc \
         g++ \
