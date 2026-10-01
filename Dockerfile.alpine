@@ -17,6 +17,8 @@ LABEL maintainer="open.source@ribose.com" \
 ARG METANORMA_IMAGE_NAME=metanorma-alpine
 
 # Install runtime dependencies
+# (apk upgrade pulls in security patchlevels of base packages — the
+# Trivy gate fails the build on fixable HIGH/CRITICAL OS CVEs otherwise)
 RUN apk add --no-cache \
     bash \
     coreutils \
@@ -33,7 +35,8 @@ RUN apk add --no-cache \
     ttf-dejavu \
     tzdata \
     unzip \
-    graphviz
+    graphviz \
+    && apk upgrade --no-cache
 
 # Install xml2rfc with optimized layer
 ENV PYTHONUNBUFFERED=1
@@ -47,7 +50,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         libffi-dev \
         python3-dev && \
     pip3 install --break-system-packages \
-      --upgrade pip wheel xml2rfc \
+      --upgrade --upgrade-strategy eager pip wheel setuptools urllib3 msgpack xml2rfc \
       --ignore-installed six chardet && \
     apk del .build-deps
 
