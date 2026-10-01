@@ -47,26 +47,27 @@ jobs:
             METANORMA_IMAGE_NAME=metanorma-${{ matrix.image_type }}
             RUBY_VERSION=${{ env.RUBY_VERSION }}
 
-      - name: Run Trivy vulnerability scanner
+      # The gate: table format, exit 1 on any fixable HIGH/CRITICAL not in
+      # .trivyignore. Table is used for the gate deliberately — the sarif
+      # invocation of trivy-action exits 1 even when the same scan scores
+      # zero findings, and a red table gate prints its findings inline.
+      - name: Trivy gate (table, blocking)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: metanorma-${{ matrix.image_type }}:test
-          format: 'sarif'
-          output: 'trivy-${{ matrix.image_type }}.sarif'
+          format: 'table'
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
           trivyignores: .trivyignore
           exit-code: '1'
 
-      # The sarif run fails silently (findings are in the SARIF, not the
-      # log) — re-scan in table format so a red gate shows its findings
-      # directly in the job log.
-      - name: Show blocking findings
-        if: failure()
+      # Advisory: SARIF report for GitHub Code Scanning. Never blocks.
+      - name: Trivy (SARIF for Code Scanning)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: metanorma-${{ matrix.image_type }}:test
-          format: 'table'
+          format: 'sarif'
+          output: 'trivy-${{ matrix.image_type }}.sarif'
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
           trivyignores: .trivyignore
