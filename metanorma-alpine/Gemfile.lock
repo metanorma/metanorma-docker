@@ -504,7 +504,7 @@ GEM
       relaton-render (>= 1.0.0)
     mn2pdf (2.72)
     mnconvert (1.89.0)
-    moxml (0.5.97)
+    moxml (0.5.98)
     multi_json (1.15.0)
     net-ftp (0.1.4)
       net-protocol
@@ -568,14 +568,14 @@ GEM
       bigdecimal (>= 3.0)
     paint (2.3.0)
     parallel (1.28.0)
-    parsanol (1.3.58-aarch64-linux)
-    parsanol (1.3.58-aarch64-linux-musl)
-    parsanol (1.3.58-arm-linux)
-    parsanol (1.3.58-arm-linux-musl)
-    parsanol (1.3.58-arm64-darwin)
-    parsanol (1.3.58-x86_64-darwin)
-    parsanol (1.3.58-x86_64-linux)
-    parsanol (1.3.58-x86_64-linux-musl)
+    parsanol (1.3.60-aarch64-linux)
+    parsanol (1.3.60-aarch64-linux-musl)
+    parsanol (1.3.60-arm-linux)
+    parsanol (1.3.60-arm-linux-musl)
+    parsanol (1.3.60-arm64-darwin)
+    parsanol (1.3.60-x86_64-darwin)
+    parsanol (1.3.60-x86_64-linux)
+    parsanol (1.3.60-x86_64-linux-musl)
     parslet (2.0.0)
     plane1converter (0.0.1)
     plist (3.7.2)
@@ -1140,4 +1140,4 @@ DEPENDENCIES
   metanorma-cli (= 1.17.0)
 
 BUNDLED WITH
-   2.5.22
+  4.0.20

@@ -48,6 +48,7 @@ build-$(1):
 		-f Dockerfile.$(call GET_PLATFORM,$(1)) \
 		--platform linux/amd64 \
 		--build-arg RUBY_VERSION=$(RUBY_VERSION) \
+		--build-arg ALPINE_RUBY_VERSION=$(ALPINE_RUBY_VERSION) \
 		--label metanorma-container-root=$(call GET_PLATFORM,$(1)) \
 		--label metanorma-container-source=$(REPO_GIT_NAME)/$(1) \
 		--label metanorma-container=$(CONTAINER_LOCAL_NAME) \
