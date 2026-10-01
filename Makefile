@@ -18,11 +18,11 @@ CONTAINER_COMMIT ?= $(shell git rev-parse --short HEAD)
 REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 
 # Image variants:
-#  metanorma-ubuntu — tebako-packaged (pre-built payloads, no compiler in
-#    the image); the main variant (unprefixed tags on Docker Hub/GHCR).
-#  metanorma-alpine — legacy gem build (ruby:3.3.7-alpine base); stays on
-#    this path until the inkscape payload ships linux-musl legs.
-IMAGE_TYPES ?= metanorma-ubuntu metanorma-alpine
+#  metanorma-debian — the main variant (unprefixed tags on Docker
+#    Hub/GHCR): gem-based build on ruby:4.0.7-slim, multi-arch.
+#  metanorma-alpine — same gem-based build path on ruby:3.3.7-alpine,
+#    smallest footprint.
+IMAGE_TYPES ?= metanorma-debian metanorma-alpine
 
 GET_PLATFORM = $(patsubst metanorma-%,%,$(1))
 
