@@ -58,6 +58,20 @@ jobs:
           trivyignores: .trivyignore
           exit-code: '1'
 
+      # The sarif run fails silently (findings are in the SARIF, not the
+      # log) — re-scan in table format so a red gate shows its findings
+      # directly in the job log.
+      - name: Show blocking findings
+        if: failure()
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: metanorma-${{ matrix.image_type }}:test
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+          exit-code: '0'
+
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
         if: always()
