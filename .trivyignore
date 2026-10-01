@@ -31,6 +31,17 @@ CVE-2026-54297
 # Reviewed: 2026-10-01
 CVE-2026-85396
 
+# Old versions vendored inside pip itself (pip/_vendor/vendor.txt pins
+# msgpack==1.1.2, urllib3==2.7.0, setuptools==70.3.0). Runtime imports
+# resolve to the fixed top-level installs (msgpack 1.2.3, urllib3 2.8.0,
+# setuptools 84.0.0); the vendored copies only serve pip's own internals.
+# Upstream: a pip release with updated vendored deps.
+# Reviewed: 2026-10-01
+GHSA-6v7p-g79w-8964
+CVE-2026-97687
+CVE-2026-97689
+CVE-2025-47273
+
 # json 2.18.0 is the default gem bundled with Ruby 4.0.7's stdlib. The
 # toolchain lock pins json 2.21.2 in /usr/local/bundle, and every process
 # in the image runs under RUBYOPT=-rbundler/setup, which puts the locked
