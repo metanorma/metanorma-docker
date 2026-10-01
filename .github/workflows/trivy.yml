@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image_type: [alpine, ubuntu]
+        image_type: [alpine, debian]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

@@ -7,19 +7,21 @@ on:
     - '*'
     paths:
       - 'Dockerfile.alpine'
-      - 'Dockerfile.ubuntu'
+      - 'Dockerfile.debian'
       - 'VERSION.mak'
       - 'Makefile'
       - 'metanorma-alpine/**'
+      - 'metanorma-debian/**'
       - 'tests/smoke/**'
       - '.github/workflows/build-push.yml'
   pull_request:
     paths:
       - 'Dockerfile.alpine'
-      - 'Dockerfile.ubuntu'
+      - 'Dockerfile.debian'
       - 'VERSION.mak'
       - 'Makefile'
       - 'metanorma-alpine/**'
+      - 'metanorma-debian/**'
       - 'tests/smoke/**'
       - '.github/workflows/build-push.yml'
   workflow_dispatch:
@@ -74,14 +76,12 @@ jobs:
       fail-fast: false
       matrix:
         root_image:
-        # ubuntu: tebako-packaged (Dockerfile.ubuntu). linux/arm64 stays
-        # disabled until the inkscape payload publishes aarch64-linux-gnu —
-        # `tebako install metanorma` cannot resolve its inkscape toolkit
-        # dependency there (https://github.com/tebako-packages/inkscape).
-        - id: ubuntu
-          image: ubuntu:24.04
-        # alpine: legacy gem build until the inkscape payload ships
-        # linux-musl legs (same dependency).
+        # debian: the default image — Docker-native gem build on a stock
+        # Ruby base (Dockerfile.debian). Multi-arch via buildx; ruby and
+        # bundle stay on PATH so user Gemfile overrides keep working.
+        - id: debian
+          image: ruby:4.0.7-slim
+        # alpine: same gem-based build path, smallest footprint.
         - id: alpine
           image: ruby:3.3.7-alpine
         image_type:
@@ -98,7 +98,7 @@ jobs:
 
     - id: label_prefix
       env:
-        IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'ubuntu'}}
+        IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'debian'}}
       run: |
         if [ "$IS_MAIN" == "true" ]; then
           echo "result=" >> $GITHUB_OUTPUT
@@ -145,8 +145,6 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         outputs: type=docker,dest=/tmp/docker-image.tar
-        secrets: |
-          tebako_github_token=${{ secrets.GITHUB_TOKEN }}
         # cache-from: type=gha
         # cache-to: type=gha,mode=min
 
@@ -184,8 +182,8 @@ jobs:
       fail-fast: false
       matrix:
         root_image:
-        - id: ubuntu
-          image: ubuntu:24.04
+        - id: debian
+          image: ruby:4.0.7-slim
           max_size: '2.0 GB'
         - id: alpine
           image: ruby:3.3.7-alpine
@@ -258,7 +256,7 @@ jobs:
     - name: Build full test matrix
       id: build
       run: |
-        echo "{\"root_image\": [\"ubuntu\", \"alpine\"], \"image_type\": [\"metanorma\"]}" > docker-matrix.json
+        echo "{\"root_image\": [\"debian\", \"alpine\"], \"image_type\": [\"metanorma\"]}" > docker-matrix.json
         echo '${{ needs.samples-matrix.outputs.samples-matrix }}' > samples-matrix.json
         echo "matrix=$(jq -s add docker-matrix.json samples-matrix.json | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
@@ -337,11 +335,9 @@ jobs:
       fail-fast: false
       matrix:
         root_image:
-        # ubuntu (tebako-packaged): linux/arm64 stays disabled until the
-        # inkscape payload publishes aarch64-linux-gnu legs.
-        - id: ubuntu
-          image: ubuntu:24.04
-          platforms: linux/amd64
+        - id: debian
+          image: ruby:4.0.7-slim
+          platforms: linux/amd64,linux/arm64
         - id: alpine
           image: ruby:3.3.7-alpine
           platforms: linux/amd64,linux/arm64
@@ -372,7 +368,7 @@ jobs:
 
     - id: label_prefix
       env:
-        IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'ubuntu'}}
+        IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'debian'}}
       run: |
         echo '::echo::on'
         if [ "$IS_MAIN" == "true" ]; then
@@ -423,8 +419,6 @@ jobs:
         # manifest of every published image.
         provenance: mode=max
         sbom: true
-        secrets: |
-          tebako_github_token=${{ secrets.GITHUB_TOKEN }}
 
     # Release supply chain (tag builds only): keyless cosign signatures on
     # both registries' digests, plus an explicit Syft SPDX SBOM attached

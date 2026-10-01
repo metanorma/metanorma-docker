@@ -5,7 +5,6 @@ image:https://img.shields.io/github/issues-pr-raw/metanorma/metanorma-docker.svg
 image:https://img.shields.io/github/commits-since/metanorma/metanorma-docker/latest.svg["Commits since latest",link="https://github.com/metanorma/metanorma-docker/releases"]
 
 image:https://badgen.net/docker/size/metanorma/metanorma/alpine-latest?icon=docker&label=alpine-latest["metanorma:alpine-latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=alpine"]
-image:https://badgen.net/docker/size/metanorma/metanorma/ubuntu-latest?icon=docker&label=ubuntu-latest["metanorma:ubuntu-latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=ubuntu"]
 image:https://badgen.net/docker/size/metanorma/metanorma/latest?icon=docker&label=latest["metanorma:latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=latest"]
 image:https://badgen.net/docker/size/metanorma/metanorma/windows-latest?icon=docker&label=windows-latest["metanorma:windows-latest", link="https://hub.docker.com/r/metanorma/metanorma/tags?name=windows"]
 
@@ -39,22 +38,30 @@ workflows for using Metanorma in your GitHub Actions workflows.
 
 == What's included?
 
-The Ubuntu image is packaged with https://github.com/tamatebako/tebako[tebako]:
-instead of compiling Ruby and gems inside the image, it carries pre-built,
-checksum-verified Metanorma payload images plus the language runtimes they
-need, all resolved from published releases. There is no compiler and no gem
-installation in the image build.
+The Linux images are built the Docker-native way: a stock
+https://hub.docker.com/_/ruby[Ruby base image] plus `bundle install`,
+compiled in-image with buildx for `linux/amd64` and `linux/arm64`. `ruby`,
+`gem` and `bundle` stay on PATH, so the documented workflow of installing
+extra gems from a `Gemfile` inside the container keeps working.
 
 At a high level, the image includes the following:
 
 * Metanorma and Metanorma CLI on https://ruby-lang.org[Ruby]
 * `mn2pdf` on the bundled Java runtime
-* https://inkscape.org[Inkscape] and `xml2rfc` as packaged companion tools
+* `xml2rfc` as a companion tool
 * Other supporting tools (`git`, `graphviz`)
 
-The exact versions and checksums of every packaged component are pinned in
-`VERSION.mak`. Release images are signed (keyless, via Sigstore cosign) and
-carry SBOM and provenance attestations — see <<Verifying release images>>.
+The `metanorma-cli` version is pinned per variant in
+`metanorma-debian/Gemfile` and `metanorma-alpine/Gemfile`; the image-level
+version lives in `VERSION.mak`. Release images are signed (keyless, via
+Sigstore cosign) and carry SBOM and provenance attestations — see
+<<Verifying release images>>.
+
+Single-executable Metanorma packages (tebako-based, for snap, Homebrew,
+Chocolatey and winget) are built separately in the
+https://github.com/metanorma/packed-metanorma[packed-metanorma]
+repository — that packaging lane is intentionally independent of these
+Docker images.
 
 
 == Usage
@@ -224,21 +231,21 @@ base containers (OS containers), each optimized for different use cases.
 |===
 |Image Type |Base |Tag |Size |Description
 
-|Ubuntu
-|`ubuntu:24.04`
+|Debian
+|`ruby:4.0.7-slim`
 |`metanorma/metanorma:latest`
 |~1.5GB
-|Default. Packaged with tebako from pre-built, checksum-verified payloads —
-no compilation inside the image. Developer-friendly and extensible.
+|Default. Gem-based build on a stock Ruby base image — `ruby`, `gem` and
+`bundle` stay on PATH, multi-arch (`amd64`, `arm64`). Developer-friendly and
+extensible.
 
 |Alpine
 |`ruby:3.3.7-alpine3.21`
 |`metanorma/metanorma:alpine-latest`
 |~1GB
-|Smallest footprint. This variant still builds the toolchain from gems (the
-packaged Inkscape component is not yet published for the musl C library, so
-the tebako packaging path is not available there yet). Extensions may be
-limited due to usage of `musl` libc and limited package availability.
+|Smallest footprint. Same gem-based build path as the default variant on
+`musl` libc. Extensions may be limited due to usage of `musl` and limited
+package availability.
 
 |Windows
 |`mcr.microsoft.com/windows/servercore:ltsc2019`
@@ -267,19 +274,14 @@ package management. Larger image size due to Windows base image.
 
 |===
 
-By default, the Ubuntu-based image is tagged as `metanorma/metanorma:latest`.
-
-NOTE: The previous Debian (`ruby:slim-bookworm`) variant is retired; its role
-as the default image is taken over by the tebako-packaged Ubuntu variant.
+By default, the Debian-based image is tagged as `metanorma/metanorma:latest`.
 
 
 === Supported Docker architectures
 
 Metanorma Docker images are available for the following Docker architectures:
 
-* Ubuntu (default): `linux/amd64`
-  (`linux/arm64` follows once the packaged Inkscape component is published
-  for `aarch64-linux`)
+* Debian (default): `linux/amd64`, `linux/arm64`
 * Alpine: `linux/amd64`, `linux/arm64`
 * Windows: `windows/amd64` (Windows Server 2019/2022/2025)
 
@@ -446,21 +448,21 @@ To start the `metanorma` container and enter it with `bash`, all you need is:
 
 [source,sh]
 ----
-make run-metanorma-ubuntu
+make run-metanorma-debian
 ----
 
 To kill the container:
 
 [source,sh]
 ----
-make kill-metanorma-ubuntu
+make kill-metanorma-debian
 ----
 
 The `Makefile` supports the following commands related to running:
 
 [source,sh]
 ----
-make {run,kill,rm,rmf}-metanorma-ubuntu
+make {run,kill,rm,rmf}-metanorma-debian
 ----
 
 
@@ -483,7 +485,7 @@ If you want to build only a subset of the variants:
 
 [source,sh]
 ----
-export IMAGE_TYPES="metanorma-ubuntu"
+export IMAGE_TYPES="metanorma-debian"
 ----
 
 The environment variables are used for:
@@ -494,9 +496,9 @@ The environment variables are used for:
 `DOCKER_LOGIN_CMD`:: how you authenticate against your repository
 
 `IMAGE_TYPES`:: the image variants to operate on
-(`metanorma-ubuntu`, `metanorma-alpine`). Versions are not set here —
-`VERSION.mak` is the single source of truth for the image version and every
-packaged component's version and checksum.
+(`metanorma-debian`, `metanorma-alpine`). Versions are not set here — the
+`metanorma-cli` pin lives in each variant's `Gemfile` and the image-level
+version in `VERSION.mak`.
 
 
 === Makefile build targets
@@ -513,24 +515,23 @@ make {build,test,push,tag,clean-remote,clean-local}-{container-flavor}
 
 === Updating container flavors
 
-The tebako-packaged Ubuntu variant consumes published components; updating it
-means editing pins in `VERSION.mak` (component versions and checksums) and
-rebuilding — there is no `bundle update` step. The legacy Alpine variant pins
-`metanorma-cli` in `metanorma-alpine/Gemfile`. The `release-tag` workflow
-updates both for a new `metanorma-cli` release.
+Each variant pins `metanorma-cli` in its `Gemfile`
+(`metanorma-debian/Gemfile`, `metanorma-alpine/Gemfile`); the image-level
+version lives in `VERSION.mak`. The `release-tag` workflow updates all of
+them for a new `metanorma-cli` release.
 
 Then, we build and push the container:
 
 [source,sh]
 ----
-make btp-metanorma-ubuntu
+make btp-metanorma-debian
 ----
 
 Lastly, we tag and push the built container as latest.
 
 [source,sh]
 ----
-make latest-tp-metanorma-ubuntu
+make latest-tp-metanorma-debian
 ----
 
 
@@ -540,7 +541,7 @@ If you feel tired typing out this:
 
 [source,sh]
 ----
-make build-metanorma-ubuntu tag-metanorma-ubuntu push-metanorma-ubuntu
+make build-metanorma-debian tag-metanorma-debian push-metanorma-debian
 ----
 
 We have a list of shortcut targets to save you from repeating fingers.
@@ -549,7 +550,7 @@ For example:
 [source,sh]
 ----
 # equivalent to make {build,push}-{container-flavor} latest-{tag,push}-{container-flavor}
-make btp-metanorma-ubuntu latest-tp-metanorma-ubuntu
+make btp-metanorma-debian latest-tp-metanorma-debian
 ----
 
 The shortcut targets are:

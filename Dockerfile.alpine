@@ -1,12 +1,9 @@
-# Alpine variant — legacy build path.
+# Alpine variant — smallest-footprint gem build.
 #
-# The Ubuntu variant is packaged with tebako (pre-built, sha256-verified
-# payloads; see Dockerfile.ubuntu). This Alpine variant still compiles the
-# toolchain from gems because the inkscape payload Metanorma depends on is
-# not yet published for linux-musl or aarch64-linux, so `tebako install
-# metanorma` cannot complete on musl hosts. Once tebako-packages/inkscape
-# publishes musl legs (both architectures), this variant moves to the
-# tebako model and the gem-build stages below are retired.
+# Built the same Docker-native way as the Debian variant (Dockerfile.debian):
+# a stock Ruby base image plus `bundle install`, compiled in-image. Kept
+# separate from the Debian variant because `musl` libc and the limited
+# Alpine package set can constrain native-gem extensions.
 FROM ruby:3.3.7-alpine3.21
 USER root
 
@@ -27,7 +24,6 @@ RUN apk add --no-cache \
     fontconfig \
     git \
     gcompat \
-    inkscape \
     libxml2 \
     libxslt \
     make \
@@ -37,8 +33,7 @@ RUN apk add --no-cache \
     ttf-dejavu \
     tzdata \
     unzip \
-    graphviz \
-    && rm -rf /usr/share/inkscape/tutorials
+    graphviz
 
 # Install xml2rfc with optimized layer
 ENV PYTHONUNBUFFERED=1
