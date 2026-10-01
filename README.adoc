@@ -515,10 +515,14 @@ make {build,test,push,tag,clean-remote,clean-local}-{container-flavor}
 
 === Updating container flavors
 
-Each variant pins `metanorma-cli` in its `Gemfile`
-(`metanorma-debian/Gemfile`, `metanorma-alpine/Gemfile`); the image-level
-version lives in `VERSION.mak`. The `release-tag` workflow updates all of
-them for a new `metanorma-cli` release.
+Each variant pins `metanorma-cli` in its `Gemfile` **plus a committed
+`Gemfile.lock`** — image builds install strictly from the lockfile
+(`BUNDLE_DEPLOYMENT`), so the whole dependency tree is reproducible; bump
+dependencies via a lockfile update. The Debian base image tag comes from
+`RUBY_VERSION` in `VERSION.mak` (passed to the build as the `RUBY_VERSION`
+build-arg), and the image-level version lives in `IMAGE_VERSION` in the
+same file. The `release-tag` workflow updates the version pins for a new
+`metanorma-cli` release.
 
 Then, we build and push the container:
 
