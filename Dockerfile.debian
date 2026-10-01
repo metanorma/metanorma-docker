@@ -26,6 +26,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 RUN mkdir -p /setup
 COPY $METANORMA_IMAGE_NAME/Gemfile $METANORMA_IMAGE_NAME/Gemfile.lock /setup/
+WORKDIR /setup
 
 # Install build dependencies and compile the toolchain
 RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
@@ -43,7 +44,6 @@ RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
       libffi-dev \
       libyaml-dev \
       zlib1g-dev && \
-    cd /setup && \
     BUNDLE_FROZEN=true bundle install && \
     find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
     find /usr/local/bundle/gems -type d -name 'test' -prune -exec rm -r "{}" \;
