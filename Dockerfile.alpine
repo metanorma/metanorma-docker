@@ -1,10 +1,14 @@
 # Alpine variant — smallest-footprint gem build.
 #
 # Built the same Docker-native way as the Debian variant (Dockerfile.debian):
-# a stock Ruby base image plus `bundle install`, compiled in-image. Kept
-# separate from the Debian variant because `musl` libc and the limited
-# Alpine package set can constrain native-gem extensions.
-FROM ruby:3.3.7-alpine3.21
+# a stock Ruby base image plus `bundle install` against the committed
+# Gemfile.lock. Kept separate from the Debian variant because `musl` libc
+# and the limited Alpine package set can constrain native-gem extensions.
+
+# Base image tag. VERSION.mak is the single source of truth — CI passes it
+# via --build-arg ALPINE_RUBY_VERSION. The default is a local-dev fallback.
+ARG ALPINE_RUBY_VERSION=4.0.7
+FROM ruby:${ALPINE_RUBY_VERSION}-alpine
 USER root
 
 LABEL maintainer="open.source@ribose.com" \
@@ -56,9 +60,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 # Setup directory for app
 RUN mkdir -p /setup
-
-# Install bundler with specific version
-RUN gem install bundler -v "~> 2.6.5"
 
 # Install metanorma toolchain with optimized layers
 COPY $METANORMA_IMAGE_NAME/Gemfile $METANORMA_IMAGE_NAME/Gemfile.lock /setup/

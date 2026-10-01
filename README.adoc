@@ -240,12 +240,12 @@ base containers (OS containers), each optimized for different use cases.
 extensible.
 
 |Alpine
-|`ruby:3.3.7-alpine3.21`
+|`ruby:4.0.7-alpine`
 |`metanorma/metanorma:alpine-latest`
 |~1GB
-|Smallest footprint. Same gem-based build path as the default variant on
-`musl` libc. Extensions may be limited due to usage of `musl` and limited
-package availability.
+|Smallest footprint. Same gem-based build path and Ruby version as the
+default variant, on `musl` libc. Extensions may be limited due to usage of
+`musl` and limited package availability.
 
 |Windows
 |`mcr.microsoft.com/windows/servercore:ltsc2019`

@@ -41,6 +41,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.result }}
       ruby_version: ${{ steps.ruby_version.outputs.result }}
+      alpine_ruby_version: ${{ steps.alpine_ruby_version.outputs.result }}
       head_tag: ${{ steps.check.outputs.head_tag }}
       foreign_pr: ${{ steps.check.outputs.foreign_pr }}
     steps:
@@ -52,6 +53,9 @@ jobs:
     - id: ruby_version
       run: |
         echo "result=$(grep '^RUBY_VERSION :=' VERSION.mak | cut -d ' ' -f 3)" >> $GITHUB_OUTPUT
+    - id: alpine_ruby_version
+      run: |
+        echo "result=$(grep '^ALPINE_RUBY_VERSION :=' VERSION.mak | cut -d ' ' -f 3)" >> $GITHUB_OUTPUT
     - name: Show version number
       run: echo ${{ steps.version.outputs.result }}
     - name: Retrieve tags
@@ -89,7 +93,7 @@ jobs:
           image: ruby:4.0.7-slim
         # alpine: same gem-based build path, smallest footprint.
         - id: alpine
-          image: ruby:3.3.7-alpine
+          image: ruby:4.0.7-alpine
         image_type:
         - metanorma
         experimental: [false]
@@ -152,6 +156,7 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
           RUBY_VERSION=${{ needs.job_info.outputs.ruby_version }}
+          ALPINE_RUBY_VERSION=${{ needs.job_info.outputs.alpine_ruby_version }}
         outputs: type=docker,dest=/tmp/docker-image.tar
         cache-from: type=gha
         cache-to: type=gha,mode=max
@@ -194,7 +199,7 @@ jobs:
           image: ruby:4.0.7-slim
           max_size: '2.0 GB'
         - id: alpine
-          image: ruby:3.3.7-alpine
+          image: ruby:4.0.7-alpine
           max_size: '1.8 GB'
         image_type:
         - metanorma
@@ -347,7 +352,7 @@ jobs:
           image: ruby:4.0.7-slim
           platforms: linux/amd64,linux/arm64
         - id: alpine
-          image: ruby:3.3.7-alpine
+          image: ruby:4.0.7-alpine
           platforms: linux/amd64,linux/arm64
 
         image_type:
@@ -425,6 +430,7 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
           RUBY_VERSION=${{ needs.job_info.outputs.ruby_version }}
+          ALPINE_RUBY_VERSION=${{ needs.job_info.outputs.alpine_ruby_version }}
         # BuildKit attestations: SLSA provenance + Syft SBOM ride the
         # manifest of every published image.
         provenance: mode=max

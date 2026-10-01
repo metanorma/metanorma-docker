@@ -33,6 +33,7 @@ jobs:
       - name: Read base image version
         run: |
           echo "RUBY_VERSION=$(grep '^RUBY_VERSION :=' VERSION.mak | cut -d ' ' -f 3)" >> $GITHUB_ENV
+          echo "ALPINE_RUBY_VERSION=$(grep '^ALPINE_RUBY_VERSION :=' VERSION.mak | cut -d ' ' -f 3)" >> $GITHUB_ENV
 
       - name: Build Docker Image
         id: docker_build
@@ -46,6 +47,7 @@ jobs:
           build-args: |
             METANORMA_IMAGE_NAME=metanorma-${{ matrix.image_type }}
             RUBY_VERSION=${{ env.RUBY_VERSION }}
+            ALPINE_RUBY_VERSION=${{ env.ALPINE_RUBY_VERSION }}
 
       # The gate: table format, exit 1 on any fixable HIGH/CRITICAL not in
       # .trivyignore. Table is used for the gate deliberately — the sarif
