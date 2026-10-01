@@ -55,6 +55,7 @@ jobs:
           output: 'trivy-${{ matrix.image_type }}.sarif'
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
+          trivyignores: .trivyignore
           exit-code: '1'
 
       - name: Upload SARIF file

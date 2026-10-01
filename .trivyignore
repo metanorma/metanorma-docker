@@ -1,0 +1,40 @@
+# Trivy ignore list — vulnerabilities that are NOT fixable in this
+# repository, with the upstream that owns the fix. The Trivy gate
+# (trivy.yml) fails on any remaining fixable HIGH/CRITICAL finding, so
+# every entry here must name its blocker and carry a review date.
+# Regenerate candidates with:
+#   docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+#     aquasec/trivy image --scanners vuln --severity HIGH,CRITICAL \
+#     --ignore-unfixed <image>
+
+# mn2pdf.jar vendors jackson-databind/jackson-core 2.11.3 (2020).
+# Upstream: metanorma/mn2pdf must upgrade its bundled jackson.
+# Reviewed: 2026-10-01
+CVE-2025-52999
+GHSA-r7wm-3cxj-wff9
+CVE-2020-36518
+CVE-2021-46877
+CVE-2022-42003
+CVE-2022-42004
+CVE-2026-54512
+CVE-2026-54513
+CVE-2026-91776
+CVE-2026-91777
+
+# faraday 2.7.x: fixed in >= 2.14.3, but relaton pins faraday ~> 2.7.0.
+# Upstream: relaton must relax its faraday constraint.
+# Reviewed: 2026-10-01
+CVE-2026-54297
+
+# rubyzip 2.3.x: fixed in >= 3.4.0, but glossarist pins rubyzip >= 2.3, < 3.
+# Upstream: glossarist must relax its rubyzip constraint.
+# Reviewed: 2026-10-01
+CVE-2026-85396
+
+# json 2.18.0 is the default gem bundled with Ruby 4.0.7's stdlib. The
+# toolchain lock pins json 2.21.2 in /usr/local/bundle, and every process
+# in the image runs under RUBYOPT=-rbundler/setup, which puts the locked
+# gem first — the stdlib copy is never loaded. Fixable only by a Ruby
+# 4.0.x patch release bundling json >= 2.19.2 (or ~> 2.17.1.2 backport).
+# Reviewed: 2026-10-01
+CVE-2026-33210
