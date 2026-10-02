@@ -1,0 +1,41 @@
+# Dependabot configuration.
+#
+# The bundler trees are now committed (metanorma-debian/Gemfile.lock,
+# metanorma-alpine/Gemfile.lock), so Dependabot scans them for security
+# alerts. Version updates intentionally stay off (open-pull-requests-limit:
+# 0): dependency bumps flow through the release-tag workflow and reviewed
+# lockfile diffs, not autonomous PRs.
+#
+# The `ignore` entries mirror .trivyignore — the security fixes they skip
+# are blocked by upstream constraints, not by this repository. Lift each
+# entry when the named upstream relaxes its pin, and drop the matching
+# .trivyignore entry at the same time.
+
+version: 2
+
+updates:
+  - package-ecosystem: "bundler"
+    directory: "/metanorma-debian"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 0
+    ignore:
+      # CVE-2026-54297: fixed in faraday >= 2.14.3; blocked by relaton's
+      # faraday ~> 2.7.0 pin.
+      - dependency-name: "faraday"
+      # CVE-2026-85396: fixed in rubyzip >= 3.4.0; blocked by glossarist's
+      # rubyzip >= 2.3, < 3 pin.
+      - dependency-name: "rubyzip"
+
+  - package-ecosystem: "bundler"
+    directory: "/metanorma-alpine"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 0
+    ignore:
+      # CVE-2026-54297: fixed in faraday >= 2.14.3; blocked by relaton's
+      # faraday ~> 2.7.0 pin.
+      - dependency-name: "faraday"
+      # CVE-2026-85396: fixed in rubyzip >= 3.4.0; blocked by glossarist's
+      # rubyzip >= 2.3, < 3 pin.
+      - dependency-name: "rubyzip"
