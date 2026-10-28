@@ -21,6 +21,15 @@ ignored:
   # Ignore "Pin versions in apk"
   - DL3018
 
+  # Ignore "Last USER should not be root" — running as root is a
+  # deliberate decision for this toolchain (host-mount ownership)
+  - DL3002
+
+  # Ignore "Avoid use of cache directory with pip" — pip caching is
+  # intentional: the RUN uses a BuildKit cache mount so downloads are
+  # reused across builds without entering the image layer
+  - DL3042
+
 # Trust specific registries
 trustedRegistries:
   - docker.io

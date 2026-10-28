@@ -7,7 +7,7 @@ on:
     inputs:
       next_version:
         description: |
-          Next version. Should correspond to the released metanorma-cli gem
+          Next version. Should correspond to the released metanorma-cli gem.
         required: true
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
 
     - uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.2'
+        ruby-version: '3.3'
 
     - run: |
         git config --global user.name "metanorma-ci"
@@ -48,17 +48,35 @@ jobs:
       with:
         version: ${{ env.DOCKER_TAG }}
 
-    - name: Update version
+    - name: Update version pins (VERSION.mak is the SSOT)
       run: |
-        echo "IMAGE_VERSION := ${METANORMA_CLI_VERSION}" > VERSION.mak
-        pushd metanorma-ruby
-        bundle remove metanorma-cli
-        bundle add metanorma-cli -v ${METANORMA_CLI_VERSION}
-        popd
+        sed -i.bak "s/^IMAGE_VERSION := .*$/IMAGE_VERSION := ${METANORMA_CLI_VERSION}/" VERSION.mak
+        rm -f VERSION.mak.bak
+        for variant in metanorma-debian metanorma-alpine; do
+          sed -i.bak "s/gem \"metanorma-cli\", \"= .*\"/gem \"metanorma-cli\", \"= ${METANORMA_CLI_VERSION}\"/" ${variant}/Gemfile
+          rm -f ${variant}/Gemfile.bak
+        done
+
+    # Image builds install with BUNDLE_DEPLOYMENT, so the committed
+    # lockfiles must track the Gemfile bump. Re-lock inside the same base
+    # images the builds use, so bundler matches (and only the bumped gem's
+    # subtree re-resolves).
+    - name: Re-lock variant dependency trees
+      run: |
+        ruby_version=$(grep '^RUBY_VERSION :=' VERSION.mak | cut -d ' ' -f 3)
+        alpine_ruby=$(grep '^ALPINE_RUBY_VERSION :=' VERSION.mak | cut -d ' ' -f 3)
+        for variant in metanorma-debian metanorma-alpine; do
+          case ${variant} in
+            metanorma-debian) image="ruby:${ruby_version}-slim" ;;
+            metanorma-alpine) image="ruby:${alpine_ruby}-alpine" ;;
+          esac
+          docker run --rm -v "$GITHUB_WORKSPACE/${variant}":/lock -w /lock "${image}" \
+            sh -c 'bundle lock --update metanorma-cli'
+        done
 
     - name: Push commit and tag
       run: |
-        git add VERSION.mak metanorma-ruby/Gemfile
+        git add VERSION.mak metanorma-debian metanorma-alpine
         git commit -m "Bump version to ${DOCKER_TAG}"
         git tag v${DOCKER_TAG}
         git push origin HEAD:${GITHUB_REF} --tags

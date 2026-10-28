@@ -7,30 +7,22 @@ on:
     - '*'
     paths:
       - 'Dockerfile.alpine'
-      - 'Dockerfile.ruby'
-      - 'Dockerfile.ubuntu'
+      - 'Dockerfile.debian'
       - 'VERSION.mak'
-      - 'Gemfile'
-      - 'metanorma-ruby/**'
-      - 'metanorma-ubuntu/**'
+      - 'Makefile'
       - 'metanorma-alpine/**'
-      - 'mn-ruby/**'
-      - 'mn-ubuntu/**'
-      - 'mn-alpine/**'
+      - 'metanorma-debian/**'
+      - 'tests/smoke/**'
       - '.github/workflows/build-push.yml'
   pull_request:
     paths:
       - 'Dockerfile.alpine'
-      - 'Dockerfile.ruby'
-      - 'Dockerfile.ubuntu'
+      - 'Dockerfile.debian'
       - 'VERSION.mak'
-      - 'Gemfile'
-      - 'metanorma-ruby/**'
-      - 'metanorma-ubuntu/**'
+      - 'Makefile'
       - 'metanorma-alpine/**'
-      - 'mn-ruby/**'
-      - 'mn-ubuntu/**'
-      - 'mn-alpine/**'
+      - 'metanorma-debian/**'
+      - 'tests/smoke/**'
       - '.github/workflows/build-push.yml'
   workflow_dispatch:
 
@@ -48,14 +40,22 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.result }}
+      ruby_version: ${{ steps.ruby_version.outputs.result }}
+      alpine_ruby_version: ${{ steps.alpine_ruby_version.outputs.result }}
       head_tag: ${{ steps.check.outputs.head_tag }}
       foreign_pr: ${{ steps.check.outputs.foreign_pr }}
     steps:
     - uses: actions/checkout@v4
     - id: version
       run: |
-        export CLI_VERSION=$(cat VERSION.mak | cut -d ' ' -f 3)
+        export CLI_VERSION=$(grep '^IMAGE_VERSION :=' VERSION.mak | cut -d ' ' -f 3)
         echo "result=${CLI_VERSION}" >> $GITHUB_OUTPUT
+    - id: ruby_version
+      run: |
+        echo "result=$(grep '^RUBY_VERSION :=' VERSION.mak | cut -d ' ' -f 3)" >> $GITHUB_OUTPUT
+    - id: alpine_ruby_version
+      run: |
+        echo "result=$(grep '^ALPINE_RUBY_VERSION :=' VERSION.mak | cut -d ' ' -f 3)" >> $GITHUB_OUTPUT
     - name: Show version number
       run: echo ${{ steps.version.outputs.result }}
     - name: Retrieve tags
@@ -84,15 +84,18 @@ jobs:
       fail-fast: false
       matrix:
         root_image:
-        - id: ruby
-          image: ruby:3.3.7-slim-bookworm
-        - id: ubuntu
-          image: ubuntu:20.04
+        # debian: the default image — Docker-native gem build on a stock
+        # Ruby base (Dockerfile.debian). Multi-arch via buildx; ruby and
+        # bundle stay on PATH so user Gemfile overrides keep working.
+        # `image` is descriptive (labels only): the actual FROM is pinned
+        # by RUBY_VERSION in VERSION.mak, passed as a build-arg.
+        - id: debian
+          image: ruby:4.0.7-slim
+        # alpine: same gem-based build path, smallest footprint.
         - id: alpine
-          image: ruby:3.3.7-alpine
+          image: ruby:4.0.7-alpine
         image_type:
         - metanorma
-        # - mn
         experimental: [false]
 
     steps:
@@ -105,13 +108,10 @@ jobs:
 
     - id: label_prefix
       env:
-        IS_PRERELEASE: ${{matrix.image_type == 'mn'}}
-        IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'ruby'}}
+        IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'debian'}}
       run: |
         if [ "$IS_MAIN" == "true" ]; then
           echo "result=" >> $GITHUB_OUTPUT
-        elif [ "$IS_PRERELEASE" == "true" ]; then
-          echo "result=prefix=pre-${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
         else
           echo "result=prefix=${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
         fi
@@ -155,12 +155,11 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
-          METANORMA_IMAGE_NAME=${{ matrix.image_type }}-${{ matrix.root_image.id }}
-        secret-files: |
-          bundle_config=.bundle/config
+          RUBY_VERSION=${{ needs.job_info.outputs.ruby_version }}
+          ALPINE_RUBY_VERSION=${{ needs.job_info.outputs.alpine_ruby_version }}
         outputs: type=docker,dest=/tmp/docker-image.tar
-        # cache-from: type=gha
-        # cache-to: type=gha,mode=min
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     - run: |
         echo "${{ steps.meta.outputs.tags }}" > /tmp/docker-tags.txt
@@ -196,20 +195,19 @@ jobs:
       fail-fast: false
       matrix:
         root_image:
-        - id: ruby
-          image: ruby:3.3.7-slim-bookworm
-          max_size: '2.0 GiB'
-        - id: ubuntu
-          image: ubuntu:22.04
+        - id: debian
+          image: ruby:4.0.7-slim
           max_size: '2.0 GB'
         - id: alpine
-          image: ruby:3.3.7-alpine
+          image: ruby:4.0.7-alpine
           max_size: '1.8 GB'
         image_type:
         - metanorma
         experimental: [false]
 
     steps:
+    - uses: actions/checkout@v4
+
     - uses: actions/download-artifact@v4
       with:
         name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
@@ -227,6 +225,17 @@ jobs:
         echo "full_name<<EOF" >> $GITHUB_OUTPUT
         echo "$(head -n 1 /tmp/docker-tags.txt)" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
+
+    # ============ Smoke test ============
+    # The publish gate: the image must run `metanorma version` AND compile
+    # a real document (tests/smoke/sample.adoc) to XML + HTML + PDF. The
+    # PDF leg exercises the spawned Java subsystem; the SVG figure
+    # exercises the graphics chain. The `test` job downstream runs
+    # `metanorma site generate` per flavor on mn-samples-*, but if the
+    # samples fetch fails the image itself would never be exercised —
+    # this gate catches "image builds green but metanorma is broken".
+    - name: Smoke test — compile a real document (incl. PDF)
+      run: tests/smoke/run-smoke.sh ${{ steps.loaded_image.outputs.full_name }}
 
     - run: docker history --no-trunc ${{ steps.loaded_image.outputs.full_name }}
 
@@ -260,7 +269,7 @@ jobs:
     - name: Build full test matrix
       id: build
       run: |
-        echo "{\"root_image\": [\"ruby\", \"ubuntu\", \"alpine\"], \"image_type\": [\"metanorma\"]}" > docker-matrix.json
+        echo "{\"root_image\": [\"debian\", \"alpine\"], \"image_type\": [\"metanorma\"]}" > docker-matrix.json
         echo '${{ needs.samples-matrix.outputs.samples-matrix }}' > samples-matrix.json
         echo "matrix=$(jq -s add docker-matrix.json samples-matrix.json | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
@@ -327,7 +336,7 @@ jobs:
           metanorma site generate --strict --agree-to-terms -c ${CONFIG_FILE} .
 
   publish:
-    name: Build+publish (${{ matrix.image_type }}-${{ matrix.root_image.id }}
+    name: Build+publish (${{ matrix.image_type }}-${{ matrix.root_image.id }})
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     needs:
@@ -339,16 +348,15 @@ jobs:
       fail-fast: false
       matrix:
         root_image:
-        - id: ruby
-          image: ruby:3.3.7-slim-bookworm
-        - id: ubuntu
-          image: ubuntu:20.04
+        - id: debian
+          image: ruby:4.0.7-slim
+          platforms: linux/amd64,linux/arm64
         - id: alpine
-          image: ruby:3.3.7-alpine
+          image: ruby:4.0.7-alpine
+          platforms: linux/amd64,linux/arm64
 
         image_type:
         - metanorma
-        # - mn
 
     steps:
     - uses: actions/checkout@v4
@@ -359,21 +367,6 @@ jobs:
       uses: docker/setup-buildx-action@v3
       with:
         driver-opts: image=moby/buildkit:master
-
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
-        path: /tmp
-
-    - id: loaded_image
-      name: Load image
-      run: |
-        docker load --input /tmp/docker-image.tar.gz
-        docker image ls -a
-        docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma
-        result=$(docker image ls --format "{{.Repository}}:{{.Tag}}" metanorma/metanorma | head -1 | tr -d '\n')
-        echo "result=${result}" >> $GITHUB_OUTPUT
 
     - uses: docker/login-action@v3
       with:
@@ -388,14 +381,11 @@ jobs:
 
     - id: label_prefix
       env:
-        IS_PRERELEASE: ${{matrix.image_type == 'mn'}}
-        IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'ruby'}}
+        IS_MAIN: ${{matrix.image_type == 'metanorma' && matrix.root_image.id == 'debian'}}
       run: |
         echo '::echo::on'
         if [ "$IS_MAIN" == "true" ]; then
           echo "result=" >> $GITHUB_OUTPUT
-        elif [ "$IS_PRERELEASE" == "true" ]; then
-          echo "result=prefix=pre-${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
         else
           echo "result=prefix=${{ matrix.root_image.id }}-,onlatest=true" >> $GITHUB_OUTPUT
         fi
@@ -433,17 +423,55 @@ jobs:
       uses: docker/build-push-action@v6
       with:
         context: .
-        platforms: linux/amd64,linux/arm64
+        platforms: ${{ matrix.root_image.platforms }}
         push: true
         file: Dockerfile.${{ matrix.root_image.id }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
-          METANORMA_IMAGE_NAME=${{ matrix.image_type }}-${{ matrix.root_image.id }}
-        secret-files: |
-          bundle_config=.bundle/config
-        # cache-from: type=gha
-        # cache-to: type=gha,mode=min
+          RUBY_VERSION=${{ needs.job_info.outputs.ruby_version }}
+          ALPINE_RUBY_VERSION=${{ needs.job_info.outputs.alpine_ruby_version }}
+        # BuildKit attestations: SLSA provenance + Syft SBOM ride the
+        # manifest of every published image.
+        provenance: mode=max
+        sbom: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    # Release supply chain (tag builds only): keyless cosign signatures on
+    # both registries' digests, plus an explicit Syft SPDX SBOM attached
+    # as a cosign attestation and uploaded as a workflow artifact.
+    - name: Install cosign
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: sigstore/cosign-installer@v3
+
+    - name: Generate Syft SBOM
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: anchore/sbom-action@v0
+      with:
+        image: docker.io/metanorma/metanorma@${{ steps.build_container.outputs.digest }}
+        format: spdx-json
+        output-file: sbom-${{ matrix.root_image.id }}.spdx.json
+
+    - name: Sign images (keyless) and attest SBOM
+      if: startsWith(github.ref, 'refs/tags/v')
+      env:
+        DIGEST: ${{ steps.build_container.outputs.digest }}
+      run: |
+        for repo in docker.io/metanorma/metanorma ghcr.io/metanorma/metanorma; do
+          cosign sign --yes "${repo}@${DIGEST}"
+          cosign attest --yes --type spdxjson \
+            --predicate "sbom-${{ matrix.root_image.id }}.spdx.json" \
+            "${repo}@${DIGEST}"
+        done
+
+    - name: Upload SBOM artifact
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
+        path: sbom-${{ matrix.root_image.id }}.spdx.json
+        retention-days: 30
 
   announce:
     name: Announce to mn-samples-*

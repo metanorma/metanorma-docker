@@ -15,10 +15,11 @@ please follow this https://docs.docker.com/install.
 
 ### Which Metanorma image to choose?
 
-We provide two images:
+We provide the following images:
 
 * `metanorma/metanorma` (`metanorma/metanorma:latest`) is the current stable version
-* `metanorma/mn` is the latest edge version
+* `metanorma/metanorma:edge` tracks the `main` branch of
+  https://github.com/metanorma/metanorma-docker
 
 It is strongly recommended to use the `metanorma/metanorma` image
 unless you want to test out our upcoming features.
@@ -75,20 +76,28 @@ For example, your document has some custom dependency that is defined
 in a `Gemfile` file, and you want to make sure the `metanorma`
 command utilizes this dependency. This is how you do it.
 
-```sh
-# ssh to the container
-docker run -it -v $(pwd):/metanorma metanorma/metanorma:latest bash
+Your `Gemfile` should include `metanorma-cli` itself plus your extra gems:
 
-# install your depencencies (inside the container)
-bundle install
-
-# run metanorma commands
-bundle exec metanorma compile -x html,doc -t iso yourdocument.adoc
+```ruby
+source "https://rubygems.org"
+gem "metanorma-cli", "= 1.17.0"
+gem "my-custom-dependency"
 ```
 
-In other words, once you are inside the container, you are in a typical
-Ubuntu Linux environment with Metanorma fully setup.
-You could run anything you want as you would have done in any other machine.
+Then point `BUNDLE_GEMFILE` at your mounted `Gemfile`:
+
+```sh
+# install your dependencies (inside the container)
+docker run -it -v $(pwd):/metanorma \
+  -e BUNDLE_GEMFILE=/metanorma/Gemfile \
+  metanorma/metanorma:latest \
+  bash -c "RUBYOPT= bundle install && bundle exec metanorma compile -x html,doc -t iso yourdocument.adoc"
+```
+
+NOTE: `RUBYOPT=` (cleared) is needed for the one-time `bundle install`
+because the image sets `RUBYOPT=-rbundler/setup`, which cannot boot until
+your `Gemfile.lock` exists. After that, `bundle exec metanorma` runs your
+bundle with your gems.
 
 
 #### Using a specific version of Metanorma

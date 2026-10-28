@@ -8,14 +8,12 @@ on:
     paths:
       - 'Dockerfile.windows'
       - 'VERSION.mak'
-      - 'Gemfile'
       - 'metanorma-windows/**'
       - '.github/workflows/build-push-windows.yml'
   pull_request:
     paths:
       - 'Dockerfile.windows'
       - 'VERSION.mak'
-      - 'Gemfile'
       - 'metanorma-windows/**'
       - '.github/workflows/build-push-windows.yml'
   workflow_dispatch:
@@ -43,7 +41,7 @@ jobs:
     - uses: actions/checkout@v4
     - id: version
       run: |
-        export CLI_VERSION=$(cat VERSION.mak | cut -d ' ' -f 3)
+        export CLI_VERSION=$(grep '^IMAGE_VERSION :=' VERSION.mak | cut -d ' ' -f 3)
         echo "result=${CLI_VERSION}" >> $GITHUB_OUTPUT
     - name: Show version number
       run: echo ${{ steps.version.outputs.result }}
@@ -104,12 +102,42 @@ jobs:
         run: echo ${{ steps.label_prefix.outputs.result }}
         shell: bash
 
+      # windows-2022 runners sometimes boot without the Docker daemon ready
+      # (see metanorma/metanorma-docker#239). Kick the service and poll until
+      # it responds before handing off to `docker build`. 60s was not always
+      # enough on the ltsc2022 leg; bumping to 180s + an explicit Start-Service
+      # call recovers runs that previously needed manual re-dispatch.
+      - name: Wait for Docker daemon
+        run: |
+          powershell -Command "Start-Service docker" 2>/dev/null || true
+          for i in $(seq 1 90); do
+            docker info >/dev/null 2>&1 && { echo "Docker ready after $i tries"; exit 0; }
+            sleep 2
+          done
+          echo "Docker daemon did not start within 180s" >&2
+          exit 1
+        shell: bash
+
       - name: Build Docker Image
         env:
           METANORMA_IMAGE_NAME: ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}
           METANORMA_VERSION: ${{ needs.job_info.outputs.version }}
         run: |
           docker build --pull --no-cache -t ${{ env.METANORMA_IMAGE_NAME }} -t ${{ env.METANORMA_IMAGE_NAME }}-${{ env.METANORMA_VERSION }} -t ghcr.io/${{ env.METANORMA_IMAGE_NAME }} -t ghcr.io/${{ env.METANORMA_IMAGE_NAME }}-${{ env.METANORMA_VERSION }} -f Dockerfile.windows --build-arg BASE_IMAGE=${{ matrix.root_image.base_image }} --label org.opencontainers.image.vendor="Ribose Inc." --label org.opencontainers.image.licenses="BSD-3-Clause" --label org.opencontainers.image.documentation="https://www.metanorma.org" --label org.opencontainers.image.ref.name="metanorma/${{ matrix.image_type }}:${{ matrix.root_image.id }}" --label org.opencontainers.image.base.name="${{ matrix.root_image.base_image }}" --label org.opencontainers.image.title="Metanorma official public image" --label org.opencontainers.image.description="Metanorma official public image on ${{ matrix.root_image.image }}" --label org.opencontainers.image.version="${{needs.job_info.outputs.version}}" .
+        shell: bash
+
+      # ============ Smoke test ============
+      # Confirm the image can actually run `metanorma` before publishing.
+      # Windows push happens inside this build job (below), so the smoke
+      # gate lives here rather than in a separate job. See build-push.yml
+      # (Linux) for the same gate in the `lint` job. Parallel to the
+      # smoke-test framework Ronald built on metanorma/suma-docker
+      # (contract at suma-docker:tests/smoke.contract).
+      - name: Smoke test — image runs metanorma
+        env:
+          METANORMA_IMAGE_NAME: ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}
+        run: |
+          docker run --rm ${{ env.METANORMA_IMAGE_NAME }} metanorma version
         shell: bash
 
       - name: Compress image and export metadata to artifacts
@@ -208,6 +236,18 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: tags-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
+
+      # Same daemon-readiness guard as the build job — see metanorma/metanorma-docker#239.
+      - name: Wait for Docker daemon
+        run: |
+          powershell -Command "Start-Service docker" 2>/dev/null || true
+          for i in $(seq 1 90); do
+            docker info >/dev/null 2>&1 && { echo "Docker ready after $i tries"; exit 0; }
+            sleep 2
+          done
+          echo "Docker daemon did not start within 180s" >&2
+          exit 1
+        shell: bash
 
       - id: loaded_image
         name: Load image
