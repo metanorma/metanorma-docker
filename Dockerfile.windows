@@ -60,7 +60,11 @@ RUN powershell -Command \
     Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
 # Install build and runtime dependencies using Chocolatey
-RUN choco install -y inkscape openjdk17 python3 git graphviz 7zip \
+# Python is pinned: unpinned `python3` resolved to 3.15, for which pyyaml (an xml2rfc
+# dependency) has no Windows wheel, and the image has no MSVC to build it from source.
+ARG PYTHON_VERSION=3.14.10
+RUN choco install -y inkscape openjdk17 git graphviz 7zip \
+    && choco install -y python3 --version=%PYTHON_VERSION% \
     && choco cache remove \
     && refreshenv
 
