@@ -711,7 +711,7 @@ GEM
       relaton-iev (~> 2.0)
       svg_conform (~> 0.2)
       vectory (~> 0.13, >= 0.13.2)
-    metanorma-taste (1.1.2)
+    metanorma-taste (1.1.3.pre.alpha.1)
       lutaml-model (>= 0.8)
     metanorma-un (0.12.20.pre.alpha.4)
       iso-639
@@ -1168,6 +1168,7 @@ PLATFORMS
 
 DEPENDENCIES
   metanorma-cli (= 1.18.0.pre.alpha.3)
+  metanorma-taste (= 1.1.3.pre.alpha.1)
 
 CHECKSUMS
   activesupport (8.1.4) sha256=891dd3fe43c4fc8391934b237b1189bb1f661c932a84a840043db9d46a4e80df
@@ -1337,7 +1338,7 @@ CHECKSUMS
   metanorma-release (0.2.25) sha256=6b73e5ad0768c52c6e3c0c7365efacf2fb63a2221037e566583360063f8124c4
   metanorma-ribose (2.9.1.pre.alpha.3) sha256=e64af1230f45f034288ae517460883b0b1536f0a0532f91f5020b042ca70a16f
   metanorma-standoc (3.5.1.pre.alpha.3) sha256=bea17054be4209f86aa07cab716034f486ad873cac0de76dedb516edce2df10b
-  metanorma-taste (1.1.2) sha256=dc520440018880a219bd6ff090eb095255db96768cca532f9bdad2dc00908448
+  metanorma-taste (1.1.3.pre.alpha.1) sha256=b00f2c4fe6c63af6d27a58a6d7d86347998a63baffb27c0622cb961f7d09ff96
   metanorma-un (0.12.20.pre.alpha.4) sha256=b39c67e3bbdaa639debea520d2fabf6b0338637d78c371d64dc79bd403d599a3
   metanorma-utils (2.0.8) sha256=6010da4cdbe345ceac663ace86b796e55614c7c71a3cb5e8d20f477ae06a04f5
   mime-types (3.7.0) sha256=dcebf61c246f08e15a4de34e386ebe8233791e868564a470c3fe77c00eed5e56

@@ -711,7 +711,7 @@ GEM
       relaton-iev (~> 2.0)
       svg_conform (~> 0.2)
       vectory (~> 0.13, >= 0.13.2)
-    metanorma-taste (1.1.2)
+    metanorma-taste (1.1.3.pre.alpha.1)
       lutaml-model (>= 0.8)
     metanorma-un (0.12.20.pre.alpha.4)
       iso-639
@@ -1169,6 +1169,7 @@ PLATFORMS
 
 DEPENDENCIES
   metanorma-cli (= 1.18.0.pre.alpha.3)
+  metanorma-taste (= 1.1.3.pre.alpha.1)
 
 BUNDLED WITH
   4.0.20
