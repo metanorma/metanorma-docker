@@ -8,8 +8,9 @@
 #     --ignore-unfixed <image>
 
 # mn2pdf.jar vendors jackson-databind/jackson-core 2.11.3 (2020).
-# Upstream: metanorma/mn2pdf must upgrade its bundled jackson.
-# Reviewed: 2026-10-01
+# Upstream: metanorma/mn2pdf must upgrade its bundled jackson
+# (mn2pdf 2.73, the latest release, still bundles 2.11.3).
+# Reviewed: 2026-10-29
 CVE-2025-52999
 GHSA-r7wm-3cxj-wff9
 CVE-2020-36518
@@ -20,6 +21,15 @@ CVE-2026-54512
 CVE-2026-54513
 CVE-2026-91776
 CVE-2026-91777
+CVE-2026-68494
+CVE-2026-89425
+
+# plantuml.jar (bundled in metanorma-plugin-plantuml 1.0.16) vendors
+# guava 33.6.0-jre; fixed in guava 33.7.2.
+# Upstream: metanorma/metanorma-plugin-plantuml must ship a plantuml.jar
+# with the fixed guava (1.0.16 is the latest release).
+# Reviewed: 2026-10-29
+CVE-2026-102554
 
 # faraday 2.7.x: fixed in >= 2.14.3, but relaton pins faraday ~> 2.7.0.
 # Upstream: relaton must relax its faraday constraint.
@@ -41,6 +51,7 @@ GHSA-6v7p-g79w-8964
 CVE-2026-97687
 CVE-2026-97689
 CVE-2025-47273
+CVE-2026-114613
 
 # json 2.18.0 is the default gem bundled with Ruby 4.0.7's stdlib. The
 # toolchain lock pins json 2.21.2 in /usr/local/bundle, and every process
