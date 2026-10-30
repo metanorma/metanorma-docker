@@ -362,7 +362,7 @@ GEM
     google-protobuf (4.36.2-x86_64-linux-musl)
       bigdecimal
       rake (~> 13.3)
-    graphql (2.6.13)
+    graphql (2.6.14)
       base64
       fiber-storage
       logger
@@ -396,12 +396,13 @@ GEM
     iso-639 (0.3.8)
       csv
     iso639 (1.4.0)
-    isodoc (3.7.4.pre.alpha.5)
+    isodoc (3.7.4)
       base64 (>= 0.1.0)
       bigdecimal
       html2doc (~> 1.12)
       mn-requirements (~> 0.5.0)
       mn2pdf (>= 2.13)
+      pubid (~> 2.0)
       relaton-cli (>= 3.0.0, < 3.1)
       relaton-render (~> 3.0, < 5)
       roman-numerals
@@ -436,21 +437,21 @@ GEM
       regexp_parser (~> 2.0)
       simpleidn (~> 0.2)
     latex-decode (0.4.2)
-    leptris (1.9.386.0-aarch64-linux)
+    leptris (1.9.390.3-aarch64-linux)
       ffi (~> 1.15)
-    leptris (1.9.386.0-aarch64-linux-musl)
+    leptris (1.9.390.3-aarch64-linux-musl)
       ffi (~> 1.15)
-    leptris (1.9.386.0-arm-linux)
+    leptris (1.9.390.3-arm-linux)
       ffi (~> 1.15)
-    leptris (1.9.386.0-arm-linux-musl)
+    leptris (1.9.390.3-arm-linux-musl)
       ffi (~> 1.15)
-    leptris (1.9.386.0-arm64-darwin)
+    leptris (1.9.390.3-arm64-darwin)
       ffi (~> 1.15)
-    leptris (1.9.386.0-x86_64-darwin)
+    leptris (1.9.390.3-x86_64-darwin)
       ffi (~> 1.15)
-    leptris (1.9.386.0-x86_64-linux)
+    leptris (1.9.390.3-x86_64-linux)
       ffi (~> 1.15)
-    leptris (1.9.386.0-x86_64-linux-musl)
+    leptris (1.9.390.3-x86_64-linux-musl)
       ffi (~> 1.15)
     libpng (1.6.58.6)
       ffi (~> 1.0)
@@ -535,7 +536,7 @@ GEM
       webrick (~> 1.7)
       webrobots (~> 0.1.2)
     memo_wise (1.13.0)
-    metanorma (2.5.6.pre.alpha.3)
+    metanorma (2.5.6)
       asciidoctor
       concurrent-ruby
       fontist (>= 2.1.2)
@@ -547,12 +548,12 @@ GEM
       mn2pdf (~> 2)
       nokogiri
       relaton-cli (>= 3.0.0)
-    metanorma-bipm (2.9.1.pre.alpha.3)
+    metanorma-bipm (2.9.1)
       metanorma-generic (>= 3.5.1.pre.alpha.1)
       metanorma-iso (>= 3.4.2)
-    metanorma-cc (2.9.1.pre.alpha.2)
+    metanorma-cc (2.9.1)
       metanorma-generic (>= 3.5.1.pre.alpha.1)
-    metanorma-cli (1.18.0)
+    metanorma-cli (1.18.1)
       canon (>= 0.2.12)
       git (>= 3.0)
       isodoc (>= 3.7.4.pre.alpha.1)
@@ -583,12 +584,12 @@ GEM
       relaton-cli (>= 3.0.0)
       socksify
       suma (~> 0.5)
-    metanorma-core (0.2.5.pre.alpha.1)
+    metanorma-core (0.2.5)
       asciidoctor
       metanorma-taste (~> 1.1.0)
       metanorma-utils
       nokogiri (~> 1.19)
-    metanorma-document (0.5.2.pre.alpha.2)
+    metanorma-document (0.5.2)
       glossarist (~> 2.13)
       lutaml-model (~> 0.8.0)
       metanorma-core
@@ -598,22 +599,22 @@ GEM
       plurimath (~> 0.11)
       pubid (~> 2.0)
       relaton (~> 3.0)
-    metanorma-gb (1.5.9.pre.alpha.4)
+    metanorma-gb (1.5.9)
       gb-agencies (~> 0.0.4)
       htmlentities (~> 4.3.4)
       isodoc (>= 3.0)
       metanorma-iso (>= 3.4.2)
       twitter_cldr (>= 6.6.0)
-    metanorma-generic (3.5.1.pre.alpha.2)
+    metanorma-generic (3.5.1)
       metanorma-standoc (>= 3.5)
-    metanorma-iec (2.9.1.pre.alpha.2)
+    metanorma-iec (2.9.1)
       metanorma-iso (>= 3.4.2)
       pubid
-    metanorma-ieee (1.7.1.pre.alpha.2)
+    metanorma-ieee (1.7.1)
       metanorma-standoc (>= 3.4.2)
       mnconvert (~> 1.20)
       pubid (~> 2.0)
-    metanorma-ietf (3.7.12.pre.alpha.2)
+    metanorma-ietf (3.7.12)
       isodoc
       leptris (~> 1.9)
       metanorma-document
@@ -621,9 +622,9 @@ GEM
       metanorma-standoc (>= 3.4.2)
       relaton-render (~> 3.0)
     metanorma-ietf-data (0.2.0)
-    metanorma-iho (1.4.1.pre.alpha.3)
+    metanorma-iho (1.4.1)
       metanorma-generic (>= 3.5.1.pre.alpha.1)
-    metanorma-iso (3.5.1.pre.alpha.4)
+    metanorma-iso (3.5.1)
       metanorma-document (~> 0.5.0)
       metanorma-standoc (>= 3.4.2)
       mnconvert (~> 1.14)
@@ -631,19 +632,19 @@ GEM
       sts (>= 0.5.6)
       tokenizer (~> 0.3.0)
       uniword (~> 1.0)
-    metanorma-itu (2.9.3.pre.alpha.1)
+    metanorma-itu (2.9.3)
       metanorma-iso (>= 3.4.2)
       metanorma-standoc (>= 3.4.2)
-      pubid (~> 2.0.0.pre.alpha)
+      pubid (~> 2.0)
       twitter_cldr (>= 3.0.0)
       tzinfo-data
-    metanorma-jis (1.2.1.pre.alpha.2)
+    metanorma-jis (1.2.1)
       japanese_calendar (~> 0)
       liquid (~> 5.4)
       metanorma-iso (>= 3.4.2)
       pubid
       uniword (~> 1.5)
-    metanorma-m3aawg (2.2.6.pre.alpha.4)
+    metanorma-m3aawg (2.2.6)
       htmlentities (~> 4.3.4)
       metanorma-generic (>= 3.5.1.pre.alpha.1)
       thread_safe
@@ -653,12 +654,12 @@ GEM
       lutaml-model (~> 0.8, >= 0.8.22)
       rubyzip
       unitsml (~> 0.6)
-    metanorma-ogc (2.10.1.pre.alpha.3)
+    metanorma-ogc (2.10.1)
       iso-639
       metanorma-iso (>= 3.4.2)
       metanorma-plugin-openapi (>= 0.1.1.pre.alpha.1)
       metanorma-standoc (>= 3.4.2)
-    metanorma-plateau (1.3.2.pre.alpha.2)
+    metanorma-plateau (1.3.2)
       metanorma-jis (>= 1.1.6)
       pubid
     metanorma-plugin-asciichem (0.1.4)
@@ -669,18 +670,17 @@ GEM
       glossarist (~> 2.8, >= 2.11.1)
       liquid
       metanorma-utils
-    metanorma-plugin-lutaml (0.7.54)
+    metanorma-plugin-lutaml (0.7.55)
       asciidoctor
       coradoc (~> 1.1.8)
       ea (>= 0.6.41)
       expressir (~> 2.3, >= 2.3.5)
-      isodoc
-      liquid
+      isodoc (>= 3.5.0)
+      liquid (~> 5)
       lutaml-lml
       lutaml-model (~> 0.8.4)
       lutaml-uml (>= 0.5, < 2)
       ogc-gml (~> 1.1)
-      relaton-cli
     metanorma-plugin-openapi (0.1.2)
       asciidoctor
       lutaml-model (~> 0.8.122)
@@ -690,9 +690,9 @@ GEM
     metanorma-release (0.2.25)
       relaton-bib (~> 2.1)
       thor (~> 1.0)
-    metanorma-ribose (2.9.1.pre.alpha.3)
+    metanorma-ribose (2.9.1)
       metanorma-generic (>= 3.5.1.pre.alpha.1)
-    metanorma-standoc (3.5.1.pre.alpha.4)
+    metanorma-standoc (3.5.1)
       addressable (~> 2.8)
       asciidoctor (~> 2.0.0)
       concurrent-ruby
@@ -713,9 +713,9 @@ GEM
       relaton-iev (~> 2.0)
       svg_conform (~> 0.2)
       vectory (~> 0.13, >= 0.13.2)
-    metanorma-taste (1.1.2)
+    metanorma-taste (1.1.3)
       lutaml-model (>= 0.8)
-    metanorma-un (0.12.20.pre.alpha.4)
+    metanorma-un (0.12.20)
       iso-639
       metanorma-standoc (>= 3.5.1.pre.alpha.1)
       roman-numerals
@@ -805,14 +805,14 @@ GEM
       bigdecimal (>= 3.0)
     paint (2.3.0)
     parallel (1.28.0)
-    parsanol (1.3.114-aarch64-linux)
-    parsanol (1.3.114-aarch64-linux-musl)
-    parsanol (1.3.114-arm-linux)
-    parsanol (1.3.114-arm-linux-musl)
-    parsanol (1.3.114-arm64-darwin)
-    parsanol (1.3.114-x86_64-darwin)
-    parsanol (1.3.114-x86_64-linux)
-    parsanol (1.3.114-x86_64-linux-musl)
+    parsanol (1.3.115-aarch64-linux)
+    parsanol (1.3.115-aarch64-linux-musl)
+    parsanol (1.3.115-arm-linux)
+    parsanol (1.3.115-arm-linux-musl)
+    parsanol (1.3.115-arm64-darwin)
+    parsanol (1.3.115-x86_64-darwin)
+    parsanol (1.3.115-x86_64-linux)
+    parsanol (1.3.115-x86_64-linux-musl)
     parslet (2.0.0)
     plane1converter (0.0.1)
     plist (3.7.2)
@@ -1171,7 +1171,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  metanorma-cli (= 1.18.0)
+  metanorma-cli (= 1.18.1)
 
 BUNDLED WITH
   4.0.20
