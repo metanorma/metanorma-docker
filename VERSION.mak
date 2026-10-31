@@ -5,4 +5,4 @@ ALPINE_RUBY_VERSION := 4.0.7
 
 # Image version: tracks the metanorma-cli release (metanorma/metanorma-cli),
 # written by the release-tag workflow.
-IMAGE_VERSION := 1.18.1
+IMAGE_VERSION := 1.18.2
