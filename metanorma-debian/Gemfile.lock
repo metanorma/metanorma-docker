@@ -421,21 +421,21 @@ GEM
       simpleidn (~> 0.2)
     latex-decode (0.4.2)
     lens_core (0.1.0)
-    leptris (1.9.411.0-aarch64-linux)
+    leptris (1.9.412.0-aarch64-linux)
       ffi (~> 1.15)
-    leptris (1.9.411.0-aarch64-linux-musl)
+    leptris (1.9.412.0-aarch64-linux-musl)
       ffi (~> 1.15)
-    leptris (1.9.411.0-arm-linux)
+    leptris (1.9.412.0-arm-linux)
       ffi (~> 1.15)
-    leptris (1.9.411.0-arm-linux-musl)
+    leptris (1.9.412.0-arm-linux-musl)
       ffi (~> 1.15)
-    leptris (1.9.411.0-arm64-darwin)
+    leptris (1.9.412.0-arm64-darwin)
       ffi (~> 1.15)
-    leptris (1.9.411.0-x86_64-darwin)
+    leptris (1.9.412.0-x86_64-darwin)
       ffi (~> 1.15)
-    leptris (1.9.411.0-x86_64-linux)
+    leptris (1.9.412.0-x86_64-linux)
       ffi (~> 1.15)
-    leptris (1.9.411.0-x86_64-linux-musl)
+    leptris (1.9.412.0-x86_64-linux-musl)
       ffi (~> 1.15)
     libpng (1.6.58.6)
       ffi (~> 1.0)
@@ -1149,6 +1149,7 @@ CHECKSUMS
   bindata (2.5.1) sha256=53186a1ec2da943d4cb413583d680644eb810aacbf8902497aac8f191fad9e58
   brotli (0.9.2) sha256=8d5e3b8f267bad385c53d73e1575e617567eee1a05e7aaee1c08bdeb8abf3024
   builder (3.3.0) sha256=497918d2f9dca528fdca4b88d84e4ef4387256d984b8154e9d5d3fe5a9c8835f
+  bundler (4.0.23) sha256=407ba8a1d928f412847f819aa5f8b6aef7c59fb51feb517112af8a165487287b
   cabriolet (0.2.4) sha256=fde76321a5b7ee5506581c01aeac44e4476332bc64fe7ae1a07a72227a318e9b
   camertron-eprun (2.0.0) sha256=e148a3035332609433d096401650f199dd6ce0031af3edb603dc44ea21aad3d5
   canon (0.3.123) sha256=f3958f2eb0fc3a6fd9283fe70ea562d7bba23c6c944509d6317d6f603f53762e
@@ -1237,14 +1238,14 @@ CHECKSUMS
   json_schemer (2.5.0) sha256=2f01fb4cce721a4e08dd068fc2030cffd0702a7f333f1ea2be6e8991f00ae396
   latex-decode (0.4.2) sha256=e85633406e315e348e0ca6de231dee1bf45a22496b0866059c635f7502c2a592
   lens_core (0.1.0) sha256=9481ce7721be1b9ddb08e0edde349775849614d40a78ff05ec5887de2aa9e2b6
-  leptris (1.9.411.0-aarch64-linux) sha256=f7db49900d017fb09f3e68511ba72b47505f9a61f7bee1e1a001c814cbb47da1
-  leptris (1.9.411.0-aarch64-linux-musl) sha256=6f02d625c04f24d7b5cd7e4b2e92c7eb1ad66c2f05d363438e3a5c454c551ae2
-  leptris (1.9.411.0-arm-linux) sha256=f1a5ffc53527c3c237a63137f0e1d7d871c14cc0a386b4b783cbb3b91af857f3
-  leptris (1.9.411.0-arm-linux-musl) sha256=ff7b5b1bce647a5087952f6fabe4bf4a920cd69e3816280e3e80018d89046e86
-  leptris (1.9.411.0-arm64-darwin) sha256=8fc312dfbb30c2d5b172faac8dded134c78a43b25b00c2a5f9dd54150c58cb49
-  leptris (1.9.411.0-x86_64-darwin) sha256=99319aa45febb182bbcaaebbb69167b33a17b1d9d3cc7f95cac424404b16360c
-  leptris (1.9.411.0-x86_64-linux) sha256=f445ab6f654176130fb22be59a9248659d29ee74541798bd381ff826c606f3ed
-  leptris (1.9.411.0-x86_64-linux-musl) sha256=3ee9896629b278bfee926e0975cbe534011ff8702617ef9d9216505b1a43577e
+  leptris (1.9.412.0-aarch64-linux) sha256=b695a3385dc7d9a06deb2132cfb7d20d219168f1eddd211add63ff74e762b4ea
+  leptris (1.9.412.0-aarch64-linux-musl) sha256=70a2214cdbf48ba9dd2f5f95fcab91e03ca84ad16ab0796bce3bffe4507dad00
+  leptris (1.9.412.0-arm-linux) sha256=2fbbf9392f5f75e3c27ff75872d95548100eccd86375d91fd3a822c27eb3cedb
+  leptris (1.9.412.0-arm-linux-musl) sha256=204db79824cf598cbbb99aef4228ba82c29aacefda6fc0f9e1f01286b5850aae
+  leptris (1.9.412.0-arm64-darwin) sha256=6a8d89803c7633a31b0cc1b46e0f88d8139a0cf7687996e5cd05efef7796d15b
+  leptris (1.9.412.0-x86_64-darwin) sha256=54715889da8c4d41d27e9f3619ad75729caa22a1b671d61b7cca13080fc59c7e
+  leptris (1.9.412.0-x86_64-linux) sha256=ceae49a1e14f87974f0c2198a4815b2ebfaf93a50717c70940a932acd9b193c9
+  leptris (1.9.412.0-x86_64-linux-musl) sha256=db3803565f81e78aab49bf6c9413c5cd9d53fe77ce5cc56eec82593c5dd345b3
   libpng (1.6.58.6) sha256=6cc9164de9934d91f56f7e106db17ce1965343538f7a725e22d8ba0019616425
   libpng (1.6.58.6-aarch64-linux) sha256=57d4a32abae936cd3b0bafdf4a7ce701973a638e07ca9d80e044d4da9465b4da
   libpng (1.6.58.6-aarch64-linux-musl) sha256=d9153b68aaa0e47126aade3a617ba6663fbcfbcf584c4fc7d6e86707b13e5664
@@ -1450,4 +1451,4 @@ CHECKSUMS
   yeptris (0.6.60.1-x86_64-linux-musl) sha256=447183523e8cddc931d381484be85fb89be1cf22bfd4ba7f4f5eae040e5685a4
 
 BUNDLED WITH
-  4.0.20
+  4.0.23
