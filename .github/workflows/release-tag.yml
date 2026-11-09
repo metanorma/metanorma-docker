@@ -77,6 +77,9 @@ jobs:
     - name: Push commit and tag
       run: |
         git add VERSION.mak metanorma-debian metanorma-alpine
-        git commit -m "Bump version to ${DOCKER_TAG}"
+        # A re-dispatch of an already-released cli version (refreshing the
+        # images after a dependency release) produces no pin delta; commit
+        # only when the re-lock changed something.
+        git diff --cached --quiet || git commit -m "Bump version to ${DOCKER_TAG}"
         git tag v${DOCKER_TAG}
         git push origin HEAD:${GITHUB_REF} --tags
