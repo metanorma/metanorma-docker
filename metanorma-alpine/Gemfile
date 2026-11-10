@@ -1,3 +1,14 @@
 source "https://rubygems.org"
 
 gem "metanorma-cli", "= 1.18.4"
+
+# Ruby 4 bundled gems required directly or transitively by the metanorma
+# stack (metanorma#669 phase 2): undeclared bundled gems warn on every
+# require under Ruby 4 and break in pruned deployments.
+gem "base64"
+gem "benchmark"
+gem "csv"
+gem "tsort"
+gem "uri"
+gem "ostruct"
+gem "faraday-retry"
