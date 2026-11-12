@@ -36,7 +36,7 @@ GEM
       racc (~> 1.7)
     bigdecimal (4.1.3)
     bindata (2.5.1)
-    brotli (0.9.2)
+    brotli (0.9.3)
     builder (3.3.0)
     cabriolet (0.2.4)
       bindata (~> 2.5)
@@ -129,7 +129,7 @@ GEM
       cabriolet (~> 0.2.4)
       omnizip (~> 0.3.11)
       thor (~> 1.0)
-    expressir (2.4.63-aarch64-linux)
+    expressir (2.4.67-aarch64-linux)
       base64 (>= 0.1.0)
       benchmark
       benchmark-ips
@@ -144,7 +144,7 @@ GEM
       table_tennis
       thor (~> 1.0)
       yeptris (~> 0.6.1)
-    expressir (2.4.63-aarch64-linux-musl)
+    expressir (2.4.67-aarch64-linux-musl)
       base64 (>= 0.1.0)
       benchmark
       benchmark-ips
@@ -159,7 +159,7 @@ GEM
       table_tennis
       thor (~> 1.0)
       yeptris (~> 0.6.1)
-    expressir (2.4.63-arm-linux)
+    expressir (2.4.67-arm-linux)
       base64 (>= 0.1.0)
       benchmark
       benchmark-ips
@@ -174,7 +174,7 @@ GEM
       table_tennis
       thor (~> 1.0)
       yeptris (~> 0.6.1)
-    expressir (2.4.63-arm-linux-musl)
+    expressir (2.4.67-arm-linux-musl)
       base64 (>= 0.1.0)
       benchmark
       benchmark-ips
@@ -189,7 +189,7 @@ GEM
       table_tennis
       thor (~> 1.0)
       yeptris (~> 0.6.1)
-    expressir (2.4.63-arm64-darwin)
+    expressir (2.4.67-arm64-darwin)
       base64 (>= 0.1.0)
       benchmark
       benchmark-ips
@@ -204,7 +204,7 @@ GEM
       table_tennis
       thor (~> 1.0)
       yeptris (~> 0.6.1)
-    expressir (2.4.63-x86_64-darwin)
+    expressir (2.4.67-x86_64-darwin)
       base64 (>= 0.1.0)
       benchmark
       benchmark-ips
@@ -219,7 +219,7 @@ GEM
       table_tennis
       thor (~> 1.0)
       yeptris (~> 0.6.1)
-    expressir (2.4.63-x86_64-linux)
+    expressir (2.4.67-x86_64-linux)
       base64 (>= 0.1.0)
       benchmark
       benchmark-ips
@@ -234,7 +234,7 @@ GEM
       table_tennis
       thor (~> 1.0)
       yeptris (~> 0.6.1)
-    expressir (2.4.63-x86_64-linux-musl)
+    expressir (2.4.67-x86_64-linux-musl)
       base64 (>= 0.1.0)
       benchmark
       benchmark-ips
@@ -277,13 +277,14 @@ GEM
     ffi (1.17.4-x86_64-linux-musl)
     fiber-storage (1.0.1)
     fiddle (1.1.8)
-    fontisan (0.4.47)
+    fontisan (0.4.48)
       base64
       bindata (~> 2.5)
       brotli (~> 0.5)
       logger
       lutaml-model (~> 0.8)
       nokogiri (~> 1.16)
+      rb_sys (~> 0.9)
       thor (~> 1.3)
     fontist (3.0.37)
       down (~> 5.0)
@@ -312,7 +313,7 @@ GEM
       logger (~> 1.6)
       process_executer (~> 4.1)
       rchardet (~> 1.9)
-    glossarist (2.14.14)
+    glossarist (2.14.16)
       lutaml-model (~> 0.8.15)
       lutaml-store (~> 0.3)
       paint (~> 2.3)
@@ -380,7 +381,7 @@ GEM
     iso-639 (0.3.8)
       csv
     iso639 (1.4.0)
-    isodoc (3.7.13)
+    isodoc (3.7.14)
       base64 (>= 0.1.0)
       bigdecimal
       csv
@@ -423,21 +424,21 @@ GEM
       simpleidn (~> 0.2)
     latex-decode (0.4.2)
     lens_core (0.1.0)
-    leptris (1.9.415.0-aarch64-linux)
+    leptris (1.9.418.1-aarch64-linux)
       ffi (~> 1.15)
-    leptris (1.9.415.0-aarch64-linux-musl)
+    leptris (1.9.418.1-aarch64-linux-musl)
       ffi (~> 1.15)
-    leptris (1.9.415.0-arm-linux)
+    leptris (1.9.418.1-arm-linux)
       ffi (~> 1.15)
-    leptris (1.9.415.0-arm-linux-musl)
+    leptris (1.9.418.1-arm-linux-musl)
       ffi (~> 1.15)
-    leptris (1.9.415.0-arm64-darwin)
+    leptris (1.9.418.1-arm64-darwin)
       ffi (~> 1.15)
-    leptris (1.9.415.0-x86_64-darwin)
+    leptris (1.9.418.1-x86_64-darwin)
       ffi (~> 1.15)
-    leptris (1.9.415.0-x86_64-linux)
+    leptris (1.9.418.1-x86_64-linux)
       ffi (~> 1.15)
-    leptris (1.9.415.0-x86_64-linux-musl)
+    leptris (1.9.418.1-x86_64-linux-musl)
       ffi (~> 1.15)
     libpng (1.6.58.6)
       ffi (~> 1.0)
@@ -483,7 +484,7 @@ GEM
       moxml (>= 0.1.24)
       parsanol (~> 1.3.68)
       ruby-graphviz
-    lutaml-model (0.8.173)
+    lutaml-model (0.8.175)
       base64 (>= 0.1.1)
       bigdecimal
       canon
@@ -524,7 +525,7 @@ GEM
       webrick (~> 1.7)
       webrobots (~> 0.1.2)
     memo_wise (1.13.0)
-    metanorma (2.5.21)
+    metanorma (2.5.24)
       asciidoctor
       concurrent-ruby
       csv
@@ -543,7 +544,7 @@ GEM
       metanorma-iso (>= 3.4.2)
     metanorma-cc (2.9.2)
       metanorma-generic (~> 3.5.1)
-    metanorma-cli (1.18.5)
+    metanorma-cli (1.18.6)
       canon (>= 0.2.12)
       git (>= 3.0)
       isodoc (~> 3.7.9)
@@ -618,7 +619,7 @@ GEM
     metanorma-ietf-data (0.2.0)
     metanorma-iho (1.4.2)
       metanorma-generic (~> 3.5.1)
-    metanorma-iso (3.5.9)
+    metanorma-iso (3.5.14)
       base64
       metanorma-document (~> 0.5.0)
       metanorma-standoc (>= 3.4.2)
@@ -626,6 +627,7 @@ GEM
       pubid (~> 2.0.3)
       sts (>= 0.5.6)
       tokenizer (~> 0.3.0)
+      unitsdb (~> 2.2.14)
       uniword (~> 1.0)
     metanorma-itu (2.9.4)
       metanorma-iso (>= 3.4.2)
@@ -667,7 +669,7 @@ GEM
       liquid (~> 5)
       metanorma-utils
       pubid (~> 2.0)
-    metanorma-plugin-lutaml (0.7.64)
+    metanorma-plugin-lutaml (0.7.67)
       asciidoctor
       coradoc (~> 1.1.8)
       ea (>= 0.6.41)
@@ -689,7 +691,7 @@ GEM
       thor (~> 1.0)
     metanorma-ribose (2.9.2)
       metanorma-generic (~> 3.5.1)
-    metanorma-standoc (3.5.13)
+    metanorma-standoc (3.5.20)
       addressable (~> 2.8)
       asciidoctor (~> 2.0.0)
       base64
@@ -704,12 +706,12 @@ GEM
       metanorma-plugin-glossarist (~> 0.5)
       metanorma-plugin-lutaml (~> 0.7.55)
       metanorma-plugin-plantuml (~> 1.0.0)
-      metanorma-utils (~> 2.0.10)
+      metanorma-utils (~> 2.0.12)
       moxml (~> 0.6.1)
-      png_conform (~> 0.1.0)
+      png_conform (~> 0.1.7)
       relaton (~> 3.1.1)
       relaton-iev (~> 2.0)
-      svg_conform (~> 0.2.6)
+      svg_conform (~> 0.2.7)
       uri
       vectory (~> 0.13, >= 0.13.2)
     metanorma-taste (1.1.5)
@@ -719,7 +721,7 @@ GEM
       metanorma-standoc (~> 3.5.7)
       roman-numerals
       twitter_cldr
-    metanorma-utils (2.0.11)
+    metanorma-utils (2.0.12)
       asciidoctor (>= 2)
       concurrent-ruby
       csv
@@ -739,16 +741,15 @@ GEM
     mml (2.4.7)
       lutaml-model (~> 0.8.155)
       moxml (~> 0.6.1)
-    mn-requirements (0.5.16)
+    mn-requirements (0.5.17)
       isodoc-i18n (>= 1.2.0)
       metanorma-core (>= 0.1.0)
       metanorma-utils (>= 2.0.0)
-      relaton (~> 3.1.1)
       tsort
       uri
-    mn2pdf (2.73)
+    mn2pdf (2.74)
     mnconvert (1.89.0)
-    moxml (0.6.4)
+    moxml (0.6.7)
     multi_json (1.21.2)
     net-http (0.10.0)
       net-protocol (>= 0.3.0)
@@ -806,14 +807,14 @@ GEM
       bigdecimal (>= 3.0)
     paint (2.3.0)
     parallel (1.28.0)
-    parsanol (1.3.136-aarch64-linux)
-    parsanol (1.3.136-aarch64-linux-musl)
-    parsanol (1.3.136-arm-linux)
-    parsanol (1.3.136-arm-linux-musl)
-    parsanol (1.3.136-arm64-darwin)
-    parsanol (1.3.136-x86_64-darwin)
-    parsanol (1.3.136-x86_64-linux)
-    parsanol (1.3.136-x86_64-linux-musl)
+    parsanol (1.3.144-aarch64-linux)
+    parsanol (1.3.144-aarch64-linux-musl)
+    parsanol (1.3.144-arm-linux)
+    parsanol (1.3.144-arm-linux-musl)
+    parsanol (1.3.144-arm64-darwin)
+    parsanol (1.3.144-x86_64-darwin)
+    parsanol (1.3.144-x86_64-linux)
+    parsanol (1.3.144-x86_64-linux-musl)
     parslet (2.0.0)
     plane1converter (0.0.1)
     plist (3.7.2)
@@ -830,12 +831,13 @@ GEM
       parslet
       thor
       unitsml (~> 0.6.4)
-    png_conform (0.1.5)
+    png_conform (0.1.7)
       bindata (~> 2.5)
       lens_core
       lutaml-model (~> 0.8.155)
       paint (~> 2.3)
       thor (~> 1.4)
+      yeptris (~> 0.6.59)
     postscript (0.2.1)
       thor
     postsvg (0.3.1)
@@ -856,7 +858,7 @@ GEM
     prism (2.1.0-x86_64-linux-musl)
     process_executer (4.1.1)
       track_open_instances (~> 0.1)
-    pubid (2.0.20)
+    pubid (2.0.22)
       benchmark
       lutaml-model (~> 0.8)
       parsanol (~> 1.3.122)
@@ -865,6 +867,9 @@ GEM
     rack (3.2.8)
     rainbow (3.1.1)
     rake (13.4.2)
+    rake-compiler-dock (1.12.0)
+    rb_sys (0.9.130)
+      rake-compiler-dock (= 1.12.0)
     rchardet (1.10.2)
     rdf (3.3.1)
       bcp47_spec (~> 0.2)
@@ -880,7 +885,7 @@ GEM
     readline (0.0.4)
       reline
     regexp_parser (2.13.1)
-    relaton (3.1.1)
+    relaton (3.1.2)
       addressable (~> 2.8)
       algolia (~> 2.3.0)
       base64 (~> 0.3)
@@ -903,7 +908,7 @@ GEM
       loc_mods (~> 0.3.0)
       logger (~> 1.6)
       lutaml-hal (~> 0.2.8)
-      lutaml-model (~> 0.8.164)
+      lutaml-model (~> 0.8.171)
       lutaml-store (~> 0.3.2)
       mechanize (~> 2.10)
       mini_portile2 (~> 2.8.0)
@@ -914,10 +919,12 @@ GEM
       pubid (~> 2.0.9)
       rfcxml (~> 0.4.3)
       rubyzip (~> 3.7)
+      singleton
       sqlite3 (~> 2.10)
       thor
       thor-hollaback
       twitter_cldr
+      uri
       w3c_api (~> 0.3.3)
       yeptris (~> 0.6.51)
     relaton-iev (2.0.2)
@@ -941,21 +948,21 @@ GEM
     rubyntlm (0.6.8)
       base64
     rubyzip (3.7.0)
-    sass-embedded (1.108.1-aarch64-linux-gnu)
+    sass-embedded (1.108.2-aarch64-linux-gnu)
       google-protobuf (~> 4.31)
-    sass-embedded (1.108.1-aarch64-linux-musl)
+    sass-embedded (1.108.2-aarch64-linux-musl)
       google-protobuf (~> 4.31)
-    sass-embedded (1.108.1-arm-linux-gnueabihf)
+    sass-embedded (1.108.2-arm-linux-gnueabihf)
       google-protobuf (~> 4.31)
-    sass-embedded (1.108.1-arm-linux-musleabihf)
+    sass-embedded (1.108.2-arm-linux-musleabihf)
       google-protobuf (~> 4.31)
-    sass-embedded (1.108.1-arm64-darwin)
+    sass-embedded (1.108.2-arm64-darwin)
       google-protobuf (~> 4.31)
-    sass-embedded (1.108.1-x86_64-darwin)
+    sass-embedded (1.108.2-x86_64-darwin)
       google-protobuf (~> 4.31)
-    sass-embedded (1.108.1-x86_64-linux-gnu)
+    sass-embedded (1.108.2-x86_64-linux-gnu)
       google-protobuf (~> 4.31)
-    sass-embedded (1.108.1-x86_64-linux-musl)
+    sass-embedded (1.108.2-x86_64-linux-musl)
       google-protobuf (~> 4.31)
     sassc-embedded (1.80.10)
       sass-embedded (~> 1.80)
@@ -1001,7 +1008,7 @@ GEM
       bigdecimal
       lutaml-model (~> 0.8.18)
       mml (~> 2.4.0)
-    suma (0.5.30)
+    suma (0.5.36)
       base64
       expressir
       glossarist (~> 2.8, >= 2.8.7)
@@ -1014,13 +1021,15 @@ GEM
       svg_conform (>= 0.1.0)
       table_tennis
       thor (>= 0.20)
-    svg_conform (0.2.6)
+    svg_conform (0.2.10)
+      lens_core (~> 0.1)
       lutaml-model (~> 0.8.155)
       moxml (~> 0.6.0)
       nokogiri (~> 1.16)
       rainbow
       table_tennis
       thor
+      yeptris (~> 0.6.36)
     sxp (2.0.0)
       matrix (~> 0.4)
       rdf (~> 3.3)
@@ -1063,7 +1072,7 @@ GEM
     unicode-name (1.15.1)
       unicode-types (~> 1.12)
     unicode-types (1.12.0)
-    unitsdb (2.2.13)
+    unitsdb (2.2.15)
       fuzzy_match
       logger
       lutaml-model (~> 0.8.0)
@@ -1123,21 +1132,21 @@ GEM
       lutaml-model (~> 0.8.159)
       nokogiri (~> 1.19)
     yaml (0.4.0)
-    yeptris (0.6.60.1-aarch64-linux)
+    yeptris (0.6.63.0-aarch64-linux)
       ffi (~> 1.15)
-    yeptris (0.6.60.1-aarch64-linux-musl)
+    yeptris (0.6.63.0-aarch64-linux-musl)
       ffi (~> 1.15)
-    yeptris (0.6.60.1-arm-linux-eabihf)
+    yeptris (0.6.63.0-arm-linux-eabihf)
       ffi (~> 1.15)
-    yeptris (0.6.60.1-arm-linux-musleabihf)
+    yeptris (0.6.63.0-arm-linux-musleabihf)
       ffi (~> 1.15)
-    yeptris (0.6.60.1-arm64-darwin)
+    yeptris (0.6.63.0-arm64-darwin)
       ffi (~> 1.15)
-    yeptris (0.6.60.1-x86_64-darwin)
+    yeptris (0.6.63.0-x86_64-darwin)
       ffi (~> 1.15)
-    yeptris (0.6.60.1-x86_64-linux)
+    yeptris (0.6.63.0-x86_64-linux)
       ffi (~> 1.15)
-    yeptris (0.6.60.1-x86_64-linux-musl)
+    yeptris (0.6.63.0-x86_64-linux-musl)
       ffi (~> 1.15)
 
 PLATFORMS
@@ -1160,7 +1169,7 @@ DEPENDENCIES
   benchmark
   csv
   faraday-retry
-  metanorma-cli (= 1.18.5)
+  metanorma-cli (= 1.18.6)
   ostruct
   tsort
   uri
