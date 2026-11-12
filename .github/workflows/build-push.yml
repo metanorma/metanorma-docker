@@ -235,9 +235,6 @@ jobs:
     # samples fetch fails the image itself would never be exercised —
     # this gate catches "image builds green but metanorma is broken".
     - name: Smoke test — compile a real document (incl. PDF)
-      # fontist/formulas#287: the Source-fonts v1.3 refresh breaks the
-      # smoke render's PDF stage (Source Han Sans). Advisory until fixed.
-      continue-on-error: true
       run: tests/smoke/run-smoke.sh ${{ steps.loaded_image.outputs.full_name }}
 
     - run: docker history --no-trunc ${{ steps.loaded_image.outputs.full_name }}
@@ -279,11 +276,6 @@ jobs:
   test:
     name: Test (${{ matrix.image_type }}-${{ matrix.root_image }}, ${{ matrix.flavor.id }})
     runs-on: ubuntu-latest
-    # Fontist formulas regression (fontist/formulas#287): the source-fonts
-    # v1.3 refresh broke Source Han Sans / Source Sans Pro installs, so
-    # every flavor rendering with those fonts fails its PDF stage in the
-    # container. Skip them until the formulas fix lands; then drop this.
-    if: ${{ !(contains(fromJSON('["bipm","cc","iec","ieee","iho","iso","itu","jcgm","ogc","oiml","pdfa"]'), matrix.flavor.id)) }}
     needs:
       - build
       - job_info
