@@ -324,6 +324,12 @@ jobs:
           echo "file=metanorma.yml" >> $GITHUB_OUTPUT
         fi
 
+    - name: Pin fontist formulas (source-fonts v1.3 regression, fontist/formulas#287)
+      run: |
+        mkdir -p ${{ github.workspace }}/formulas-pin
+        git clone https://github.com/fontist/formulas.git ${{ github.workspace }}/formulas-pin
+        git -C ${{ github.workspace }}/formulas-pin checkout 74c038bf85e2393177ef303920db74a2c821740b
+
     - name: Run tests
       env:
         IMAGE_NAME: ${{ steps.loaded_image.outputs.full_name }}
@@ -331,6 +337,7 @@ jobs:
       run: |
         docker run --rm \
           -v ${{ github.workspace }}/samples:/metanorma \
+          -v ${{ github.workspace }}/formulas-pin:/root/.fontist/versions/v5/formulas \
           -w /metanorma \
           ${IMAGE_NAME} \
           metanorma site generate --agree-to-terms -c ${CONFIG_FILE} .
