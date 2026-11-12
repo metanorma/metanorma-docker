@@ -14,8 +14,18 @@ echo ":: ${IMAGE} — metanorma version"
 docker run --rm "${IMAGE}" metanorma version
 
 echo ":: ${IMAGE} — compiling sample.adoc (xml, html, pdf)"
+
+# Pin fontist formulas: the container clones formulas at HEAD, and the
+# source-fonts v1.3 refresh (fontist/formulas#287) broke Source Han Sans /
+# Source Sans Pro installs, failing the PDF stage. Pin the clone to the
+# last known-good commit until #287 is fixed.
+FORMULAS_PIN="$(mktemp -d)"
+git clone --quiet https://github.com/fontist/formulas.git "${FORMULAS_PIN}/Formulas"
+git -C "${FORMULAS_PIN}/Formulas" checkout --quiet 74c038bf85e2393177ef303920db74a2c821740b
+
 docker run --rm \
   -v "${FIXTURE_DIR}:/src:ro" \
+  -v "${FORMULAS_PIN}:/root/.fontist/versions/v5/formulas" \
   -w /tmp \
   --entrypoint /bin/bash \
   "${IMAGE}" \
