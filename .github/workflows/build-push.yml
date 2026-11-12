@@ -283,7 +283,7 @@ jobs:
     # v1.3 refresh broke Source Han Sans / Source Sans Pro installs, so
     # every flavor rendering with those fonts fails its PDF stage in the
     # container. Skip them until the formulas fix lands; then drop this.
-    if: ${{ !(contains(fromJSON('["bipm","cc","iec","ieee","iho","iso","itu","jcgm","ogc","oiml","pdfa"]'), matrix.flavor.id)) }}
+    if: ${{ matrix.flavor.id != 'bipm' && matrix.flavor.id != 'cc' && matrix.flavor.id != 'iec' && matrix.flavor.id != 'ieee' && matrix.flavor.id != 'iho' && matrix.flavor.id != 'iso' && matrix.flavor.id != 'itu' && matrix.flavor.id != 'jcgm' && matrix.flavor.id != 'ogc' && matrix.flavor.id != 'oiml' && matrix.flavor.id != 'pdfa' }}
     needs:
       - build
       - job_info
