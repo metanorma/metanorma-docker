@@ -619,7 +619,7 @@ GEM
     metanorma-ietf-data (0.2.0)
     metanorma-iho (1.4.2)
       metanorma-generic (~> 3.5.1)
-    metanorma-iso (3.5.14)
+    metanorma-iso (3.5.15)
       base64
       metanorma-document (~> 0.5.0)
       metanorma-standoc (>= 3.4.2)
@@ -691,7 +691,7 @@ GEM
       thor (~> 1.0)
     metanorma-ribose (2.9.2)
       metanorma-generic (~> 3.5.1)
-    metanorma-standoc (3.5.20)
+    metanorma-standoc (3.5.21)
       addressable (~> 2.8)
       asciidoctor (~> 2.0.0)
       base64
