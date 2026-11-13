@@ -619,7 +619,7 @@ GEM
     metanorma-ietf-data (0.2.0)
     metanorma-iho (1.4.2)
       metanorma-generic (~> 3.5.1)
-    metanorma-iso (3.5.16)
+    metanorma-iso (3.5.17)
       base64
       metanorma-document (~> 0.5.0)
       metanorma-standoc (>= 3.4.2)
@@ -1321,7 +1321,7 @@ CHECKSUMS
   metanorma-ietf (3.7.15) sha256=47a334e98fa6bff7612056f63ea2fcb9c73aac043c81f5728b23dbcf4ed3ec24
   metanorma-ietf-data (0.2.0) sha256=3bae28b99b24212cc8b92dc3def3559dbeaf8868b319da8c21d42bda3f09bbf7
   metanorma-iho (1.4.2) sha256=2a4520d679c82d92ee55fb396730508b53e5efad60628e98616142f0ce78f0e1
-  metanorma-iso (3.5.16) sha256=ba0c01c30af7c46aa36421e37ed29907f2dfde897c3ace6bf350033f57cf7a36
+  metanorma-iso (3.5.17) sha256=dd95964e1458f2888bdd7bb6dc849e2bf624086941a59e08f97d20959ea19a98
   metanorma-itu (2.9.4) sha256=dfd256f9121308a703f3e587b68bc02a27ac46843cd462b0db59547fb613caed
   metanorma-jis (1.2.4) sha256=e16b83f8c8a8957b65e55a76e2ade7446a5698115f37d381fe7261456a202521
   metanorma-m3aawg (2.2.7) sha256=845f842cd773ebdb64f984c9013c0d587fa95dfca0511ac4aaf0e20b87356e5d

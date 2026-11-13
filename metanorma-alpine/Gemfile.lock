@@ -619,7 +619,7 @@ GEM
     metanorma-ietf-data (0.2.0)
     metanorma-iho (1.4.2)
       metanorma-generic (~> 3.5.1)
-    metanorma-iso (3.5.16)
+    metanorma-iso (3.5.17)
       base64
       metanorma-document (~> 0.5.0)
       metanorma-standoc (>= 3.4.2)
