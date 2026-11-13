@@ -619,7 +619,7 @@ GEM
     metanorma-ietf-data (0.2.0)
     metanorma-iho (1.4.2)
       metanorma-generic (~> 3.5.1)
-    metanorma-iso (3.5.15)
+    metanorma-iso (3.5.16)
       base64
       metanorma-document (~> 0.5.0)
       metanorma-standoc (>= 3.4.2)
@@ -691,7 +691,7 @@ GEM
       thor (~> 1.0)
     metanorma-ribose (2.9.2)
       metanorma-generic (~> 3.5.1)
-    metanorma-standoc (3.5.21)
+    metanorma-standoc (3.5.22)
       addressable (~> 2.8)
       asciidoctor (~> 2.0.0)
       base64
@@ -1321,7 +1321,7 @@ CHECKSUMS
   metanorma-ietf (3.7.15) sha256=47a334e98fa6bff7612056f63ea2fcb9c73aac043c81f5728b23dbcf4ed3ec24
   metanorma-ietf-data (0.2.0) sha256=3bae28b99b24212cc8b92dc3def3559dbeaf8868b319da8c21d42bda3f09bbf7
   metanorma-iho (1.4.2) sha256=2a4520d679c82d92ee55fb396730508b53e5efad60628e98616142f0ce78f0e1
-  metanorma-iso (3.5.15) sha256=932c82f495ff16e75d755694af0940f7d6647180ecb748199c309f02ac76593c
+  metanorma-iso (3.5.16) sha256=ba0c01c30af7c46aa36421e37ed29907f2dfde897c3ace6bf350033f57cf7a36
   metanorma-itu (2.9.4) sha256=dfd256f9121308a703f3e587b68bc02a27ac46843cd462b0db59547fb613caed
   metanorma-jis (1.2.4) sha256=e16b83f8c8a8957b65e55a76e2ade7446a5698115f37d381fe7261456a202521
   metanorma-m3aawg (2.2.7) sha256=845f842cd773ebdb64f984c9013c0d587fa95dfca0511ac4aaf0e20b87356e5d
@@ -1335,7 +1335,7 @@ CHECKSUMS
   metanorma-plugin-plantuml (1.0.17) sha256=932a2d96efd9b993c8d87de3d7d49d017e3f79056962a4d54d88abd5373c38a6
   metanorma-release (0.2.26) sha256=b13741ca41aa1fdcd355e05d10cd9be94a725cfe1e42abc078e66dde23279c7d
   metanorma-ribose (2.9.2) sha256=da43a51163edfec1850903e5db866f76300c08c4e17ee5579b5c2062980e6b97
-  metanorma-standoc (3.5.21) sha256=e81ae4266e2430e1084c260bc2eecd9e80cda6e17bc5dd254ed9f93b2e5340c4
+  metanorma-standoc (3.5.22) sha256=b7aa08835e56575da74c71331644d2b239551c1caf18e5b5a4ca16d5cdd619a6
   metanorma-taste (1.1.5) sha256=657cc9516f0e3b0a0ab607c24228de4f64d0fd7f6f11920d012fbab1f070e912
   metanorma-un (0.12.21) sha256=347cc6e6d7c5bcc0d5f672544b6ce75c2a5066e491044b28bdb1cfeff53b7cdd
   metanorma-utils (2.0.12) sha256=bdc134f797af5c8a9ab953acbb002a62a523a98788e9d653e299a7e45ebafd86
