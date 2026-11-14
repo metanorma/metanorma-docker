@@ -384,7 +384,7 @@ GEM
     iso-639 (0.3.8)
       csv
     iso639 (1.4.0)
-    isodoc (3.7.15)
+    isodoc (3.7.16)
       base64 (>= 0.1.0)
       bigdecimal
       csv
@@ -590,7 +590,7 @@ GEM
       metanorma-utils
       nokogiri (~> 1.19)
       singleton
-    metanorma-document (0.5.6)
+    metanorma-document (0.5.7)
       base64
       glossarist (~> 2.14)
       lutaml-model (~> 0.8.164)
@@ -624,9 +624,9 @@ GEM
       metanorma-standoc (>= 3.4.2)
       relaton (~> 3.1.1)
     metanorma-ietf-data (0.2.0)
-    metanorma-iho (1.4.3)
+    metanorma-iho (1.4.4)
       metanorma-generic (~> 3.5.1)
-    metanorma-iso (3.5.18)
+    metanorma-iso (3.5.19)
       base64
       metanorma-document (~> 0.5.0)
       metanorma-standoc (>= 3.4.2)
@@ -721,7 +721,7 @@ GEM
       svg_conform (~> 0.2.7)
       uri
       vectory (~> 0.13, >= 0.13.2)
-    metanorma-taste (1.1.5)
+    metanorma-taste (1.1.6)
       lutaml-model (~> 0.8.156)
     metanorma-un (0.12.21)
       iso-639
@@ -814,14 +814,14 @@ GEM
       bigdecimal (>= 3.0)
     paint (2.3.0)
     parallel (1.28.0)
-    parsanol (1.3.148-aarch64-linux)
-    parsanol (1.3.148-aarch64-linux-musl)
-    parsanol (1.3.148-arm-linux)
-    parsanol (1.3.148-arm-linux-musl)
-    parsanol (1.3.148-arm64-darwin)
-    parsanol (1.3.148-x86_64-darwin)
-    parsanol (1.3.148-x86_64-linux)
-    parsanol (1.3.148-x86_64-linux-musl)
+    parsanol (1.3.149-aarch64-linux)
+    parsanol (1.3.149-aarch64-linux-musl)
+    parsanol (1.3.149-arm-linux)
+    parsanol (1.3.149-arm-linux-musl)
+    parsanol (1.3.149-arm64-darwin)
+    parsanol (1.3.149-x86_64-darwin)
+    parsanol (1.3.149-x86_64-linux)
+    parsanol (1.3.149-x86_64-linux-musl)
     parslet (2.0.0)
     plane1converter (0.0.1)
     plist (3.7.2)
@@ -867,7 +867,7 @@ GEM
     prism (2.1.0-x86_64-linux-musl)
     process_executer (4.1.1)
       track_open_instances (~> 0.1)
-    pubid (2.0.30)
+    pubid (2.0.34)
       benchmark
       lutaml-model (~> 0.8)
       parsanol (~> 1.3.122)
@@ -1144,21 +1144,21 @@ GEM
       lutaml-model (~> 0.8.159)
       nokogiri (~> 1.19)
     yaml (0.4.0)
-    yeptris (0.6.65.0-aarch64-linux)
+    yeptris (0.6.66.0-aarch64-linux)
       ffi (~> 1.15)
-    yeptris (0.6.65.0-aarch64-linux-musl)
+    yeptris (0.6.66.0-aarch64-linux-musl)
       ffi (~> 1.15)
-    yeptris (0.6.65.0-arm-linux-eabihf)
+    yeptris (0.6.66.0-arm-linux-eabihf)
       ffi (~> 1.15)
-    yeptris (0.6.65.0-arm-linux-musleabihf)
+    yeptris (0.6.66.0-arm-linux-musleabihf)
       ffi (~> 1.15)
-    yeptris (0.6.65.0-arm64-darwin)
+    yeptris (0.6.66.0-arm64-darwin)
       ffi (~> 1.15)
-    yeptris (0.6.65.0-x86_64-darwin)
+    yeptris (0.6.66.0-x86_64-darwin)
       ffi (~> 1.15)
-    yeptris (0.6.65.0-x86_64-linux)
+    yeptris (0.6.66.0-x86_64-linux)
       ffi (~> 1.15)
-    yeptris (0.6.65.0-x86_64-linux-musl)
+    yeptris (0.6.66.0-x86_64-linux-musl)
       ffi (~> 1.15)
 
 PLATFORMS
@@ -1279,7 +1279,7 @@ CHECKSUMS
   io-console (0.9.5) sha256=83dd9bbf4c4680416629245b39cd4212eb5f4d9a4ea91804870c1f6b846414d5
   iso-639 (0.3.8) sha256=48b8104a4b55367fda347609e36ef8eeb3a0b4d048b36365371c274958be7535
   iso639 (1.4.0) sha256=819b2a085a102c146d4f259a4cd520ecf788738ec1e837848527db993857143d
-  isodoc (3.7.15) sha256=b2871f5035bfcb0d25c4c7799feabfec3f5e634087cc914b66216a8704ef2dc4
+  isodoc (3.7.16) sha256=614b6aac4112a898daf7aef319690716ef255be00bdf0b6496736d0478bed5dc
   isodoc-i18n (1.5.3) sha256=39e16f8dc35ec130da3241b44bb13199e5b407bfd7c4874a0ee02482cd7d6e47
   isoics (0.1.13) sha256=57d3a1e30817e03fe8e2442bf62ec5b17e101bae0eea2c0f507030fe834c7482
   japanese_calendar (0.4.2) sha256=4357d4232215f498f905204d503d0cf4b88999e3be589e5e4e1168ca27e6c11d
@@ -1326,15 +1326,15 @@ CHECKSUMS
   metanorma-cc (2.9.2) sha256=36651d5e6300847fed525829dc3c2557e4ac0748d26fdb00fcd3bd6f2e200b46
   metanorma-cli (1.18.6) sha256=49c90bf56e401680fca654ef4f94b3ddf9452ad41f4a8e33172b2f3ea60843d3
   metanorma-core (0.2.8) sha256=3b2d73dd4859c7bd3b9d6a72cf0d5d357eac4a4c9daccb619aee21d2cf95e4c9
-  metanorma-document (0.5.6) sha256=33567211f30023351dd5c5d5903b9199fb83121550e01e336e142a722c6d5aa2
+  metanorma-document (0.5.7) sha256=823d91afaa7780eb98d335ef8f600555c61dfc97971873342eba091620897162
   metanorma-gb (1.5.10) sha256=a374cd96828cd7da4ef44eb827c425a2743b6a8583fcd2988f85d7b644985e1e
   metanorma-generic (3.5.2) sha256=28559538e1e14424d166cced201cfb7c79dbb3577cd5630dbda589870a22dbdf
   metanorma-iec (2.9.2) sha256=083d27a5b134538a7b710a56d4c9d69a1ccf8ce805867db9b686ccc88bfaad9c
   metanorma-ieee (1.7.3) sha256=5a2d79f9ed29027fb31412dbfa5f3733e0a657ff9a2de898c54934a8bbb1a475
   metanorma-ietf (3.7.15) sha256=47a334e98fa6bff7612056f63ea2fcb9c73aac043c81f5728b23dbcf4ed3ec24
   metanorma-ietf-data (0.2.0) sha256=3bae28b99b24212cc8b92dc3def3559dbeaf8868b319da8c21d42bda3f09bbf7
-  metanorma-iho (1.4.3) sha256=721f638e428bcf0bf1e55135dc080f88c7f91bf6fa4385b81f6f982e9b4c0722
-  metanorma-iso (3.5.18) sha256=8facdcc923ee84b364d2bc0a0c893fea9273742a9d8854fbffa026b55e1f9f73
+  metanorma-iho (1.4.4) sha256=2a2ce60eb47a7e113683ff0c998cbc7a3f635ec32dcabe1ccbac41fb328f8fcf
+  metanorma-iso (3.5.19) sha256=90f8915a83948c17232858dfb2492787e73d4b5bd1a310c18fc8f3e577625afa
   metanorma-itu (2.9.4) sha256=dfd256f9121308a703f3e587b68bc02a27ac46843cd462b0db59547fb613caed
   metanorma-jis (1.2.4) sha256=e16b83f8c8a8957b65e55a76e2ade7446a5698115f37d381fe7261456a202521
   metanorma-m3aawg (2.2.7) sha256=845f842cd773ebdb64f984c9013c0d587fa95dfca0511ac4aaf0e20b87356e5d
@@ -1349,7 +1349,7 @@ CHECKSUMS
   metanorma-release (0.2.26) sha256=b13741ca41aa1fdcd355e05d10cd9be94a725cfe1e42abc078e66dde23279c7d
   metanorma-ribose (2.9.2) sha256=da43a51163edfec1850903e5db866f76300c08c4e17ee5579b5c2062980e6b97
   metanorma-standoc (3.5.22) sha256=b7aa08835e56575da74c71331644d2b239551c1caf18e5b5a4ca16d5cdd619a6
-  metanorma-taste (1.1.5) sha256=657cc9516f0e3b0a0ab607c24228de4f64d0fd7f6f11920d012fbab1f070e912
+  metanorma-taste (1.1.6) sha256=7567a465ef869fd83b1625c2f1b4e09ac075a05ea8eb8350889427bfd3c12c19
   metanorma-un (0.12.21) sha256=347cc6e6d7c5bcc0d5f672544b6ce75c2a5066e491044b28bdb1cfeff53b7cdd
   metanorma-utils (2.0.12) sha256=bdc134f797af5c8a9ab953acbb002a62a523a98788e9d653e299a7e45ebafd86
   mime-types (3.7.0) sha256=dcebf61c246f08e15a4de34e386ebe8233791e868564a470c3fe77c00eed5e56
@@ -1387,14 +1387,14 @@ CHECKSUMS
   ox (2.14.29) sha256=206736d5a8dade9dca10cf72022bc157ad6ca3eecaba3853918426ed88e12dc2
   paint (2.3.0) sha256=327d623e4038619d5bd99ae5db07973859cd78400c7f0329eea283cef8e83be5
   parallel (1.28.0) sha256=33e6de1484baf2524792d178b0913fc8eb94c628d6cfe45599ad4458c638c970
-  parsanol (1.3.148-aarch64-linux) sha256=92039533bb4398e4ff5863a38b275fd2ac5492fc9a015872f06059e8111d096d
-  parsanol (1.3.148-aarch64-linux-musl) sha256=2ed88b639bedbc0591e0e6b2bd590520dfffccca5fb77d0cffc0cd144ed73d5b
-  parsanol (1.3.148-arm-linux) sha256=06e383b9543c1ebc2eb89b583e9e2a272f61585a8dceaae83a5d75455dbdf363
-  parsanol (1.3.148-arm-linux-musl) sha256=337c26bcc026f440e8ffb2667a32813173bd22a78eb542cb5d2605460a760e3e
-  parsanol (1.3.148-arm64-darwin) sha256=462ee6ae37bd49b209c3cd18bc5793042ca65dae92fea0970616ae60a26e24d6
-  parsanol (1.3.148-x86_64-darwin) sha256=fe18600b266593f8b2665cac56f955ed278febef94b0e35ece07a7a0957e090a
-  parsanol (1.3.148-x86_64-linux) sha256=580c421582e00ceede360a3a9f53a63e2ae79d46e29374231c8f867f9bfe4e54
-  parsanol (1.3.148-x86_64-linux-musl) sha256=718905b315278e29cf20192df442f15557573d16150dc5a6600d0bb0948aa24a
+  parsanol (1.3.149-aarch64-linux) sha256=fed7d4cde81c7c2afeb5c79da7e3ba57a23e07764d16d7acd55440bba3ba9992
+  parsanol (1.3.149-aarch64-linux-musl) sha256=7e3a419322c1bf7e74fdb329f8d2bcea96cc449c86c54df12a6b37096295d6b0
+  parsanol (1.3.149-arm-linux) sha256=eb4f688bf40f15c416f8baaf96e34255a138d3db848e2a4f4a44353c257e30da
+  parsanol (1.3.149-arm-linux-musl) sha256=0a5892644399306bfce0d1034e2c1820f34f3290b2f40b3f1ad25ba18ceaf7b2
+  parsanol (1.3.149-arm64-darwin) sha256=b473296bb63b258bf334c80d1230f301db08a5ce9029602669991d26e15bbaad
+  parsanol (1.3.149-x86_64-darwin) sha256=7cdc00289226765ac6d21c16b4d610ab7687b25b5431db85e3f8f6e0b95851bb
+  parsanol (1.3.149-x86_64-linux) sha256=9c52a9c5af39bbb471955ef7dd208e8658671bc2dbad0e8403fd36433b8e8052
+  parsanol (1.3.149-x86_64-linux-musl) sha256=d895660bcb3be7594f016ce9fff125d627c8257c695c9dbf8fd588886279e18a
   parslet (2.0.0) sha256=d45130695d39b43d7e6a91f4d2ec66b388a8d822bae38de9b4de9a5fbde1f606
   plane1converter (0.0.1) sha256=86c5dd19ba46c013c0e1780499657702a21d75e05611275714db2dc3773703a9
   plist (3.7.2) sha256=d37a4527cc1116064393df4b40e1dbbc94c65fa9ca2eec52edf9a13616718a42
@@ -1412,7 +1412,7 @@ CHECKSUMS
   prism (2.1.0-x86_64-linux-gnu) sha256=b2b647afce09551e650b8bb3e2fc91d7d73d392a09534ca307ec0d619c33bfd4
   prism (2.1.0-x86_64-linux-musl) sha256=249f45981726923e259b927902246219fa25ad10a76f43849c9aee1a3d3ec5b8
   process_executer (4.1.1) sha256=02e93624eb984c94282a892084781d8343d39198b983a25753c862c228f1786e
-  pubid (2.0.30) sha256=07d8d3670261dcecbb2f57bb776aa2ad860b546a98ffd926deae5849a09cd5e6
+  pubid (2.0.34) sha256=6f7e336215155caaa728a833c83b04f946a50dc9a9caf4f592162ca81e6d3624
   public_suffix (7.0.5) sha256=1a8bb08f1bbea19228d3bed6e5ed908d1cb4f7c2726d18bd9cadf60bc676f623
   racc (1.8.1) sha256=4a7f6929691dbec8b5209a0b373bc2614882b55fc5d2e447a21aaa691303d62f
   rack (3.2.8) sha256=1fecc85e463ebc7a2a945fff829ffcd549babeb1556384796fad946c28dc4ec7
@@ -1505,14 +1505,14 @@ CHECKSUMS
   word-to-markdown (1.2.1) sha256=bb4cc410280cf93ea80282e2ab50a669f2750327f29c31db1790c050b3ec2944
   xmi (0.7.9) sha256=e4bcc4ee3d672a3cf2bf1c1ce9b504afca0430724fd5039d244da97f7590c972
   yaml (0.4.0) sha256=240e69d1e6ce3584d6085978719a0faa6218ae426e034d8f9b02fb54d3471942
-  yeptris (0.6.65.0-aarch64-linux) sha256=3a99ffe80fef3cd63a3717db0c80876550b10107b2156c212d21dc232b5c4fcc
-  yeptris (0.6.65.0-aarch64-linux-musl) sha256=b53b4770194c80ab8c3bab6a81d177800bec94045f2e588708683f4f452dbe1c
-  yeptris (0.6.65.0-arm-linux-eabihf) sha256=0e78b260fcfd9dbef17c3b6b7db218dfa90be9f2d0c9d310bc3da7594bfc7741
-  yeptris (0.6.65.0-arm-linux-musleabihf) sha256=9cc35d18285b48e1e1c03e59cc9037f445f8bafb1328609e5a699b49da7f5dd4
-  yeptris (0.6.65.0-arm64-darwin) sha256=454bd215ff788c432319a83c9a350f5c8ba1a92188e1e2b59f7ca25d86f88f68
-  yeptris (0.6.65.0-x86_64-darwin) sha256=58e8ed71f0ae11cbae7d1636371ae6a01e553defd3ff3f925fe74e1e3422d179
-  yeptris (0.6.65.0-x86_64-linux) sha256=f0b06c7eb79c963f04948116df4c738adaca42c6b2fb7eb11f3381b07791ba20
-  yeptris (0.6.65.0-x86_64-linux-musl) sha256=19cc60e7f48b2ca63082a70b02075688fd3bf3455a161ce84c175e919c296117
+  yeptris (0.6.66.0-aarch64-linux) sha256=8db5f492b14d00c3b9503bd344f3945bd7196053ab7c1ddac1a6e96e7153c977
+  yeptris (0.6.66.0-aarch64-linux-musl) sha256=6c13ffa216cb2a30b28dd42c5971775f72e1e85ebe28993bb0dcec62b327e5d1
+  yeptris (0.6.66.0-arm-linux-eabihf) sha256=40656823f13410f2d9db209cc8217dbb1f9624e278372ef7309ff9919d618112
+  yeptris (0.6.66.0-arm-linux-musleabihf) sha256=9f24b8ce4f5dfab2c160cf4b6483f18ea8abdf1396a4eb4b257b155fb9ac0122
+  yeptris (0.6.66.0-arm64-darwin) sha256=fb20ff20d17857d4a3adfdfed6e79f808fa3cb7809aff318156e1a0492e5c05a
+  yeptris (0.6.66.0-x86_64-darwin) sha256=5f870123e294c6300337ead4a70db209ad713ed6525ee94e4615a3433a1aca64
+  yeptris (0.6.66.0-x86_64-linux) sha256=481832a112d33bef8b91f14d4cb384a1e5e8398651239f6d35cdcab784c18f69
+  yeptris (0.6.66.0-x86_64-linux-musl) sha256=9e995b20909facf87329f6b5de3d63658938ca1bd3acbbfe9ae51572facba4f1
 
 BUNDLED WITH
   4.0.20
