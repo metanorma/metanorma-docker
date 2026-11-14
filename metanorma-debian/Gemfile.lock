@@ -1144,21 +1144,21 @@ GEM
       lutaml-model (~> 0.8.159)
       nokogiri (~> 1.19)
     yaml (0.4.0)
-    yeptris (0.6.66.0-aarch64-linux)
+    yeptris (0.6.65.0-aarch64-linux)
       ffi (~> 1.15)
-    yeptris (0.6.66.0-aarch64-linux-musl)
+    yeptris (0.6.65.0-aarch64-linux-musl)
       ffi (~> 1.15)
-    yeptris (0.6.66.0-arm-linux-eabihf)
+    yeptris (0.6.65.0-arm-linux-eabihf)
       ffi (~> 1.15)
-    yeptris (0.6.66.0-arm-linux-musleabihf)
+    yeptris (0.6.65.0-arm-linux-musleabihf)
       ffi (~> 1.15)
-    yeptris (0.6.66.0-arm64-darwin)
+    yeptris (0.6.65.0-arm64-darwin)
       ffi (~> 1.15)
-    yeptris (0.6.66.0-x86_64-darwin)
+    yeptris (0.6.65.0-x86_64-darwin)
       ffi (~> 1.15)
-    yeptris (0.6.66.0-x86_64-linux)
+    yeptris (0.6.65.0-x86_64-linux)
       ffi (~> 1.15)
-    yeptris (0.6.66.0-x86_64-linux-musl)
+    yeptris (0.6.65.0-x86_64-linux-musl)
       ffi (~> 1.15)
 
 PLATFORMS
@@ -1505,14 +1505,14 @@ CHECKSUMS
   word-to-markdown (1.2.1) sha256=bb4cc410280cf93ea80282e2ab50a669f2750327f29c31db1790c050b3ec2944
   xmi (0.7.9) sha256=e4bcc4ee3d672a3cf2bf1c1ce9b504afca0430724fd5039d244da97f7590c972
   yaml (0.4.0) sha256=240e69d1e6ce3584d6085978719a0faa6218ae426e034d8f9b02fb54d3471942
-  yeptris (0.6.66.0-aarch64-linux) sha256=8db5f492b14d00c3b9503bd344f3945bd7196053ab7c1ddac1a6e96e7153c977
-  yeptris (0.6.66.0-aarch64-linux-musl) sha256=6c13ffa216cb2a30b28dd42c5971775f72e1e85ebe28993bb0dcec62b327e5d1
-  yeptris (0.6.66.0-arm-linux-eabihf) sha256=40656823f13410f2d9db209cc8217dbb1f9624e278372ef7309ff9919d618112
-  yeptris (0.6.66.0-arm-linux-musleabihf) sha256=9f24b8ce4f5dfab2c160cf4b6483f18ea8abdf1396a4eb4b257b155fb9ac0122
-  yeptris (0.6.66.0-arm64-darwin) sha256=fb20ff20d17857d4a3adfdfed6e79f808fa3cb7809aff318156e1a0492e5c05a
-  yeptris (0.6.66.0-x86_64-darwin) sha256=5f870123e294c6300337ead4a70db209ad713ed6525ee94e4615a3433a1aca64
-  yeptris (0.6.66.0-x86_64-linux) sha256=481832a112d33bef8b91f14d4cb384a1e5e8398651239f6d35cdcab784c18f69
-  yeptris (0.6.66.0-x86_64-linux-musl) sha256=9e995b20909facf87329f6b5de3d63658938ca1bd3acbbfe9ae51572facba4f1
+  yeptris (0.6.65.0-aarch64-linux) sha256=3a99ffe80fef3cd63a3717db0c80876550b10107b2156c212d21dc232b5c4fcc
+  yeptris (0.6.65.0-aarch64-linux-musl) sha256=b53b4770194c80ab8c3bab6a81d177800bec94045f2e588708683f4f452dbe1c
+  yeptris (0.6.65.0-arm-linux-eabihf) sha256=0e78b260fcfd9dbef17c3b6b7db218dfa90be9f2d0c9d310bc3da7594bfc7741
+  yeptris (0.6.65.0-arm-linux-musleabihf) sha256=9cc35d18285b48e1e1c03e59cc9037f445f8bafb1328609e5a699b49da7f5dd4
+  yeptris (0.6.65.0-arm64-darwin) sha256=454bd215ff788c432319a83c9a350f5c8ba1a92188e1e2b59f7ca25d86f88f68
+  yeptris (0.6.65.0-x86_64-darwin) sha256=58e8ed71f0ae11cbae7d1636371ae6a01e553defd3ff3f925fe74e1e3422d179
+  yeptris (0.6.65.0-x86_64-linux) sha256=f0b06c7eb79c963f04948116df4c738adaca42c6b2fb7eb11f3381b07791ba20
+  yeptris (0.6.65.0-x86_64-linux-musl) sha256=19cc60e7f48b2ca63082a70b02075688fd3bf3455a161ce84c175e919c296117
 
 BUNDLED WITH
   4.0.20
