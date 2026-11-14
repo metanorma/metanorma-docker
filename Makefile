@@ -20,7 +20,7 @@ REPO_GIT_NAME ?= $(shell git config --get remote.origin.url)
 # Image variants:
 #  metanorma-debian — the main variant (unprefixed tags on Docker
 #    Hub/GHCR): gem-based build on ruby:4.0.7-slim, multi-arch.
-#  metanorma-alpine — same gem-based build path on ruby:3.3.7-alpine,
+#  metanorma-alpine — same gem-based build path on ruby:4.0.7-alpine,
 #    smallest footprint.
 IMAGE_TYPES ?= metanorma-debian metanorma-alpine
 
