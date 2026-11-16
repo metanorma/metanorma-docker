@@ -3,9 +3,11 @@
 # way: a stock Ruby base image plus `bundle install` against the committed
 # Gemfile.lock (BUNDLE_DEPLOYMENT at build time pins the whole dependency
 # tree), compiled in-image with buildx for linux/amd64 and linux/arm64.
-# The builder stage keeps the C toolchain out of the final image. ruby,
-# gem and bundle stay on PATH, so the documented `bundle install` /
-# `bundle exec metanorma` workflow for user Gemfiles keeps working.
+# The builder stage keeps the full build stack out of the final image, but
+# the runtime keeps the minimal toolchain needed to compile native gem
+# extensions, so the documented `bundle install` / `bundle exec metanorma`
+# workflow for user Gemfiles keeps working. ruby, gem and bundle stay on
+# PATH.
 
 # Base image tag. VERSION.mak is the single source of truth — the Makefile
 # and CI pass it via --build-arg RUBY_VERSION. The default below is only a
@@ -49,7 +51,8 @@ RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
     find /usr/local/bundle/gems -type d -name 'test' -prune -exec rm -r "{}" \;
 
 # ---------------------------------------------------------------------------
-# Runtime: the compiled toolchain plus host tools. No compiler, no headers.
+# Runtime: the compiled toolchain plus host tools. No full build stack —
+# only what native-gem extension compilation needs (see the apt run below).
 # ---------------------------------------------------------------------------
 FROM ruby:${RUBY_VERSION}-slim
 
@@ -72,12 +75,27 @@ RUN mkdir -p /usr/share/man/man1
 # Install runtime dependencies
 # (apt-get upgrade pulls in security patchlevels of base packages — the
 # Trivy gate fails the build on fixable HIGH/CRITICAL OS CVEs otherwise)
+#
+# The runtime also carries the minimal native-build toolchain (make, gcc,
+# libc6-dev, libffi-dev): the documented `bundle install` workflow for
+# user Gemfiles runs in-image, and current metanorma releases resolve
+# default gems that compile from source at install time (bigdecimal, json,
+# racc, strscan), while fiddle additionally needs libffi's headers.
+# Without them every fresh user bundle dies on Gem::Ext::BuildError
+# (metanorma-docker#270). libc6-dev is the C standard-library headers:
+# gcc only recommends it, which --no-install-recommends drops. No g++:
+# the metanorma stack ships no C++ extensions outside the precompiled
+# platform gems.
 RUN apt-get update && \
     apt-get --no-install-recommends install -y \
       ca-certificates \
       curl \
       git \
       gnupg2 \
+      make \
+      gcc \
+      libc6-dev \
+      libffi-dev \
       python3 \
       python3-lxml \
       openjdk-21-jre-headless \
