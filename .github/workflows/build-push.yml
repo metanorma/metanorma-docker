@@ -202,9 +202,13 @@ jobs:
       fail-fast: false
       matrix:
         root_image:
+        # debian: the size limit tracks the deliberate image contents —
+        # the runtime carries the minimal native-build toolchain since
+        # metanorma-docker#270 (~190 MB of gcc/make/headers), and the
+        # published multi-arch images already measure ~2.4 GB with it.
         - id: debian
           image: ruby:4.0.7-slim
-          max_size: '2.0 GB'
+          max_size: '2.4 GB'
         - id: alpine
           image: ruby:4.0.7-alpine
           max_size: '1.8 GB'
