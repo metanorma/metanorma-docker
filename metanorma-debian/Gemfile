@@ -2,6 +2,13 @@ source "https://rubygems.org"
 
 gem "metanorma-cli", "= 1.18.7.pre.20261116"
 
+# Model-driven documents (the ISO/OGC requirements-model pipelines: .xea
+# models + liquid templates) activate this plugin at compile time. metanorma
+# 2.5.x already depends on it, but the declaration makes the membership a
+# property of the image: the plugin must never fall out of the bundle when
+# the flavor dependency graph churns (metanorma-docker#270).
+gem "metanorma-plugin-lutaml"
+
 # Ruby 4 bundled gems required directly or transitively by the metanorma
 # stack (metanorma#669 phase 2): undeclared bundled gems warn on every
 # require under Ruby 4 and break in pruned deployments.
