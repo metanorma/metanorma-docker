@@ -67,7 +67,17 @@ COPY $METANORMA_IMAGE_NAME/Gemfile $METANORMA_IMAGE_NAME/Gemfile.lock /setup/
 WORKDIR /setup
 ENV BUNDLE_WITHOUT="development:test"
 
-# Use build dependencies in a single layer to reduce image size
+# Use build dependencies in a single layer to reduce image size.
+# The bundle-build step below covers leptris: its platform gems carry
+# the accelerated native read layer as per-minor compiled bundles, but
+# the currently published musl variants ship only native_3_3 — no
+# native_4_0 for this image's ruby 4.0 — so leptris warns once per run
+# and falls back to the slower FFI surface (the unversioned native.so
+# is deliberately refused: wrong-ABI load, leptris-ruby#476; packaging
+# gap tracked as leptris-ruby#645). Build the missing bundle for the
+# image's ruby with the gem's own build script — inside this layer,
+# before apk del removes gcc; a no-op for gems that shipped the
+# complete set. Drop once leptris-ruby#645 ships full musl platform gems.
 RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
     --mount=type=cache,target=/usr/local/bundle/cache \
     apk add --no-cache --virtual .build-deps \
@@ -82,6 +92,12 @@ RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
         yaml-dev \
         zlib-dev && \
     BUNDLE_FROZEN=true bundle install && \
+    minor="$(ruby -e 'print RUBY_VERSION[/\A\d+\.\d+/].tr(".", "_")')" && \
+    for d in /usr/local/bundle/gems/leptris-*/; do \
+      [ -d "$d" ] || continue; \
+      [ -f "${d}lib/leptris/xml/native_${minor}.so" ] || \
+        ruby "${d}ext/build_native_per_minor.rb"; \
+    done && \
     apk del .build-deps && \
     rm -rf /root/.bundle/cache && \
     find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \

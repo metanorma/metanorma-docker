@@ -50,6 +50,24 @@ RUN --mount=type=secret,id=bundle_config,dst=/usr/local/bundle/config \
     find /usr/local/bundle/gems -type d -name 'spec' -prune -exec rm -r "{}" \; && \
     find /usr/local/bundle/gems -type d -name 'test' -prune -exec rm -r "{}" \;
 
+# leptris ships its accelerated native read layer as per-minor compiled
+# bundles inside the platform gem, but the currently published linux
+# variants carry an incomplete set: aarch64-linux and both musl variants
+# ship only native_3_3 — no native_4_0 for this image's ruby 4.0 — so
+# leptris warns once per run and falls back to the slower FFI surface
+# (the unversioned native.so is deliberately refused: wrong-ABI load,
+# leptris-ruby#476; packaging gap tracked as leptris-ruby#645). Build the
+# missing bundle for the image's ruby with the gem's own build script;
+# a no-op for gems that shipped the complete set. Drop this once
+# leptris-ruby#645 ships full linux platform gems.
+RUN set -eux; \
+    minor="$(ruby -e 'print RUBY_VERSION[/\A\d+\.\d+/].tr(".", "_")')"; \
+    for d in /usr/local/bundle/gems/leptris-*/; do \
+      [ -d "$d" ] || continue; \
+      [ -f "${d}lib/leptris/xml/native_${minor}.so" ] || \
+        ruby "${d}ext/build_native_per_minor.rb"; \
+    done
+
 # ---------------------------------------------------------------------------
 # Runtime: the compiled toolchain plus host tools. No full build stack —
 # only what native-gem extension compilation needs (see the apt run below).
