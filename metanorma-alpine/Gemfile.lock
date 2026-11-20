@@ -622,7 +622,7 @@ GEM
       metanorma-iso (>= 3.4.2)
     metanorma-cc (2.9.2)
       metanorma-generic (~> 3.5.1)
-    metanorma-cli (1.18.7.pre.20261120)
+    metanorma-cli (1.18.7.pre.20261121)
       canon (>= 0.2.12)
       expressir (~> 2.4.73)
       git (>= 3.0)
@@ -640,7 +640,7 @@ GEM
       metanorma-ieee (~> 1.7.2)
       metanorma-ietf (~> 3.7.12)
       metanorma-iho (~> 1.4.7)
-      metanorma-iso (~> 3.5.28)
+      metanorma-iso (~> 3.5.29)
       metanorma-itu (~> 2.9.3)
       metanorma-jis (~> 1.2.3)
       metanorma-m3aawg (~> 2.2.6)
@@ -705,13 +705,13 @@ GEM
     metanorma-iho (1.4.7)
       metanorma-generic (~> 3.5.1)
       pubid (~> 2.0, >= 2.0.30)
-    metanorma-iso (3.5.28)
+    metanorma-iso (3.5.30)
       base64
       metanorma-document (~> 0.5.8)
       metanorma-standoc (>= 3.4.2)
       mnconvert (~> 1.14)
       pubid (~> 2.0.3)
-      sts (~> 0.6.14)
+      sts (~> 0.6.15)
       tokenizer (~> 0.3.0)
       unitsdb (~> 2.2.14)
       uniword (~> 1.7.6)
@@ -1088,7 +1088,7 @@ GEM
     sterile (1.0.28)
       nokogiri (>= 1.11.7)
     strscan (3.1.8)
-    sts (0.6.14)
+    sts (0.6.15)
       bigdecimal
       lutaml-model (~> 0.8.18)
       mml (~> 2.4.0)
@@ -1257,7 +1257,7 @@ DEPENDENCIES
   benchmark
   csv
   faraday-retry
-  metanorma-cli (= 1.18.7.pre.20261120)
+  metanorma-cli (= 1.18.7.pre.20261121)
   ostruct
   tsort
   uri

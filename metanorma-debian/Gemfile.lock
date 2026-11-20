@@ -622,7 +622,7 @@ GEM
       metanorma-iso (>= 3.4.2)
     metanorma-cc (2.9.2)
       metanorma-generic (~> 3.5.1)
-    metanorma-cli (1.18.7.pre.20261120)
+    metanorma-cli (1.18.7.pre.20261121)
       canon (>= 0.2.12)
       expressir (~> 2.4.73)
       git (>= 3.0)
@@ -640,7 +640,7 @@ GEM
       metanorma-ieee (~> 1.7.2)
       metanorma-ietf (~> 3.7.12)
       metanorma-iho (~> 1.4.7)
-      metanorma-iso (~> 3.5.28)
+      metanorma-iso (~> 3.5.29)
       metanorma-itu (~> 2.9.3)
       metanorma-jis (~> 1.2.3)
       metanorma-m3aawg (~> 2.2.6)
@@ -705,13 +705,13 @@ GEM
     metanorma-iho (1.4.7)
       metanorma-generic (~> 3.5.1)
       pubid (~> 2.0, >= 2.0.30)
-    metanorma-iso (3.5.28)
+    metanorma-iso (3.5.30)
       base64
       metanorma-document (~> 0.5.8)
       metanorma-standoc (>= 3.4.2)
       mnconvert (~> 1.14)
       pubid (~> 2.0.3)
-      sts (~> 0.6.14)
+      sts (~> 0.6.15)
       tokenizer (~> 0.3.0)
       unitsdb (~> 2.2.14)
       uniword (~> 1.7.6)
@@ -1088,7 +1088,7 @@ GEM
     sterile (1.0.28)
       nokogiri (>= 1.11.7)
     strscan (3.1.8)
-    sts (0.6.14)
+    sts (0.6.15)
       bigdecimal
       lutaml-model (~> 0.8.18)
       mml (~> 2.4.0)
@@ -1256,7 +1256,7 @@ DEPENDENCIES
   benchmark
   csv
   faraday-retry
-  metanorma-cli (= 1.18.7.pre.20261120)
+  metanorma-cli (= 1.18.7.pre.20261121)
   metanorma-plugin-lutaml
   ostruct
   tsort
@@ -1409,7 +1409,7 @@ CHECKSUMS
   metanorma (2.5.25) sha256=e78bed3076379ff319facf9805133c9c42b15fe2e535605ed0a08d5ed1d57cff
   metanorma-bipm (2.9.3) sha256=0e9641fe49059c454d1a9b168013e3017292ad62d4876194d9c71b02f9bd9397
   metanorma-cc (2.9.2) sha256=36651d5e6300847fed525829dc3c2557e4ac0748d26fdb00fcd3bd6f2e200b46
-  metanorma-cli (1.18.7.pre.20261120) sha256=dddc8c284844da6ee1ebd100cf0275fdc27768d5a6ea1a782d493f1183ad80f7
+  metanorma-cli (1.18.7.pre.20261121) sha256=baae4530513daa9ea7db1174ee819dae461d7793b268f772893fc85aef9308db
   metanorma-core (0.2.9) sha256=8bf01ac0328f0d764a94b1bb927a88ca5a1fbb3a64d57dcfc48ffc4107f8b4d4
   metanorma-document (0.5.11) sha256=966f8157579c093afacc81a1052afe67b2b4e69bd33942b8e70e8577136dcfb2
   metanorma-gb (1.5.10) sha256=a374cd96828cd7da4ef44eb827c425a2743b6a8583fcd2988f85d7b644985e1e
@@ -1419,7 +1419,7 @@ CHECKSUMS
   metanorma-ietf (3.7.15) sha256=47a334e98fa6bff7612056f63ea2fcb9c73aac043c81f5728b23dbcf4ed3ec24
   metanorma-ietf-data (0.2.0) sha256=3bae28b99b24212cc8b92dc3def3559dbeaf8868b319da8c21d42bda3f09bbf7
   metanorma-iho (1.4.7) sha256=63f907698c065212b716d67541d9b5ff4804f7ea414292f93a6859a167822476
-  metanorma-iso (3.5.28) sha256=a39d10812ace69b8d1d225816cb760696db96c2587c308405125112539121d84
+  metanorma-iso (3.5.30) sha256=5cbb93235545f2a695599201fc29785e447b88cf2965d8171431e49539d480b4
   metanorma-itu (2.9.4) sha256=dfd256f9121308a703f3e587b68bc02a27ac46843cd462b0db59547fb613caed
   metanorma-jis (1.2.4) sha256=e16b83f8c8a8957b65e55a76e2ade7446a5698115f37d381fe7261456a202521
   metanorma-m3aawg (2.2.7) sha256=845f842cd773ebdb64f984c9013c0d587fa95dfca0511ac4aaf0e20b87356e5d
@@ -1550,7 +1550,7 @@ CHECKSUMS
   ssrf_filter (1.6.0) sha256=78d15bc26d0385c931f46f12a9c1cbb90e6556bd96b95f25e5a5f786c8dcf999
   sterile (1.0.28) sha256=25d9b6fe2a9fd5161bd5043fd245567bcc235911d42b7950b1daace11205b1fb
   strscan (3.1.8) sha256=aae2db611a225559f21ffbb71765c9a4e60fd262534a9ea84f4f11c7f32f679e
-  sts (0.6.14) sha256=1556ecc92248da704eab9da1d075dcebbaaf7f296f5d0bea248b9dc4b9d80cf1
+  sts (0.6.15) sha256=e18e2f5b6a21e1154c3ecc197f983e4c5beb462e7d2d07f651607fe294a4d39b
   suma (0.5.46) sha256=81fc256ceb757368e8c9f1955215b81a9d8b8bd1ad2a9a3d02885f386661220a
   svg_conform (0.2.10) sha256=3538653ec1d9b47da82e024d9d79fdfafbbcdbcb0906429431a3c50dbf9ca2e2
   sxp (2.0.0) sha256=79971bbab54a82fe4a861332475eb8c1f33142d70f2b7e830dacbd9082824721
