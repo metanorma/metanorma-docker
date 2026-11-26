@@ -446,7 +446,7 @@ GEM
     iso-639 (0.3.8)
       csv
     iso639 (1.4.0)
-    isodoc (3.7.22)
+    isodoc (3.7.23)
       base64 (>= 0.1.0)
       bigdecimal
       csv
