@@ -4,7 +4,7 @@
 # and trivy.yml.
 set -euo pipefail
 
-VULNERABLE_IMAGE="${1:-alpine:3.14}"
+VULNERABLE_IMAGE="${1:-alpine:3.20.0}"
 TRIVY_SEVERITY="${TRIVY_SEVERITY:-CRITICAL,HIGH}"
 
 echo "Verifying Trivy gate rejects vulnerable image: ${VULNERABLE_IMAGE} (severity=${TRIVY_SEVERITY})"
