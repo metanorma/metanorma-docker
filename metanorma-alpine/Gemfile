@@ -12,3 +12,8 @@ gem "tsort"
 gem "uri"
 gem "ostruct"
 gem "faraday-retry"
+
+# Temporary pin while isodoc 3.7.21+ / html2doc 1.12.2 /tmp/isodoc-work
+# Errno::ENOENT is resolved upstream (metanorma/isodoc#935).
+gem "html2doc", "< 1.12.2"
+gem "isodoc", "< 3.7.21"
