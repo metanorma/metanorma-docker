@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       test_vulnerable_base:
-        description: 'Verify the Trivy gate fails on a deliberately vulnerable base image (alpine:3.14)'
+        description: 'Verify the Trivy gate fails on a deliberately vulnerable base image (alpine:3.20.0)'
         type: boolean
         required: false
         default: false
@@ -70,7 +70,7 @@ jobs:
       - name: Trivy gate (table, blocking)
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ github.event.inputs.test_vulnerable_base == 'true' && 'alpine:3.14' || format('metanorma-{0}:test', matrix.image_type) }}
+          image-ref: ${{ github.event.inputs.test_vulnerable_base == 'true' && 'alpine:3.20.0' || format('metanorma-{0}:test', matrix.image_type) }}
           format: 'table'
           severity: ${{ env.TRIVY_SEVERITY }}
           ignore-unfixed: true
