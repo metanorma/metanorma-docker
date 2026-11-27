@@ -288,25 +288,43 @@ Metanorma Docker images are available for the following Docker architectures:
 
 === Verifying release images
 
-Release images (version tags) are published to both Docker Hub and GHCR with:
+Every pushed variant digest (both `main` edge builds and version tags) is
+published to Docker Hub and GHCR with:
 
-* keyless https://docs.sigstore.dev/[Sigstore] signatures (cosign) on the image
-  digest
-* an SBOM (SPDX JSON, generated with Syft) attached as a cosign attestation
-* BuildKit provenance and SBOM attestations embedded in the image manifest
+* keyless https://docs.sigstore.dev/[Sigstore] signatures (`cosign`) via GitHub
+  Actions OIDC on every pushed Linux (`debian`, `alpine`) and Windows
+  (`windows-ltsc2022`, `windows-ltsc2025`, and `:windows` manifest list) digest
+* BuildKit native SLSA provenance (`provenance=mode=max`) and SPDX SBOM
+  (`sbom=true`) OCI attestations on Linux (`debian`, `alpine`) images as the
+  sole SBOM/provenance source
 
-To verify a release image:
+To verify a pushed image signature and inspect its BuildKit attestations:
 
 [source,sh]
 ----
 cosign verify metanorma/metanorma@<digest> \
   --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
-  --certificate-identity-regexp=https://github.com/metanorma/metanorma-docker/
+  --certificate-identity-regexp="^https://github.com/metanorma/.*"
 
-cosign verify-attestation --type spdxjson metanorma/metanorma@<digest> \
-  --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
-  --certificate-identity-regexp=https://github.com/metanorma/metanorma-docker/
+docker buildx imagetools inspect metanorma/metanorma@<digest>
 ----
+
+==== Windows base-image and BuildKit realities
+
+* Windows variants (`ltsc2022`, `ltsc2025` on `mcr.microsoft.com/windows/servercore`)
+  are built on GitHub-hosted Windows Server Core runners with the native
+  Windows Docker daemon (`docker build`), because BuildKit/Buildx does not
+  support native `windows/amd64` container builds on these runners.
+* Because BuildKit is unavailable for native Windows container builds on those
+  runners, Buildx native SBOM (`sbom=true`) and SLSA provenance
+  (`provenance=mode=max`) OCI referrers are not emitted for Windows images.
+  Keyless `cosign` signing via Actions OIDC is supported on Windows runners and
+  signs every pushed Windows variant digest and the `:windows` manifest list.
+* The Trivy release-blocking vulnerability gate (`CRITICAL,HIGH`, fixable)
+  gates Linux (`debian`, `alpine`) pushes in `build-push.yml`. Trivy does not
+  maintain a Windows Server Core OS package/KB vulnerability database, so
+  Windows images are gated by the `metanorma version` smoke test and the
+  `metanorma site generate` test suite before manifest publication.
 
 
 

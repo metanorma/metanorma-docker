@@ -191,6 +191,30 @@ jobs:
           docker image push --all-tags ghcr.io/${{ env.IMAGE_NAME }}
         shell: bash
 
+      # Windows Server Core runners use the native Windows Docker daemon
+      # (`docker build`), not BuildKit/Buildx, so Buildx native provenance
+      # and SBOM OCI referrers are not supported on Windows images. Keyless
+      # cosign signing via Actions OIDC IS supported and signs every pushed
+      # variant digest on both registries.
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign Windows variant digests (keyless)
+        if: github.event_name != 'pull_request'
+        env:
+          METANORMA_IMAGE_NAME: ${{ env.IMAGE_NAME }}:windows-${{ matrix.root_image.id }}
+        run: |
+          docker_digest=$(docker inspect --format='{{range .RepoDigests}}{{println .}}{{end}}' "${METANORMA_IMAGE_NAME}" | grep -E "^(docker\.io/)?${IMAGE_NAME}@sha256:" | head -n 1 | cut -d'@' -f2)
+          ghcr_digest=$(docker inspect --format='{{range .RepoDigests}}{{println .}}{{end}}' "ghcr.io/${METANORMA_IMAGE_NAME}" | grep "^ghcr\.io/${IMAGE_NAME}@sha256:" | head -n 1 | cut -d'@' -f2)
+          if [ -z "${docker_digest}" ] || [ -z "${ghcr_digest}" ]; then
+            echo "Failed to resolve pushed Windows digests (docker='${docker_digest}', ghcr='${ghcr_digest}')" >&2
+            exit 1
+          fi
+          cosign sign --yes "docker.io/${IMAGE_NAME}@${docker_digest}"
+          cosign sign --yes "ghcr.io/${IMAGE_NAME}@${ghcr_digest}"
+        shell: bash
+
   samples-matrix:
     name: Samples matrix
     uses: metanorma/ci/.github/workflows/build-sample-matrix.yml@main
@@ -321,3 +345,21 @@ jobs:
           inputs: ghcr.io/${{ env.IMAGE_NAME }}:windows
           images: ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2022,ghcr.io/${{ env.IMAGE_NAME }}:windows-ltsc2025
           push: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign Windows manifest lists (keyless)
+        run: |
+          for ref in "docker.io/${{ env.IMAGE_NAME }}:windows" "ghcr.io/${{ env.IMAGE_NAME }}:windows"; do
+            digest=$(docker buildx imagetools inspect "${ref}" --format '{{.Manifest.Digest}}')
+            if [ -z "${digest}" ]; then
+              echo "Failed to resolve manifest digest for ${ref}" >&2
+              exit 1
+            fi
+            repo="${ref%:*}"
+            cosign sign --yes "${repo}@${digest}"
+          done

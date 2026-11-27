@@ -13,6 +13,7 @@ on:
       - 'metanorma-alpine/**'
       - 'metanorma-debian/**'
       - 'tests/smoke/**'
+      - '.trivyignore'
       - '.github/workflows/build-push.yml'
   pull_request:
     paths:
@@ -23,8 +24,12 @@ on:
       - 'metanorma-alpine/**'
       - 'metanorma-debian/**'
       - 'tests/smoke/**'
+      - '.trivyignore'
       - '.github/workflows/build-push.yml'
   workflow_dispatch:
+
+env:
+  TRIVY_SEVERITY: 'CRITICAL,HIGH'
 
 concurrency:
   group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
@@ -262,6 +267,20 @@ jobs:
         image: ${{ steps.loaded_image.outputs.full_name }}
         size: ${{ matrix.root_image.max_size }}
 
+    # ============ Trivy release-blocking gate ============
+    # Fails on any fixable finding at or above TRIVY_SEVERITY not listed in
+    # .trivyignore. Because `publish` needs `lint`, a blocking finding stops
+    # image push.
+    - name: Trivy vulnerability gate (blocking)
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ steps.loaded_image.outputs.full_name }}
+        format: 'table'
+        severity: ${{ env.TRIVY_SEVERITY }}
+        ignore-unfixed: true
+        trivyignores: .trivyignore
+        exit-code: '1'
+
   samples-matrix:
     name: Samples matrix
     uses: metanorma/ci/.github/workflows/build-sample-matrix.yml@main
@@ -351,6 +370,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     needs:
+    - lint
     - test
     - job_info
 
@@ -449,40 +469,19 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    # Release supply chain (tag builds only): keyless cosign signatures on
-    # both registries' digests, plus an explicit Syft SPDX SBOM attached
-    # as a cosign attestation and uploaded as a workflow artifact.
+    # Release supply chain: keyless cosign signatures on every pushed
+    # variant digest (both registries). Buildx native provenance=mode=max
+    # and sbom=true are the sole provenance/SBOM source (no second scanner).
     - name: Install cosign
-      if: startsWith(github.ref, 'refs/tags/v')
       uses: sigstore/cosign-installer@v3
 
-    - name: Generate Syft SBOM
-      if: startsWith(github.ref, 'refs/tags/v')
-      uses: anchore/sbom-action@v0
-      with:
-        image: docker.io/metanorma/metanorma@${{ steps.build_container.outputs.digest }}
-        format: spdx-json
-        output-file: sbom-${{ matrix.root_image.id }}.spdx.json
-
-    - name: Sign images (keyless) and attest SBOM
-      if: startsWith(github.ref, 'refs/tags/v')
+    - name: Sign images (keyless)
       env:
         DIGEST: ${{ steps.build_container.outputs.digest }}
       run: |
         for repo in docker.io/metanorma/metanorma ghcr.io/metanorma/metanorma; do
           cosign sign --yes "${repo}@${DIGEST}"
-          cosign attest --yes --type spdxjson \
-            --predicate "sbom-${{ matrix.root_image.id }}.spdx.json" \
-            "${repo}@${DIGEST}"
         done
-
-    - name: Upload SBOM artifact
-      if: startsWith(github.ref, 'refs/tags/v')
-      uses: actions/upload-artifact@v4
-      with:
-        name: sbom-${{ matrix.image_type }}-${{ matrix.root_image.id }}-${{ github.run_id }}
-        path: sbom-${{ matrix.root_image.id }}.spdx.json
-        retention-days: 30
 
   announce:
     name: Announce to mn-samples-*
