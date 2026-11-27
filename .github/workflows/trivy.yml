@@ -5,12 +5,23 @@ on:
     branches: [ main ]
     paths:
       - 'Dockerfile.*'
+      - '.trivyignore'
       - '.github/workflows/trivy.yml'
   pull_request:
     paths:
       - 'Dockerfile.*'
+      - '.trivyignore'
       - '.github/workflows/trivy.yml'
   workflow_dispatch:
+    inputs:
+      test_vulnerable_base:
+        description: 'Verify the Trivy gate fails on a deliberately vulnerable base image (alpine:3.14)'
+        type: boolean
+        required: false
+        default: false
+
+env:
+  TRIVY_SEVERITY: 'CRITICAL,HIGH'
 
 permissions:
  contents: read
@@ -31,11 +42,13 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Read base image version
+        if: github.event.inputs.test_vulnerable_base != 'true'
         run: |
           echo "RUBY_VERSION=$(grep '^RUBY_VERSION :=' VERSION.mak | cut -d ' ' -f 3)" >> $GITHUB_ENV
           echo "ALPINE_RUBY_VERSION=$(grep '^ALPINE_RUBY_VERSION :=' VERSION.mak | cut -d ' ' -f 3)" >> $GITHUB_ENV
 
       - name: Build Docker Image
+        if: github.event.inputs.test_vulnerable_base != 'true'
         id: docker_build
         uses: docker/build-push-action@v6
         with:
@@ -49,35 +62,37 @@ jobs:
             RUBY_VERSION=${{ env.RUBY_VERSION }}
             ALPINE_RUBY_VERSION=${{ env.ALPINE_RUBY_VERSION }}
 
-      # The gate: table format, exit 1 on any fixable HIGH/CRITICAL not in
-      # .trivyignore. Table is used for the gate deliberately — the sarif
-      # invocation of trivy-action exits 1 even when the same scan scores
-      # zero findings, and a red table gate prints its findings inline.
+      # The gate: table format, exit 1 on any fixable finding at or above
+      # TRIVY_SEVERITY not in .trivyignore. Table is used for the gate
+      # deliberately — the sarif invocation of trivy-action exits 1 even when
+      # the same scan scores zero findings, and a red table gate prints its
+      # findings inline.
       - name: Trivy gate (table, blocking)
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: metanorma-${{ matrix.image_type }}:test
+          image-ref: ${{ github.event.inputs.test_vulnerable_base == 'true' && 'alpine:3.14' || format('metanorma-{0}:test', matrix.image_type) }}
           format: 'table'
-          severity: 'CRITICAL,HIGH'
+          severity: ${{ env.TRIVY_SEVERITY }}
           ignore-unfixed: true
           trivyignores: .trivyignore
           exit-code: '1'
 
       # Advisory: SARIF report for GitHub Code Scanning. Never blocks.
       - name: Trivy (SARIF for Code Scanning)
+        if: github.event.inputs.test_vulnerable_base != 'true'
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: metanorma-${{ matrix.image_type }}:test
           format: 'sarif'
           output: 'trivy-${{ matrix.image_type }}.sarif'
-          severity: 'CRITICAL,HIGH'
+          severity: ${{ env.TRIVY_SEVERITY }}
           ignore-unfixed: true
           trivyignores: .trivyignore
           exit-code: '0'
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        if: always() && github.event.inputs.test_vulnerable_base != 'true'
         with:
           sarif_file: trivy-${{ matrix.image_type }}.sarif
           category: trivy-${{ matrix.image_type }}
